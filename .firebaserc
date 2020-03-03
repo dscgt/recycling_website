@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "route-recorder-de136": {
+      "hosting": {
+        "recycling-frontend": [
+          "route-recorder-de136"
+        ]
+      }
+    }
+  }
+}

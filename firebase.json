@@ -1,0 +1,19 @@
+{
+  "hosting": [
+    {
+      "target": "recycling-frontend",
+      "public": "dist/recycling-frontend",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    }
+  ]
+}
