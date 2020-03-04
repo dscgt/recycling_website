@@ -1,5 +1,5 @@
 export { IRouteRecord } from './iroute-record.interface';
-export { ICrewMember } from './icrewmember.interface';
+export { ICrewmember } from './icrewmember.interface';
 export { InputType } from './input-type.enum';
 export { IRoute } from './iroute.interface';
 export { IRouteStop } from './iroute-stop.interface';

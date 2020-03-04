@@ -1,9 +1,9 @@
 import { IRouteStop } from './iroute-stop.interface';
-import { ICrewMember } from './icrewmember.interface';
+import { ICrewmember } from './icrewmember.interface';
 import { IRoute } from './iroute.interface';
 
 export interface IRouteRecord {
-  crewmember: ICrewMember;
+  crewmember: ICrewmember;
   comments: string;
   tonnage: number;
   startTime: Date;

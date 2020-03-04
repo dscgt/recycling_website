@@ -1,6 +1,28 @@
-<h3>Routes</h3>
-<ul>
-  <li *ngFor="let record of (this.records | async)">
-    {{ record | json }}
-  </li>
-</ul>
+<mat-paginator #paginator
+  [length]="totalRows$ | async"
+  [pageIndex]="0"
+  [pageSize]="10"
+  [pageSizeOptions]="[5, 10, 25, 100]"
+></mat-paginator>
+
+<mat-accordion displayMode="flat" multi class="mat-table">
+  <section matSort class="mat-elevation-z2 mat-header-row">
+    <span class="mat-header-cell" mat-sort-header="crewmember">Crewmember</span>
+    <span class="mat-header-cell" mat-sort-header="tonnage">Tonnage</span>
+    <span class="mat-header-cell" mat-sort-header="route">Route</span>
+    <span class="mat-header-cell" mat-sort-header="endTime">End Time</span>
+    <span class="mat-header-cell" mat-sort-header="startTime">Total Time</span>
+  </section>
+
+  <mat-expansion-panel *ngFor="let record of displayRows$ | async">
+    <mat-expansion-panel-header class="mat-row">
+      <span class="mat-cell">{{ record.crewmember.name }}</span>
+      <span class="mat-cell">{{ record.tonnage }}</span>
+      <span class="mat-cell">{{ record.route.name }}</span>
+      <span class="mat-cell">{{ record.endTime.toLocaleString() }}</span>
+      <span class="mat-cell">{{ record.endTime.getUTCMinutes() }} hrs</span>
+    </mat-expansion-panel-header>
+    <div><pre>{{ record | json }}</pre></div>
+  </mat-expansion-panel>
+
+</mat-accordion>

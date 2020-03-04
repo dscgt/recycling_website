@@ -8,11 +8,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import { NavigationComponent, AppComponent } from './core';
+import { NavigationComponent, AppComponent, PageNotFoundComponent, HomeComponent } from './core';
 import { RouterModule } from '@angular/router';
 import { APP_ROUTES } from './app.routes';
-import { PageNotFoundComponent } from './core/pages/page-not-found/page-not-found.component';
-import { HomeComponent } from './core/pages/home/home.component';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 

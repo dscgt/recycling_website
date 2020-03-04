@@ -1,4 +1,4 @@
-export interface ICrewMember {
+export interface ICrewmember {
   name: string;
   id: string;
   hours: {

@@ -27,12 +27,12 @@ export class DrawerService {
       name: 'Home'
     },
     {
-      icon: 'home',
+      icon: 'assignment',
       path: 'routes/records',
-      name: 'View Route Records'
+      name: 'Route Records'
     },
     {
-      icon: 'home',
+      icon: 'edit_location',
       path: 'routes/manage',
       name: 'Manage Routes'
     }
