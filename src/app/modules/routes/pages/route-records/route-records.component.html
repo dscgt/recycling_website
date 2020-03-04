@@ -1,0 +1,6 @@
+<h3>Routes</h3>
+<ul>
+  <li *ngFor="let record of (this.records | async)">
+    {{ record | json }}
+  </li>
+</ul>

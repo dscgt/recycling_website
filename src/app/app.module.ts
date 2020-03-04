@@ -13,6 +13,8 @@ import { RouterModule } from '@angular/router';
 import { APP_ROUTES } from './app.routes';
 import { PageNotFoundComponent } from './core/pages/page-not-found/page-not-found.component';
 import { HomeComponent } from './core/pages/home/home.component';
+import { AngularFireModule } from '@angular/fire';
+import { AngularFirestoreModule } from '@angular/fire/firestore';
 
 @NgModule({
   declarations: [
@@ -30,7 +32,18 @@ import { HomeComponent } from './core/pages/home/home.component';
     MatSidenavModule,
     MatIconModule,
     MatListModule,
-    RouterModule.forRoot(APP_ROUTES)
+    RouterModule.forRoot(APP_ROUTES),
+    AngularFireModule.initializeApp({
+      apiKey: "AIzaSyCHz8Yz0SigXL5xOioF_l2UzYpkrkdhC7Q",
+      authDomain: "route-recorder-de136.firebaseapp.com",
+      databaseURL: "https://route-recorder-de136.firebaseio.com",
+      projectId: "route-recorder-de136",
+      storageBucket: "route-recorder-de136.appspot.com",
+      messagingSenderId: "53721343327",
+      appId: "1:53721343327:web:f872ccfcc666c82fc7c2ea",
+      measurementId: "G-6K8HWZ5GME"
+    }),
+    AngularFirestoreModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
