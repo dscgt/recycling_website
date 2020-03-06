@@ -22,11 +22,6 @@ export class DrawerService {
   private linksSource: BehaviorSubject<ILink[]>;
   private linksBacking: ILink[] = [
     {
-      icon: 'home',
-      path: '',
-      name: 'Home'
-    },
-    {
       icon: 'edit_location',
       path: 'routes/manage',
       name: 'Manage Routes'
@@ -35,6 +30,16 @@ export class DrawerService {
       icon: 'assignment',
       path: 'routes/records',
       name: 'Route Records'
+    },
+    {
+      icon: 'format_list_bulleted',
+      path: 'checkin/manage',
+      name: 'Manage Checkin'
+    },
+    {
+      icon: 'assignment',
+      path: 'checkin/records',
+      name: 'Checkin Records'
     },
   ];
 }

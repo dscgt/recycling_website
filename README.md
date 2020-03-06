@@ -14,3 +14,10 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
   - disable CTRL keys
 - vscode-icons
 
+## Commands
+
+Send to Firebase Hosting
+
+```
+ng run recycling-frontend:deploy
+```

@@ -1,0 +1,78 @@
+<app-expansion-table
+  [defaultPageSize]="10"
+  [pageSizeOptions]="[5, 10, 25, 50]"
+  [data$]="models$"
+  [displayData]="displayData">
+  <ng-template let-model>
+    <pre>{{ model | json }}</pre>
+  </ng-template>
+</app-expansion-table>
+<app-fab
+  icon="add"
+  label="Create a checkin item"
+  (click)="createModel()">
+</app-fab>
+<app-projection-dialog
+  [control$]="controlDialog$"
+  (onClose)="dialogClosed()"
+  (getDialogRef)="receiveDialogRef($event)">
+  <h2 mat-dialog-title>Create a Checkin Item</h2>
+  <mat-dialog-content>
+
+    <form [formGroup]="createModelForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline">
+        <mat-label>Title of Checkin Item</mat-label>
+        <input matInput placeholder="insert title of checkin item" formControlName="title" required>
+        <mat-icon matSuffix>create</mat-icon>
+      </mat-form-field>
+
+      <mat-card mat-elevation-z1>
+        <div formArrayName="fields">
+          <mat-card-header>
+            <mat-card-subtitle>Fields</mat-card-subtitle>
+            <span class="spacer"></span>
+            <button mat-icon-button aria-label="Add another field" (click)="addField()" type="button">
+              <mat-icon>add</mat-icon>
+            </button>
+            <button mat-icon-button aria-label="Remove a field" (click)="removeField()" type="button">
+              <mat-icon>clear</mat-icon>
+            </button>
+          </mat-card-header>
+          <div *ngFor="let field of fields.controls; let i = index;">
+            <div [formGroupName]="i">
+              <mat-form-field>
+                <mat-label>Title of Field</mat-label>
+                <input matInput placeholder="insert title of field" formControlName="title" required>
+                <mat-icon matSuffix>edit</mat-icon>
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Type of Field</mat-label>
+                <mat-select formControlName="type" required>
+                  <mat-option *ngFor="let inputType of fieldInputTypes" [value]="inputType">
+                    {{ inputType }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div *ngIf="i < fields.length - 1">
+              <mat-divider></mat-divider><br>
+            </div>
+          </div>
+        </div>
+      </mat-card>
+
+      <br>
+    </form>
+
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button (click)="closeDialog()" mat-icon-button aria-label="Cancel creating checkin item" type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+    <button mat-icon-button aria-label="Confirm creating checkin item"
+      [disabled]="(createModelForm.valid === null) ? false : !createModelForm.valid"
+      type="submit" (click)="onSubmit()">
+      <mat-icon>check</mat-icon>
+    </button>
+  </mat-dialog-actions>
+</app-projection-dialog>

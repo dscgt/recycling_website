@@ -8,6 +8,10 @@ export const APP_ROUTES = [
     path: 'routes',
     loadChildren: () => import('./modules/routes/routes.module').then(m => m.RoutesModule)
   },
+  {
+    path: 'checkin',
+    loadChildren: () => import('./modules/checkin/checkin.module').then(m => m.CheckinModule)
+  },
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: '**', component: PageNotFoundComponent }
 ];
