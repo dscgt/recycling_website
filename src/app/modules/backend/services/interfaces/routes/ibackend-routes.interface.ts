@@ -6,4 +6,5 @@ export interface IBackendRoutes {
   getRecord(id: number): Observable<IRouteRecord>;
   getRoutes(): Observable<IRoute[]>;
   getRoute(id: number): Observable<IRoute>;
+  addRoute(route: IRoute): void;
 }

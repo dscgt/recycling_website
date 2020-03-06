@@ -23,7 +23,11 @@
         *ngIf="isHandset$ | async">
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
       </button>
-      <span>recycling-frontend</span>
+      <span class="overflow">{{ title }}</span>
+      <span class="title-spacer"></span>
+      <button mat-icon-button aria-label="logout">
+        <mat-icon>exit_to_app</mat-icon>
+      </button>
     </mat-toolbar>
     <ng-content></ng-content>
   </mat-sidenav-content>

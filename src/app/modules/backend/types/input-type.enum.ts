@@ -1,4 +1,4 @@
 export enum InputType {
-  KEYBOARD="KEYBOARD",
-  NUMPAD="NUMPAD"
+  KEYBOARD="Keyboard",
+  NUMPAD="Numpad"
 }

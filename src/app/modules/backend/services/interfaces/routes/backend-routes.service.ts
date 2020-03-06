@@ -20,4 +20,5 @@ export abstract class BackendRoutesService implements IBackendRoutes {
   public abstract getRecord(id: number): Observable<IRouteRecord>;
   public abstract getRoutes(): Observable<IRoute[]>;
   public abstract getRoute(id: number): Observable<IRoute>;
+  public abstract addRoute(route: IRoute): void;
 }

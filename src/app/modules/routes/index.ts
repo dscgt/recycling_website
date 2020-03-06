@@ -1,1 +1,1 @@
-export * from './pages';
+export { RoutesModule } from './routes.module';

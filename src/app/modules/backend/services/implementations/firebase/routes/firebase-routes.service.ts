@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { AngularFirestore, AngularFirestoreCollection, DocumentReference } from '@angular/fire/firestore';
+import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
 import { IBackendRoutes } from '../../../interfaces/routes';
-import { Observable, of, zip } from 'rxjs';
-import { IRoute, IRouteRecord, ICrewmember, IRouteStop, IField } from 'src/app/modules/backend/types';
+import { Observable, zip } from 'rxjs';
+import { IRoute, IRouteRecord, ICrewmember } from 'src/app/modules/backend/types';
 import 'firebase/firestore';
 import { switchMap, map } from 'rxjs/operators';
-import { IFirestoreRouteRecord, IFirestoreRoute, IFirestoreCrewmember } from '../types';
+import { IFirestoreRouteRecord, IFirestoreCrewmember } from '../types';
 import { FirebaseHelperService } from '../helper';
 
 // NOTE: w/ RxJS for some reason zip([observable1, observable2]) does not behave correctly
@@ -29,8 +29,7 @@ export class FirebaseRoutesService implements IBackendRoutes {
   private convertRecord(rawRecord: IFirestoreRouteRecord): Observable<IRouteRecord> {
     const rawCrewmember$: Observable<IFirestoreCrewmember> = this.helper.getReference$<IFirestoreCrewmember>(rawRecord.crewmember);
     const crewmember$: Observable<ICrewmember> = this.helper.convertCrewmember$(rawCrewmember$);
-    const rawRoute$: Observable<IFirestoreRoute> = this.helper.getReference$<IFirestoreRoute>(rawRecord.route);
-    const route$: Observable<IRoute> = this.convertRoute$(rawRoute$);
+    const route$: Observable<IRoute> = this.helper.getReference$<IRoute>(rawRecord.route);
     return zip<Observable<ICrewmember>, Observable<IRoute>>(crewmember$, route$).pipe(
       map(([crewmember, route]: [ICrewmember, IRoute]): IRouteRecord => {
         const record: IRouteRecord = { ...rawRecord } as unknown as IRouteRecord;
@@ -51,47 +50,21 @@ export class FirebaseRoutesService implements IBackendRoutes {
     );
   }
 
-  private convertRoute(rawRoute: IFirestoreRoute): Observable<IRoute> {
-    const field$s: Observable<IField>[] = rawRoute.stopData.fields.map(
-      (field: DocumentReference): Observable<IField> => {
-        return this.helper.getReference$<IField>(field);
-      }
-    );
-    const fields$: Observable<IField[]> = zip<Observable<IField>>(...field$s);
-    const stop$s: Observable<IRouteStop>[] = rawRoute.stopData.stops.map(
-      (stop: DocumentReference): Observable<IRouteStop> => {
-        return this.helper.getReference$<IRouteStop>(stop);
-      }
-    );
-    const stops$: Observable<IRouteStop[]> = zip<Observable<IRouteStop>>(...stop$s);
-    return zip<Observable<IField[]>, Observable<IRouteStop[]>>(fields$, stops$).pipe(
-      map(([fields, stops]: [IField[], IRouteStop[]]): IRoute => {
-        const route: IRoute = { ...rawRoute } as unknown as IRoute;
-        route.stopData.fields = fields;
-        route.stopData.stops = stops;
-        return route;
-      })
-    );
-  }
-
-  private convertRoute$(rawRoute$: Observable<IFirestoreRoute>): Observable<IRoute> {
-    return rawRoute$.pipe(
-      switchMap((rawRoute: IFirestoreRoute): Observable<IRoute> => {
-        return this.convertRoute(rawRoute);
+  private convertItems$<T, U>(rawItems$: Observable<T[]>, convertFn: (raw: T) => Observable<U>): Observable<U[]> {
+    return rawItems$.pipe(
+      switchMap((rawItems: T[]): Observable<U[]> => {
+        const item$s: Observable<U>[] = rawItems.map(
+          (rawItem: T): Observable<U> => convertFn(rawItem)
+        );
+        return zip<Observable<U>>(...item$s);
       })
     );
   }
 
   public getRecords(): Observable<IRouteRecord[]> {
-    return this.recordsCollection.valueChanges().pipe(
-      switchMap((rawRecords: IFirestoreRouteRecord[]): Observable<IRouteRecord[]> => {
-        const record$s: Observable<IRouteRecord>[] = rawRecords.map(
-          (rawRecord: IFirestoreRouteRecord): Observable<IRouteRecord> => {
-            return this.convertRecord(rawRecord);
-          }
-        );
-        return zip<Observable<IRouteRecord>>(...record$s);
-      })
+    return this.convertItems$<IFirestoreRouteRecord, IRouteRecord>(
+      this.recordsCollection.valueChanges(),
+      (record: IFirestoreRouteRecord): Observable<IRouteRecord> => this.convertRecord(record)
     );
   }
 
@@ -105,5 +78,9 @@ export class FirebaseRoutesService implements IBackendRoutes {
 
   public getRoute(id: number): Observable<IRoute> {
     throw new Error("Method not implemented.");
+  }
+
+  public addRoute(route: IRoute): void {
+    this.routesCollection.add(route);
   }
 }

@@ -27,14 +27,14 @@ export class DrawerService {
       name: 'Home'
     },
     {
+      icon: 'edit_location',
+      path: 'routes/manage',
+      name: 'Manage Routes'
+    },
+    {
       icon: 'assignment',
       path: 'routes/records',
       name: 'Route Records'
     },
-    {
-      icon: 'edit_location',
-      path: 'routes/manage',
-      name: 'Manage Routes'
-    }
   ];
 }

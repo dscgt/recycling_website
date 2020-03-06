@@ -46,8 +46,7 @@ export class MatDataService {
       data$, sort$,
       (data: T[], sort: Sort): T[] => {
         let compareFn: (a: T, b: T) => number = this.compare;
-        if (propertiesWithSpecialSorting
-            && propertiesWithSpecialSorting.hasOwnProperty(sort.active)) {
+        if (propertiesWithSpecialSorting && propertiesWithSpecialSorting.hasOwnProperty(sort.active)) {
           compareFn = (a: T, b: T) => compareFn(
             propertiesWithSpecialSorting[sort.active](a),
             propertiesWithSpecialSorting[sort.active](b)

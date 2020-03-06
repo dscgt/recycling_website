@@ -3,7 +3,7 @@ import { IField } from './ifield.interface';
 
 export interface IRoute {
   name: string;
-  id: string;
+  id?: string;
   stopData: {
     fields: IField[];
     stops: IRouteStop[];

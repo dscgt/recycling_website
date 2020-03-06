@@ -1,0 +1,14 @@
+// taken from https://material.io/develop/web/components/buttons/floating-action-buttons/
+
+.fab {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+}
+
+@media(min-width: 1024px) {
+  .fab {
+    right: 1.5rem;
+    bottom: 1.5rem;
+  }
+}

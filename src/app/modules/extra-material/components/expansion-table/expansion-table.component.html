@@ -1,0 +1,27 @@
+<mat-paginator #paginator
+  [length]="totalRows$ | async"
+  [pageIndex]="0"
+  [pageSize]="defaultPageSize"
+  [pageSizeOptions]="pageSizeOptions">
+</mat-paginator>
+
+<mat-accordion displayMode="flat" multi class="mat-table">
+  <section matSort class="mat-elevation-z2 mat-header-row">
+    <span *ngFor="let datum of displayData"
+      class="mat-header-cell overflow"
+      [mat-sort-header]="datum.property">
+      {{ datum.name }}
+    </span>
+  </section>
+
+  <mat-expansion-panel *ngFor="let datum of displayRows$ | async">
+    <mat-expansion-panel-header class="mat-row">
+      <span *ngFor="let displayDatum of displayData" class="mat-cell overflow">
+        {{ displayDatum.accessor(datum) }}
+      </span>
+    </mat-expansion-panel-header>
+    <ng-container
+      *ngTemplateOutlet="expansionContent; context: { $implicit: datum }">
+    </ng-container>
+  </mat-expansion-panel>
+</mat-accordion>
