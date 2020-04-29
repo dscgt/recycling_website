@@ -16,7 +16,7 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 ## Commands
 
-Send to Firebase Hosting
+Send to Firebase Hosting:
 
 ```
 ng run recycling-frontend:deploy
