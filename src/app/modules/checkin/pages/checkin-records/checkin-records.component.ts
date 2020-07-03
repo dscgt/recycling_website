@@ -24,6 +24,11 @@ export class CheckinRecordsComponent implements OnInit {
   ngOnInit(): void {
     this.displayData = [
       {
+        name: "Model",
+        property: "modelTitle",
+        accessor: (record: ICheckinRecord) => record.modelTitle
+      },
+      {
         name: "Checkout Time",
         property: "checkoutTime",
         accessor: (record: ICheckinRecord) => record.checkoutTime.toLocaleString()
@@ -37,7 +42,7 @@ export class CheckinRecordsComponent implements OnInit {
         name: "# of Hours",
         property: "hours",
         accessor: (record: ICheckinRecord) => {
-          const hours: number = (record.checkinTime.valueOf() - record.checkoutTime.valueOf()) / (1000 * 60 * 60);
+          const hours: number = (record.checkoutTime.valueOf() - record.checkinTime.valueOf()) / (1000 * 60 * 60);
           return hours.toString();
         }
       },
