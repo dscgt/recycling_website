@@ -22,7 +22,7 @@
     <form [formGroup]="createModelForm" (ngSubmit)="onSubmit()">
       <mat-form-field appearance="outline">
         <mat-label>Title of Checkin Item</mat-label>
-        <input matInput placeholder="insert title of checkin item" formControlName="title" required>
+        <input matInput placeholder="Insert title of checkin item" formControlName="title" required>
         <mat-icon matSuffix>create</mat-icon>
       </mat-form-field>
 
@@ -48,8 +48,8 @@
               <mat-form-field>
                 <mat-label>Type of Field</mat-label>
                 <mat-select formControlName="type" required>
-                  <mat-option *ngFor="let inputType of fieldInputTypes" [value]="inputType">
-                    {{ inputType }}
+                  <mat-option *ngFor="let type of fieldInputTypes; let i = index;" [value]="fieldInputTypeValues[i]">
+                    {{ type }}
                   </mat-option>
                 </mat-select>
               </mat-form-field>

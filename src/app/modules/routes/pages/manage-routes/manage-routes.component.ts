@@ -23,6 +23,7 @@ export class ManageRoutesComponent implements OnInit {
   public dialogRef: MatDialogRef<TemplateRef<any>>;
   public createRouteForm: FormGroup;
   public fieldInputTypes: string[];
+  public fieldInputTypeValues: string[];
 
   get fields(): FormArray {
     return this.createRouteForm.get('fields') as FormArray;
@@ -42,7 +43,8 @@ export class ManageRoutesComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.fieldInputTypes = Object.values(InputType);
+    this.fieldInputTypes = Object.keys(InputType);
+    this.fieldInputTypeValues = Object.values(InputType);
     this.controlDialogSubject$ = new BehaviorSubject<boolean>(false);
     this.controlDialog$ = this.controlDialogSubject$.asObservable();
     this.routes$ = this.routesBackend.getRoutes();

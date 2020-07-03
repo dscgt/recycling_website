@@ -23,6 +23,7 @@ export class ManageCheckinComponent implements OnInit {
   public dialogRef: MatDialogRef<TemplateRef<any>>;
   public createModelForm: FormGroup;
   public fieldInputTypes: string[];
+  public fieldInputTypeValues: string[];
 
   get fields(): FormArray {
     return this.createModelForm.get('fields') as FormArray;
@@ -34,7 +35,8 @@ export class ManageCheckinComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.fieldInputTypes = Object.values(InputType);
+    this.fieldInputTypes = Object.keys(InputType);
+    this.fieldInputTypeValues = Object.values(InputType);
     this.controlDialogSubject$ = new BehaviorSubject<boolean>(false);
     this.controlDialog$ = this.controlDialogSubject$.asObservable();
     this.models$ = this.backend.getModels();

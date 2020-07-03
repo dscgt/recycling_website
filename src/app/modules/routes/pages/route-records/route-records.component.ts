@@ -28,14 +28,14 @@ export class RouteRecordsComponent implements OnInit {
         accessor: (record: IRouteRecord) => record.crewmember.name
       },
       {
-        name: "Tonnage",
-        property: "tonnage",
-        accessor: (record: IRouteRecord) => record.tonnage.toString()
-      },
-      {
         name: "Route",
         property: "route",
         accessor: (record: IRouteRecord) => record.route.title
+      },
+      {
+        name: "Start Time",
+        property: "startTime",
+        accessor: (record: IRouteRecord) => record.startTime.toLocaleString()
       },
       {
         name: "End Time",

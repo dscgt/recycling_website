@@ -48,7 +48,7 @@
               <mat-form-field>
                 <mat-label>Type of Field</mat-label>
                 <mat-select formControlName="type" required>
-                  <mat-option *ngFor="let type of fieldInputTypes" [value]="type">
+                  <mat-option *ngFor="let type of fieldInputTypes; let i = index;" [value]="fieldInputTypeValues[i]">
                     {{ type }}
                   </mat-option>
                 </mat-select>
@@ -116,7 +116,7 @@
                 <mat-form-field>
                   <mat-label>Type of Field</mat-label>
                   <mat-select formControlName="type" required>
-                    <mat-option *ngFor="let type of fieldInputTypes" [value]="type">
+                    <mat-option *ngFor="let type of fieldInputTypes; let i = index;" [value]="fieldInputTypeValues[i]">
                       {{ type }}
                     </mat-option>
                   </mat-select>
