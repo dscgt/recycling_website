@@ -70,6 +70,8 @@ export class ManageCheckinComponent implements OnInit {
     return this.fb.group({
       title: [''],
       type: [''],
+      optional: [false],
+      delay: [false],
     });
   }
 

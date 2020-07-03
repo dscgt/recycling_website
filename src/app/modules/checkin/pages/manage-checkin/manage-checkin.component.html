@@ -42,7 +42,7 @@
             <div [formGroupName]="i">
               <mat-form-field>
                 <mat-label>Title of Field</mat-label>
-                <input matInput placeholder="insert title of field" formControlName="title" required>
+                <input matInput placeholder="Insert title of field" formControlName="title" required>
                 <mat-icon matSuffix>edit</mat-icon>
               </mat-form-field>
               <mat-form-field>
@@ -53,6 +53,8 @@
                   </mat-option>
                 </mat-select>
               </mat-form-field>
+              <mat-checkbox formControlName="optional">Optional?</mat-checkbox>
+              <mat-checkbox formControlName="delay">Delay?</mat-checkbox>
             </div>
             <div *ngIf="i < fields.length - 1">
               <mat-divider></mat-divider><br>
