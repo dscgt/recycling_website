@@ -22,7 +22,7 @@
     <form [formGroup]="createRouteForm" (ngSubmit)="onSubmit()">
       <mat-form-field appearance="outline">
         <mat-label>Name of Route</mat-label>
-        <input matInput placeholder="insert name of route" formControlName="name" required>
+        <input matInput placeholder="insert name of route" formControlName="title" required>
         <mat-icon matSuffix>navigation</mat-icon>
       </mat-form-field>
 
@@ -42,12 +42,12 @@
             <div [formGroupName]="i">
               <mat-form-field>
                 <mat-label>Name of Field</mat-label>
-                <input matInput placeholder="insert name of field" formControlName="name" required>
+                <input matInput placeholder="Insert name of field" formControlName="title" required>
                 <mat-icon matSuffix>edit</mat-icon>
               </mat-form-field>
               <mat-form-field>
                 <mat-label>Type of Field</mat-label>
-                <mat-select formControlName="inputType" required>
+                <mat-select formControlName="type" required>
                   <mat-option *ngFor="let type of fieldInputTypes" [value]="type">
                     {{ type }}
                   </mat-option>
@@ -80,8 +80,13 @@
             <div [formGroupName]="i">
               <mat-form-field appearance="standard">
                 <mat-label>Name of Stop</mat-label>
-                <input matInput placeholder="insert name of stop" formControlName="name" required>
+                <input matInput placeholder="E.g. CRC, West Village" formControlName="title" required>
                 <mat-icon matSuffix>place</mat-icon>
+              </mat-form-field>
+              <mat-form-field appearance="standard">
+                <mat-label>Description</mat-label>
+                <input matInput placeholder="Short description of stop" formControlName="description">
+                <mat-icon matSuffix>edit</mat-icon>
               </mat-form-field>
             </div>
             <div *ngIf="i < stops.length - 1">
@@ -89,6 +94,41 @@
             </div>
           </div>
         </div>
+        <mat-card mat-elevation-z1>
+          <div formArrayName="fields_stops">
+            <mat-card-header>
+              <mat-card-subtitle>Fields</mat-card-subtitle>
+              <span class="spacer"></span>
+              <button mat-icon-button aria-label="Add another field" (click)="addField_Stop()" type="button">
+                <mat-icon>add</mat-icon>
+              </button>
+              <button mat-icon-button aria-label="Remove a field" (click)="removeField_Stop()" type="button">
+                <mat-icon>clear</mat-icon>
+              </button>
+            </mat-card-header>
+            <div *ngFor="let field of fields_stops.controls; let i = index;">
+              <div [formGroupName]="i">
+                <mat-form-field>
+                  <mat-label>Name of Field</mat-label>
+                  <input matInput placeholder="Insert name of field" formControlName="title" required>
+                  <mat-icon matSuffix>edit</mat-icon>
+                </mat-form-field>
+                <mat-form-field>
+                  <mat-label>Type of Field</mat-label>
+                  <mat-select formControlName="type" required>
+                    <mat-option *ngFor="let type of fieldInputTypes" [value]="type">
+                      {{ type }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-checkbox formControlName="optional">Optional</mat-checkbox>
+              </div>
+              <div *ngIf="i < fields_stops.length - 1">
+                <mat-divider></mat-divider><br>
+              </div>
+            </div>
+          </div>
+        </mat-card>
       </mat-card>
 
       <br>

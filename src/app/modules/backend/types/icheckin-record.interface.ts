@@ -1,5 +1,6 @@
 export interface ICheckinRecord {
-  categoryId?: string;
+  modelId?: string;
+  modelTitle: string;
   checkinTime: Date;
   checkoutTime: Date;
   properties: {

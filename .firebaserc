@@ -6,6 +6,13 @@
           "route-recorder-de136"
         ]
       }
+    },
+    "recycling-checkin": {
+      "hosting": {
+        "recycling-frontend": [
+          "recycling-checkin"
+        ]
+      }
     }
   }
 }

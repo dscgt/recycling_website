@@ -32,6 +32,10 @@ export class ManageRoutesComponent implements OnInit {
     return this.createRouteForm.get('stops') as FormArray;
   }
 
+  get fields_stops(): FormArray {
+    return this.createRouteForm.get('fields_stops') as FormArray;
+  }
+
   constructor(
     private routesBackend: BackendRoutesService,
     private fb: FormBuilder
@@ -44,13 +48,18 @@ export class ManageRoutesComponent implements OnInit {
     this.routes$ = this.routesBackend.getRoutes();
     this.displayData = [
       {
-        name: "Name",
-        property: "name",
-        accessor: (route: IRoute) => route.name
+        name: "Title",
+        property: "title",
+        accessor: (route: IRoute) => route.title
       },
       {
-        name: "# of Fields",
+        name: "# of Fields in Route",
         property: "fields",
+        accessor: (route: IRoute) => route.fields.length.toString()
+      },
+      {
+        name: "# of Fields in Stops",
+        property: "fields_stops",
         accessor: (route: IRoute) => route.stopData.fields.length.toString()
       },
       {
@@ -60,14 +69,19 @@ export class ManageRoutesComponent implements OnInit {
       },
     ];
     this.createRouteForm = this.fb.group({
-      name: [''],
+      title: [''],
       fields: this.fb.array([ this.createField() ]),
-      stops: this.fb.array([ this.createStop() ])
+      stops: this.fb.array([ this.createStop() ]),
+      fields_stops: this.fb.array([ this.createField() ])
     });
   }
 
   public addField(): void {
     this.fields.push(this.createField());
+  }
+
+  public addField_Stop(): void {
+    this.fields_stops.push(this.createField());
   }
 
   public addStop(): void {
@@ -80,6 +94,12 @@ export class ManageRoutesComponent implements OnInit {
     }
   }
 
+  public removeField_Stop(): void {
+    if (this.fields_stops.length > 1) {
+      this.fields_stops.removeAt(this.fields_stops.length - 1);
+    }
+  }
+
   public removeStop(): void {
     if (this.stops.length > 1) {
       this.stops.removeAt(this.stops.length - 1);
@@ -88,15 +108,16 @@ export class ManageRoutesComponent implements OnInit {
 
   public createField(): FormGroup {
     return this.fb.group({
-      name: [''],
-      optional: [''],
-      inputType: ['']
+      title: [''],
+      optional: [false],
+      type: ['']
     });
   }
 
   public createStop(): FormGroup {
     return this.fb.group({
-      name: ['']
+      title: [''],
+      description: ['']
     });
   }
 
@@ -119,7 +140,8 @@ export class ManageRoutesComponent implements OnInit {
   public onSubmit(): void {
     const vals: any = this.createRouteForm.value;
     const route: IRoute = {
-      name: vals["name"],
+      title: vals["title"],
+      fields: [],
       stopData: {
         fields: [],
         stops: []
@@ -127,6 +149,10 @@ export class ManageRoutesComponent implements OnInit {
     };
 
     for (let field of vals["fields"]) {
+      route.fields.push(field as IField);
+    }
+
+    for (let field of vals["fields_stops"]) {
       route.stopData.fields.push(field as IField);
     }
 

@@ -1,7 +1,8 @@
 import { InputType } from './input-type.enum';
 
 export interface IField {
-  name: string;
+  title: string;
   optional: boolean;
-  inputType: InputType;
+  type: InputType;
+  groupId: string;
 }

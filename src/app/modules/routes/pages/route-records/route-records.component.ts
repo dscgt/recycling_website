@@ -35,7 +35,7 @@ export class RouteRecordsComponent implements OnInit {
       {
         name: "Route",
         property: "route",
-        accessor: (record: IRouteRecord) => record.route.name
+        accessor: (record: IRouteRecord) => record.route.title
       },
       {
         name: "End Time",

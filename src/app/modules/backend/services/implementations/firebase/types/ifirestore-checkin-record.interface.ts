@@ -1,7 +1,8 @@
 import { ITimestamp } from './itimestamp.interface';
 
 export interface IFirestoreCheckinRecord {
-  categoryId?: string;
+  modelId?: string;
+  modelTitle: string;
   checkinTime: ITimestamp;
   checkoutTime: ITimestamp;
   properties: {

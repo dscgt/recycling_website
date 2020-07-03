@@ -1,6 +1,13 @@
 .spacer {
   flex: 1 1
 }
-.mat-form-field + .mat-form-field {
+
+.mat-form-field {
   margin-left: 8px;
 }
+
+.mat-checkbox {
+  margin-left: 9px;
+}
+
+// + .mat-form-field 
