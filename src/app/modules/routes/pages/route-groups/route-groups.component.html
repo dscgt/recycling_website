@@ -1,0 +1,70 @@
+<app-expansion-table
+  [defaultPageSize]="10"
+  [pageSizeOptions]="[5, 10, 25, 50]"
+  [data$]="groups$"
+  [displayData]="displayData">
+  <ng-template let-model>
+    <pre>{{ model | json }}</pre>
+  </ng-template>
+</app-expansion-table>
+<app-fab
+  icon="add"
+  label="Create a route group"
+  (click)="createGroup()">
+</app-fab>
+<app-projection-dialog
+  [control$]="controlDialog$"
+  (onClose)="dialogClosed()"
+  (getDialogRef)="receiveDialogRef($event)">
+  <h2 mat-dialog-title>Create a Route Group</h2>
+  <mat-dialog-content>
+
+    <form [formGroup]="createGroupForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline">
+        <mat-label>Title of Route Group</mat-label>
+        <input matInput placeholder="Insert title of route group" formControlName="title" required>
+        <mat-icon matSuffix>create</mat-icon>
+      </mat-form-field>
+
+      <mat-card mat-elevation-z1>
+        <div formArrayName="members">
+          <mat-card-header>
+            <mat-card-subtitle>Members</mat-card-subtitle>
+            <span class="spacer"></span>
+            <button mat-icon-button aria-label="Add another member" (click)="addMember()" type="button">
+              <mat-icon>add</mat-icon>
+            </button>
+            <button mat-icon-button aria-label="Remove a member" (click)="removeMember()" type="button">
+              <mat-icon>clear</mat-icon>
+            </button>
+          </mat-card-header>
+          <div *ngFor="let member of members.controls; let i = index;">
+            <div [formGroupName]="i">
+              <mat-form-field>
+                <mat-label>Member name</mat-label>
+                <input matInput placeholder="Insert name of member" formControlName="title" required>
+                <mat-icon matSuffix>edit</mat-icon>
+              </mat-form-field>
+            </div>
+            <div *ngIf="i < members.length - 1">
+              <mat-divider></mat-divider><br>
+            </div>
+          </div>
+        </div>
+      </mat-card>
+
+      <br>
+    </form>
+
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button (click)="closeDialog()" mat-icon-button aria-label="Cancel creating route group" type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+    <button mat-icon-button aria-label="Confirm creating route group"
+      [disabled]="(createGroupForm.valid === null) ? false : !createGroupForm.valid"
+      type="submit" (click)="onSubmit()">
+      <mat-icon>check</mat-icon>
+    </button>
+  </mat-dialog-actions>
+</app-projection-dialog>

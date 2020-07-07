@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { IRouteRecord, IRoute } from '../../../types';
+import { IRouteRecord, IRoute, IRouteGroup } from '../../../types';
 
 export interface IBackendRoutes {
   getRecords(): Observable<IRouteRecord[]>;
@@ -7,4 +7,6 @@ export interface IBackendRoutes {
   getRoutes(): Observable<IRoute[]>;
   getRoute(id: number): Observable<IRoute>;
   addRoute(route: IRoute): void;
+  getGroups(): Observable<IRouteGroup[]>;
+  addGroup(route: IRouteGroup): void;
 }

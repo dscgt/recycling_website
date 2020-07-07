@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouteRecordsComponent, ManageRoutesComponent } from './pages';
+import { RouteRecordsComponent, ManageRoutesComponent, RouteGroupComponent } from './pages';
 import { RouterModule } from '@angular/router';
 import { ROUTES_ROUTES } from './routes.routes';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -24,6 +24,7 @@ import { MatSelectModule } from '@angular/material/select';
   declarations: [
     ManageRoutesComponent,
     RouteRecordsComponent,
+    RouteGroupComponent
   ],
   imports: [
     CommonModule,

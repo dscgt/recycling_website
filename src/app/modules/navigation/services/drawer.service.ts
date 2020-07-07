@@ -32,6 +32,11 @@ export class DrawerService {
       name: 'Route Records'
     },
     {
+      icon: 'group',
+      path: 'routes/groups',
+      name: 'Route Groups'
+    },
+    {
       icon: 'format_list_bulleted',
       path: 'checkin/manage',
       name: 'Manage Checkin'

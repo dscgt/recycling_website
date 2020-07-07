@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AngularFirestoreCollection, AngularFirestore } from '@angular/fire/firestore';
 import { IBackendRoutes } from '../../../interfaces/routes';
 import { Observable, zip } from 'rxjs';
-import { IRoute, IRouteRecord, ICrewmember } from 'src/app/modules/backend/types';
+import { IRoute, IRouteRecord, ICrewmember, IRouteGroup } from 'src/app/modules/backend/types';
 import 'firebase/firestore';
 import { switchMap, map } from 'rxjs/operators';
 import { IFirestoreRouteRecord, IFirestoreCrewmember } from '../types';
@@ -17,6 +17,7 @@ import { FirebaseHelperService } from '../helper';
 export class FirebaseRoutesService implements IBackendRoutes {
   private recordsCollection: AngularFirestoreCollection<IFirestoreRouteRecord>;
   private routesCollection: AngularFirestoreCollection<IRoute>;
+  private groupsCollection: AngularFirestoreCollection<IRouteGroup>;
 
   constructor(
     private readonly firestore: AngularFirestore,
@@ -24,6 +25,7 @@ export class FirebaseRoutesService implements IBackendRoutes {
   ) {
     this.recordsCollection = this.firestore.collection<IFirestoreRouteRecord>('records');
     this.routesCollection = this.firestore.collection<IRoute>('routes');
+    this.groupsCollection = this.firestore.collection<IRouteGroup>('groups');
   }
 
   private convertRecord(rawRecord: IFirestoreRouteRecord): Observable<IRouteRecord> {
@@ -82,5 +84,13 @@ export class FirebaseRoutesService implements IBackendRoutes {
 
   public addRoute(route: IRoute): void {
     this.routesCollection.add(route);
+  }
+
+  public getGroups(): Observable<IRouteGroup[]> {
+    return this.groupsCollection.valueChanges();
+  }
+
+  public addGroup(group: IRouteGroup): void {
+    this.groupsCollection.add(group);
   }
 }

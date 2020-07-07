@@ -8,3 +8,5 @@ export { ICheckinRecord } from './icheckin-record.interface';
 export { ICheckinModel } from './icheckin-model.interface';
 export { ICheckinGroup } from './icheckin-group.interface';
 export { ICheckinGroupMember } from './icheckin-group-member.interface';
+export { IRouteGroup } from './iroute-group.interface';
+export { IRouteGroupMember } from './iroute-group-member.interface';

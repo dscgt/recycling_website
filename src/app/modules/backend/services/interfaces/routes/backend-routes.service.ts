@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { FirebaseRoutesService, FirebaseHelperService } from '../../implementations/firebase';
 import { Observable } from 'rxjs';
 import { IBackendRoutes } from './ibackend-routes.interface';
-import { IRoute, IRouteRecord } from '../../../types';
+import { IRoute, IRouteRecord, IRouteGroup } from '../../../types';
 import { AngularFirestore } from '@angular/fire/firestore';
 
 @Injectable({
@@ -21,4 +21,6 @@ export abstract class BackendRoutesService implements IBackendRoutes {
   public abstract getRoutes(): Observable<IRoute[]>;
   public abstract getRoute(id: number): Observable<IRoute>;
   public abstract addRoute(route: IRoute): void;
+  public abstract getGroups(): Observable<IRouteGroup[]>;
+  public abstract addGroup(route: IRouteGroup): void;
 }
