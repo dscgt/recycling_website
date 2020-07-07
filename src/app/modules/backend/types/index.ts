@@ -6,3 +6,5 @@ export { IRouteStop } from './iroute-stop.interface';
 export { IField } from './ifield.interface';
 export { ICheckinRecord } from './icheckin-record.interface';
 export { ICheckinModel } from './icheckin-model.interface';
+export { ICheckinGroup } from './icheckin-group.interface';
+export { ICheckinGroupMember } from './icheckin-group-member.interface';

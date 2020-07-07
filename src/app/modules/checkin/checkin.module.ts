@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CHECKIN_ROUTES } from './checkin.routes';
-import { CheckinRecordsComponent, ManageCheckinComponent } from './pages';
+import { CheckinRecordsComponent, ManageCheckinComponent, CheckinGroupComponent } from './pages';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSortModule } from '@angular/material/sort';
@@ -25,7 +25,8 @@ import { SharedModule } from '../shared';
 @NgModule({
   declarations: [
     ManageCheckinComponent,
-    CheckinRecordsComponent
+    CheckinRecordsComponent,
+    CheckinGroupComponent,
   ],
   imports: [
     CommonModule,

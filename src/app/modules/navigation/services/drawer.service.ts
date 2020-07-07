@@ -41,5 +41,10 @@ export class DrawerService {
       path: 'checkin/records',
       name: 'Checkin Records'
     },
+    {
+      icon: 'group',
+      path: 'checkin/groups',
+      name: 'Checkin Groups'
+    },
   ];
 }
