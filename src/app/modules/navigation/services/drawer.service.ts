@@ -22,6 +22,11 @@ export class DrawerService {
   private linksSource: BehaviorSubject<ILink[]>;
   private linksBacking: ILink[] = [
     {
+      icon: 'home',
+      path: '',
+      name: 'Home'
+    },
+    {
       icon: 'edit_location',
       path: 'routes/manage',
       name: 'Manage Routes'

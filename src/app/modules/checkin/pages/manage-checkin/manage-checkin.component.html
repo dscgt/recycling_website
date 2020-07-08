@@ -47,7 +47,7 @@
               </mat-form-field>
               <mat-form-field>
                 <mat-label>Type of Field</mat-label>
-                <mat-select formControlName="type" required>
+                <mat-select formControlName="type" [(value)]="selectedInputType[i]" required>
                   <mat-option *ngFor="let type of fieldInputTypes; let i = index;" [value]="fieldInputTypeValues[i]">
                     {{ type }}
                   </mat-option>
@@ -55,6 +55,14 @@
               </mat-form-field>
               <mat-checkbox formControlName="optional">Optional?</mat-checkbox>
               <mat-checkbox formControlName="delay">Delay?</mat-checkbox>
+              <mat-form-field  *ngIf="selectedInputType[i] === 'select'" class="selectGroup">
+                <mat-label>Select Group</mat-label>
+                <mat-select formControlName="groupid" [(value)]="selectedGroup">
+                  <mat-option *ngFor="let title of groupTitles;" [value]="title">
+                    {{ title }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
             </div>
             <div *ngIf="i < fields.length - 1">
               <mat-divider></mat-divider><br>

@@ -1,1 +1,47 @@
-<mat-card>n/a</mat-card>
+<mat-card>
+    Welcome to the administrator portal for Solid Waste and Recycling management.
+    <br/><br/>
+    Select an option from the menu on the left, or click a button below to begin!
+</mat-card>
+
+<mat-card>
+    <h2>Recycling Routes</h2>
+    <div class="actions">
+        <form action="routes/manage">
+            <button mat-button>
+                Manage Routes
+            </button>
+        </form>
+        <form action="routes/records">
+            <button mat-button>
+                View Route Records
+            </button>
+        </form>
+        <form action="routes/groups">
+            <button mat-button>
+                Control Route Groups
+            </button>
+        </form>
+    </div>
+</mat-card>
+
+<mat-card>
+    <h2>Recycling Checkins</h2>
+    <div class="actions">
+        <form action="checkin/manage">
+            <button mat-button>
+                Manage Checkins
+            </button>
+        </form>
+        <form action="checkin/records">
+            <button mat-button>
+                View Checkin Records
+            </button>
+        </form>
+        <form action="checkin/groups">
+            <button mat-button>
+                Control Checkin Groups
+            </button>
+        </form>
+    </div>
+</mat-card>

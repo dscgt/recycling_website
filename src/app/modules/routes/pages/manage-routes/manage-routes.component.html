@@ -22,7 +22,7 @@
     <form [formGroup]="createRouteForm" (ngSubmit)="onSubmit()">
       <mat-form-field appearance="outline">
         <mat-label>Name of Route</mat-label>
-        <input matInput placeholder="insert name of route" formControlName="title" required>
+        <input matInput placeholder="Insert name of route" formControlName="title" required>
         <mat-icon matSuffix>navigation</mat-icon>
       </mat-form-field>
 
@@ -47,13 +47,21 @@
               </mat-form-field>
               <mat-form-field>
                 <mat-label>Type of Field</mat-label>
-                <mat-select formControlName="type" required>
+                <mat-select formControlName="type" [(value)]="selectedInputType[i]" required>
                   <mat-option *ngFor="let type of fieldInputTypes; let i = index;" [value]="fieldInputTypeValues[i]">
                     {{ type }}
                   </mat-option>
                 </mat-select>
               </mat-form-field>
               <mat-checkbox formControlName="optional">Optional</mat-checkbox>
+              <mat-form-field  *ngIf="selectedInputType[i] === 'select'" class="selectGroup">
+                <mat-label>Select Group</mat-label>
+                <mat-select formControlName="groupid" [(value)]="selectedGroup">
+                  <mat-option *ngFor="let title of groupTitles;" [value]="title">
+                    {{ title }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
             </div>
             <div *ngIf="i < fields.length - 1">
               <mat-divider></mat-divider><br>
@@ -115,13 +123,21 @@
                 </mat-form-field>
                 <mat-form-field>
                   <mat-label>Type of Field</mat-label>
-                  <mat-select formControlName="type" required>
+                  <mat-select formControlName="type" [(value)]="selectedInputType_stop[i]" required>
                     <mat-option *ngFor="let type of fieldInputTypes; let i = index;" [value]="fieldInputTypeValues[i]">
                       {{ type }}
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
                 <mat-checkbox formControlName="optional">Optional</mat-checkbox>
+                <mat-form-field  *ngIf="selectedInputType_stop[i] === 'select'" class="selectGroup">
+                  <mat-label>Select Group</mat-label>
+                  <mat-select formControlName="groupid" [(value)]="selectedGroup">
+                    <mat-option *ngFor="let title of groupTitles;" [value]="title">
+                      {{ title }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
               </div>
               <div *ngIf="i < fields_stops.length - 1">
                 <mat-divider></mat-divider><br>

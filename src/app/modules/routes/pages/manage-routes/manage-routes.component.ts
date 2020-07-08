@@ -24,6 +24,11 @@ export class ManageRoutesComponent implements OnInit {
   public createRouteForm: FormGroup;
   public fieldInputTypes: string[];
   public fieldInputTypeValues: string[];
+  public selectedInputType: string[];
+  public groupTitles: string[];
+  public selectedGroup: string;
+  public selectedInputType_stop: string[];
+  public selectedGroup_stop: string;
 
   get fields(): FormArray {
     return this.createRouteForm.get('fields') as FormArray;
@@ -48,6 +53,10 @@ export class ManageRoutesComponent implements OnInit {
     this.controlDialogSubject$ = new BehaviorSubject<boolean>(false);
     this.controlDialog$ = this.controlDialogSubject$.asObservable();
     this.routes$ = this.routesBackend.getRoutes();
+    this.selectedInputType = [];
+    this.selectedGroup = "Group 1";  // ignore, this was to test default groups
+    this.selectedInputType_stop = [];
+    this.selectedGroup_stop = "Group 1";  // ignore, this was to test default groups
     this.displayData = [
       {
         name: "Title",
@@ -76,6 +85,7 @@ export class ManageRoutesComponent implements OnInit {
       stops: this.fb.array([ this.createStop() ]),
       fields_stops: this.fb.array([ this.createField() ])
     });
+    this.groupTitles = ["Group 1", "Group 2"];
   }
 
   public addField(): void {
@@ -83,7 +93,7 @@ export class ManageRoutesComponent implements OnInit {
   }
 
   public addField_Stop(): void {
-    this.fields_stops.push(this.createField());
+    this.fields_stops.push(this.createField_Stop());
   }
 
   public addStop(): void {
@@ -109,10 +119,22 @@ export class ManageRoutesComponent implements OnInit {
   }
 
   public createField(): FormGroup {
+    this.selectedInputType.push('');
     return this.fb.group({
       title: [''],
       optional: [false],
-      type: ['']
+      type: [''],
+      groupid: ['']
+    });
+  }
+
+  public createField_Stop(): FormGroup {
+    this.selectedInputType_stop.push('');
+    return this.fb.group({
+      title: [''],
+      optional: [false],
+      type: [''],
+      groupid: ['']
     });
   }
 

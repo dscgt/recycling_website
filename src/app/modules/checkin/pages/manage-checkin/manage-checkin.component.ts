@@ -24,6 +24,9 @@ export class ManageCheckinComponent implements OnInit {
   public createModelForm: FormGroup;
   public fieldInputTypes: string[];
   public fieldInputTypeValues: string[];
+  public selectedInputType: string[];
+  public groupTitles: string[];
+  public selectedGroup: string;
 
   get fields(): FormArray {
     return this.createModelForm.get('fields') as FormArray;
@@ -40,6 +43,8 @@ export class ManageCheckinComponent implements OnInit {
     this.controlDialogSubject$ = new BehaviorSubject<boolean>(false);
     this.controlDialog$ = this.controlDialogSubject$.asObservable();
     this.models$ = this.backend.getModels();
+    this.selectedInputType = [];
+    this.selectedGroup = "Group 1";  // ignore, this was to test default groups
     this.displayData = [
       {
         name: "Title",
@@ -56,6 +61,7 @@ export class ManageCheckinComponent implements OnInit {
       title: [''],
       fields: this.fb.array([ this.createField() ]),
     });
+    this.groupTitles = ["Group 1", "Group 2"];
   }
 
   public addField(): void {
@@ -69,11 +75,13 @@ export class ManageCheckinComponent implements OnInit {
   }
 
   public createField(): FormGroup {
+    this.selectedInputType.push("");
     return this.fb.group({
       title: [''],
       type: [''],
       optional: [false],
       delay: [false],
+      groupid: ['']
     });
   }
 
