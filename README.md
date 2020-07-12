@@ -50,4 +50,3 @@ ng run recycling-frontend:deploy
 - firebase is initialized in app.module.ts. From here, need to figure out how to initialize 2 apps.
 https://github.com/angular/angularfire/blob/master/docs/install-and-setup.md -- initializing one app
 https://github.com/angular/angularfire/issues/1240 -- links to initialize 2 apps
-- NEW PLAN: rip out "backend-web.service.ts" crap and use implementations directly. Rely completely on the provider method that you saw.
