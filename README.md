@@ -42,4 +42,12 @@ Send to Firebase Hosting:
 ng run recycling-frontend:deploy
 ```
 
-
+## Temporary developer notes
+- within src/app/: app.routes.ts lazy-loads routes that correspond to route recorder (modules/routes/routes.module.ts) and routes that correspond to recycling checkin (modules/routes/checkin.routes.ts). Seems to be a nesting thing ex. all the route recorder routes happen under /routes, which is defined in app.routes.ts
+- src/app/core handles the modules: home page, 404 page, the sidebar ('navigation'), and top-level UI (components/app). Meanwhile src/app/modules handles everything else; a mix of frontend modules and backend services
+- actually, navigation in src/app/core seems to handle the navigation view, but it gets its information from modules/navigation which seems to act as its "backend"
+- module pages (ex. src/app/modules/routes/pages/route-groups/...) access Firebase by calling backend services (ex. src/app/modules/backend/services/interfaces/...). But these are interfaces and abstract classes w/o implementation...these are nevertheless able to return fully implemented versions of themselves with the useFactory property of the @Injectable annotation's param. Something to do with this: https://angular.io/guide/dependency-injection-providers. This way they reference the fully implemented versions located at app/modules/backend/services/implementations/firebase/...
+- firebase is initialized in app.module.ts. From here, need to figure out how to initialize 2 apps.
+https://github.com/angular/angularfire/blob/master/docs/install-and-setup.md -- initializing one app
+https://github.com/angular/angularfire/issues/1240 -- links to initialize 2 apps
+- NEW PLAN: rip out "backend-web.service.ts" crap and use implementations directly. Rely completely on the provider method that you saw.
