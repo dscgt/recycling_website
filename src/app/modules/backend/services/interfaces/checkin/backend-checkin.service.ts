@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ICheckinModel, ICheckinRecord, ICheckinGroup } from '../../../types';
-import { AngularFirestore } from '@angular/fire/firestore';
 import { IBackendCheckin } from './ibackend-checkin.interface';
 import { FirebaseHelperService, FirebaseCheckinService } from '../../implementations/firebase';
+import { CheckinAngularFirestore } from '../../factory/factory.service';
 
 @Injectable({
   providedIn: 'root',
-  useFactory: (firestore: AngularFirestore) => {
+  useFactory: (firestore: CheckinAngularFirestore) => {
     return new FirebaseCheckinService(firestore);
   },
   deps: [
-    AngularFirestore,
+    CheckinAngularFirestore,
     FirebaseHelperService
   ]
 })

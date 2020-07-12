@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
-import { AngularFirestoreCollection, AngularFirestore } from '@angular/fire/firestore';
+import { AngularFirestoreCollection } from '@angular/fire/firestore';
 import { IBackendRoutes } from '../../../interfaces/routes';
-import { Observable, zip } from 'rxjs';
-import { IRoute, IRouteRecord, ICrewmember, IRouteGroup } from 'src/app/modules/backend/types';
+import { Observable, zip, of } from 'rxjs';
+import { IRoute, IRouteRecord, ICrewmember, IRouteGroup, IField } from 'src/app/modules/backend/types';
 import 'firebase/firestore';
 import { switchMap, map } from 'rxjs/operators';
 import { IFirestoreRouteRecord, IFirestoreCrewmember } from '../types';
 import { FirebaseHelperService } from '../helper';
+import { RoutesAngularFirestore } from '../../../factory/factory.service';
+import { DocumentReference } from '@angular/fire/firestore';
 
 // NOTE: w/ RxJS for some reason zip([observable1, observable2]) does not behave correctly
 //               instead do zip(...[observable1, observable2]) instead to unroll array
@@ -20,11 +22,11 @@ export class FirebaseRoutesService implements IBackendRoutes {
   private groupsCollection: AngularFirestoreCollection<IRouteGroup>;
 
   constructor(
-    private readonly firestore: AngularFirestore,
-    private helper: FirebaseHelperService
+    private readonly firestore: RoutesAngularFirestore,
+    private helper: FirebaseHelperService,
   ) {
     this.recordsCollection = this.firestore.collection<IFirestoreRouteRecord>('records');
-    this.routesCollection = this.firestore.collection<IRoute>('routes');
+    this.routesCollection = this.firestore.collection<IRoute>('models');
     this.groupsCollection = this.firestore.collection<IRouteGroup>('groups');
   }
 
@@ -74,8 +76,24 @@ export class FirebaseRoutesService implements IBackendRoutes {
     throw new Error("Method not implemented.");
   }
 
+  // Currently, all DocumentReference-type groups within fields are converted to empty strings.
+  // This is not ideal, and is meant to be a temporary workaround for crashes.
   public getRoutes(): Observable<IRoute[]> {
-    return this.routesCollection.valueChanges();
+    return this.routesCollection.valueChanges().pipe(
+      map((routes:IRoute[]) => routes.map((route:IRoute) => {
+        route.fields.forEach((field: IField) => {
+          if (typeof field.groupId !== "string") {
+            field.groupId = "";
+          }
+        })
+        route.stopData.fields.forEach((field: IField) => {
+          if (typeof field.groupId !== "string") {
+            field.groupId = "";
+          }
+        })
+        return route;
+      }))
+    );
   }
 
   public getRoute(id: number): Observable<IRoute> {
