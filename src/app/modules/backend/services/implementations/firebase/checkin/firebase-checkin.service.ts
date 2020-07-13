@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AngularFirestoreCollection } from '@angular/fire/firestore';
+import { AngularFirestoreCollection, DocumentChangeAction } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import 'firebase/firestore';
 import { IBackendCheckin } from '../../../interfaces/checkin';
@@ -58,11 +58,23 @@ export class FirebaseCheckinService implements IBackendCheckin {
   }
 
   public getGroups(): Observable<ICheckinGroup[]> {
-    return this.groupsCollection.valueChanges();
+    return this.groupsCollection.snapshotChanges().pipe(
+      map((snapshots: DocumentChangeAction<ICheckinGroup>[]) =>
+        snapshots.map((snapshot: DocumentChangeAction<ICheckinGroup>) => {
+          const toReturn:ICheckinGroup = snapshot.payload.doc.data();
+          toReturn.id = snapshot.payload.doc.id;
+          return toReturn;
+        })
+      )
+    );
   }
 
   public addGroup(group: ICheckinGroup): void {
     this.groupsCollection.add(group);
+  }
+
+  public deleteGroup(id: string): void {
+    this.groupsCollection.doc(id).delete();
   }
 
 }

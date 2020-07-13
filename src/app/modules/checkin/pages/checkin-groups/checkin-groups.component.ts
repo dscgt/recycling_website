@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
 // different model
-import { ICheckinGroup, ICheckinGroupMember, BackendCheckinService } from 'src/app/modules/backend';
+import { ICheckinGroup, ICheckinGroupMember, BackendCheckinService, ICheckinModel } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormArray, FormBuilder } from '@angular/forms';
@@ -16,15 +16,22 @@ export class CheckinGroupComponent implements OnInit {
   @ViewChild(ExpansionTableComponent)
   private expansionTable: ExpansionTableComponent<ICheckinGroup>;
 
-  private controlDialogSubject$: BehaviorSubject<boolean>;
+  private controlCreationDialogSubject$: BehaviorSubject<boolean>;
+  private controlConfirmationDialogSubject$: BehaviorSubject<boolean>;
 
   public groups$: Observable<ICheckinGroup[]>;
   public displayData: IDisplayData<ICheckinGroup>[];
-  public controlDialog$: Observable<boolean>;
-  public dialogRef: MatDialogRef<TemplateRef<any>>;
+  public controlCreationDialog$: Observable<boolean>;
+  public controlConfirmationDialog$: Observable<boolean>;
+  public creationDialogRef: MatDialogRef<TemplateRef<any>>;
+  public confirmationDialogRef: MatDialogRef<TemplateRef<any>>;
   public createGroupForm: FormGroup;
   public fieldInputTypes: string[];
   public fieldInputTypeValues: string[];
+
+  // workaround. app-expansion-table contains information for a group, and uses these to populate
+  // each row, however this bugs out with app-projection-dialog. 
+  public groupToDelete: ICheckinGroup;
 
   get members(): FormArray {
     return this.createGroupForm.get('members') as FormArray;
@@ -36,8 +43,12 @@ export class CheckinGroupComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.controlDialogSubject$ = new BehaviorSubject<boolean>(false);
-    this.controlDialog$ = this.controlDialogSubject$.asObservable();
+    // initialize dialog controls
+    this.controlCreationDialogSubject$ = new BehaviorSubject<boolean>(false);
+    this.controlCreationDialog$ = this.controlCreationDialogSubject$.asObservable();
+    this.controlConfirmationDialogSubject$ = new BehaviorSubject<boolean>(false);
+    this.controlConfirmationDialog$ = this.controlConfirmationDialogSubject$.asObservable();
+
     this.groups$ = this.backend.getGroups();
     this.displayData = [
       {
@@ -73,26 +84,48 @@ export class CheckinGroupComponent implements OnInit {
     });
   }
 
-  public dialogClosed(): void {
-    // console.log("Dialog closed in child");
-  }
-
   public createGroup(): void {
-    this.controlDialogSubject$.next(true);
+    this.controlCreationDialogSubject$.next(true);
   }
 
-  public receiveDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
-    this.dialogRef = ref;
+  public confirmDeleteGroup(group: ICheckinGroup): void {
+    this.groupToDelete = group;
+    this.controlConfirmationDialogSubject$.next(true);
   }
 
-  public closeDialog(): void {
-    this.dialogRef?.close();
+  public onDelete(): void {
+    this.closeConfirmationDialog();
+    this.backend.deleteGroup(this.groupToDelete.id);
   }
 
   public onSubmit(): void {
     const group: ICheckinGroup = this.createGroupForm.value;
     this.backend.addGroup(group);
-    this.closeDialog();
+    this.closeCreationDialog();
+  }
+
+  public creationDialogClosed(): void {
+    // console.log("Dialog closed in child");
+  }
+
+  public receiveCreationDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
+    this.creationDialogRef = ref;
+  }
+
+  public closeCreationDialog(): void {
+    this.creationDialogRef?.close();
+  }
+
+  public confirmationDialogClosed(): void {
+    // console.log("Dialog closed in child");
+  }
+
+  public receiveConfirmationDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
+    this.confirmationDialogRef = ref;
+  }
+
+  public closeConfirmationDialog(): void {
+    this.confirmationDialogRef?.close();
   }
 
 }
