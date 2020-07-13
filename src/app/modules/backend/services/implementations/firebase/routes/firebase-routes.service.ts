@@ -101,6 +101,18 @@ export class FirebaseRoutesService implements IBackendRoutes {
   }
 
   public addRoute(route: IRoute): void {
+    const toAdd = Object.assign({}, route);
+    // change groupIds to DocumentReference's before sending to Firestore
+    toAdd.fields.forEach((field:IField) => {
+      if (typeof field.groupId === 'string') {
+        field.groupId = this.groupsCollection.doc(field.groupId).ref;
+      }
+    })
+    toAdd.stopData.fields.forEach((field:IField) => {
+      if (typeof field.groupId === 'string') {
+        field.groupId = this.groupsCollection.doc(field.groupId).ref;
+      }
+    })
     this.routesCollection.add(route);
   }
 
