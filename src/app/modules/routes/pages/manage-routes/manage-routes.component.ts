@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef, ChangeDetectorRef } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { IRoute, BackendRoutesService, InputType, IField, IRouteStop, IRouteGroup } from 'src/app/modules/backend';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
@@ -45,7 +45,8 @@ export class ManageRoutesComponent implements OnInit {
 
   constructor(
     private routesBackend: BackendRoutesService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private cdref: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -89,6 +90,14 @@ export class ManageRoutesComponent implements OnInit {
     });
   }
 
+  // This is a workaround for a bug with Angular / Angular Forms
+  // Without this, the dynamic [require] binding causes an error
+  // This may have performance impacts
+  // See https://github.com/angular/angular/issues/23657
+  ngAfterContentChecked(): void {
+    this.cdref.detectChanges();
+  }
+
   public addField(): void {
     this.fields.push(this.createField());
   }
@@ -102,12 +111,16 @@ export class ManageRoutesComponent implements OnInit {
   }
 
   public removeField(): void {
+    this.selectedInputType.pop();
+    this.selectedGroup.pop();
     if (this.fields.length > 1) {
       this.fields.removeAt(this.fields.length - 1);
     }
   }
 
   public removeField_Stop(): void {
+    this.selectedInputType_stop.pop();
+    this.selectedGroup_stop.pop();
     if (this.fields_stops.length > 1) {
       this.fields_stops.removeAt(this.fields_stops.length - 1);
     }

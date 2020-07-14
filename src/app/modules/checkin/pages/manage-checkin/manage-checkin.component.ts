@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef, ChangeDetectorRef } from '@angular/core';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
 import { ICheckinModel, InputType, BackendCheckinService, ICheckinGroup } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -35,7 +35,8 @@ export class ManageCheckinComponent implements OnInit {
 
   constructor(
     private backend: BackendCheckinService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private cdref: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -65,11 +66,21 @@ export class ManageCheckinComponent implements OnInit {
     });
   }
 
+  // This is a workaround for a bug with Angular / Angular Forms
+  // Without this, the dynamic [require] binding causes an error
+  // This may have performance impacts
+  // See https://github.com/angular/angular/issues/23657
+  ngAfterContentChecked(): void {
+    this.cdref.detectChanges();
+  }
+
   public addField(): void {
     this.fields.push(this.createField());
   }
 
   public removeField(): void {
+    this.selectedInputType.pop();
+    this.selectedGroup.pop();
     if (this.fields.length > 1) {
       this.fields.removeAt(this.fields.length - 1);
     }

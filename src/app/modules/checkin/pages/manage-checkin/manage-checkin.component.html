@@ -57,7 +57,7 @@
               <mat-checkbox formControlName="delay">Delay?</mat-checkbox>
               <mat-form-field  *ngIf="selectedInputType[i] === 'select'" class="selectGroup">
                 <mat-label>Select Group</mat-label>
-                <mat-select formControlName="groupId" [(value)]="selectedGroup[i]">
+                <mat-select formControlName="groupId" [(value)]="selectedGroup[i]" [required]="selectedInputType[i] === 'select'">
                   <mat-option *ngFor="let group of groups$ | async" [value]="group.id">
                     {{ group.title }}
                   </mat-option>
