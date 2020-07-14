@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AngularFirestoreCollection } from '@angular/fire/firestore';
+import { AngularFirestoreCollection, DocumentChangeAction } from '@angular/fire/firestore';
 import { IBackendRoutes } from '../../../interfaces/routes';
 import { Observable, zip, of } from 'rxjs';
 import { IRoute, IRouteRecord, ICrewmember, IRouteGroup, IField } from 'src/app/modules/backend/types';
@@ -101,14 +101,39 @@ export class FirebaseRoutesService implements IBackendRoutes {
   }
 
   public addRoute(route: IRoute): void {
+    const toAdd = Object.assign({}, route);
+    // change groupIds to DocumentReference's before sending to Firestore
+    toAdd.fields.forEach((field:IField) => {
+      if (typeof field.groupId === 'string') {
+        field.groupId = this.groupsCollection.doc(field.groupId).ref;
+      }
+    })
+    toAdd.stopData.fields.forEach((field:IField) => {
+      if (typeof field.groupId === 'string') {
+        field.groupId = this.groupsCollection.doc(field.groupId).ref;
+      }
+    })
     this.routesCollection.add(route);
   }
 
   public getGroups(): Observable<IRouteGroup[]> {
-    return this.groupsCollection.valueChanges();
+    return this.groupsCollection.snapshotChanges().pipe(
+      map((snapshots: DocumentChangeAction<IRouteGroup>[]) =>
+        snapshots.map((snapshot: DocumentChangeAction<IRouteGroup>) => {
+          const toReturn: IRouteGroup = snapshot.payload.doc.data();
+          toReturn.id = snapshot.payload.doc.id;
+          return toReturn;
+        })
+      )
+    );
   }
 
   public addGroup(group: IRouteGroup): void {
     this.groupsCollection.add(group);
   }
+
+  public deleteGroup(id: string): void {
+    this.groupsCollection.doc(id).delete();
+  }
+  
 }

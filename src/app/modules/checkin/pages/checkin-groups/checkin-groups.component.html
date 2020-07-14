@@ -3,19 +3,31 @@
   [pageSizeOptions]="[5, 10, 25, 50]"
   [data$]="groups$"
   [displayData]="displayData">
-  <ng-template let-model>
-    <pre>{{ model | json }}</pre>
+  <ng-template let-group>
+    <button mat-raised-button color="warn" aria-label="Delete This Group" (click)="confirmDeleteGroup(group)" type="button">Delete This Group</button>
   </ng-template>
 </app-expansion-table>
+<app-projection-dialog [control$]="controlConfirmationDialog$" (onClose)="confirmationDialogClosed()"
+  (getDialogRef)="receiveConfirmationDialogRef($event)">
+  <h2 mat-dialog-title>Are you sure you want to delete this group?</h2>
+  <mat-dialog-actions align="end">
+    <button (click)="closeConfirmationDialog()" mat-icon-button aria-label="Cancel deleting group" type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+    <button mat-icon-button aria-label="Confirm deleting group" type="submit" (click)="onDelete()">
+      <mat-icon>check</mat-icon>
+    </button>
+  </mat-dialog-actions>
+</app-projection-dialog>
 <app-fab
   icon="add"
   label="Create a checkin item"
   (click)="createGroup()">
 </app-fab>
 <app-projection-dialog
-  [control$]="controlDialog$"
-  (onClose)="dialogClosed()"
-  (getDialogRef)="receiveDialogRef($event)">
+  [control$]="controlCreationDialog$"
+  (onClose)="creationDialogClosed()"
+  (getDialogRef)="receiveCreationDialogRef($event)">
   <h2 mat-dialog-title>Create a Checkin Group</h2>
   <mat-dialog-content>
 
@@ -58,7 +70,7 @@
 
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button (click)="closeDialog()" mat-icon-button aria-label="Cancel creating checkin group" type="button">
+    <button (click)="closeCreationDialog()" mat-icon-button aria-label="Cancel creating checkin group" type="button">
       <mat-icon>close</mat-icon>
     </button>
     <button mat-icon-button aria-label="Confirm creating checkin group"

@@ -1,9 +1,10 @@
-import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef, ChangeDetectorRef } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { IRoute, BackendRoutesService, InputType, IField, IRouteStop } from 'src/app/modules/backend';
+import { IRoute, BackendRoutesService, InputType, IField, IRouteStop, IRouteGroup } from 'src/app/modules/backend';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormControl, FormBuilder, FormArray } from '@angular/forms';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-manage-routes',
@@ -25,10 +26,10 @@ export class ManageRoutesComponent implements OnInit {
   public fieldInputTypes: string[];
   public fieldInputTypeValues: string[];
   public selectedInputType: string[];
-  public groupTitles: string[];
-  public selectedGroup: string;
+  public groups$: Observable<IRouteGroup[]>;
+  public selectedGroup: string[];
   public selectedInputType_stop: string[];
-  public selectedGroup_stop: string;
+  public selectedGroup_stop: string[];
 
   get fields(): FormArray {
     return this.createRouteForm.get('fields') as FormArray;
@@ -44,7 +45,8 @@ export class ManageRoutesComponent implements OnInit {
 
   constructor(
     private routesBackend: BackendRoutesService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private cdref: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -54,9 +56,10 @@ export class ManageRoutesComponent implements OnInit {
     this.controlDialog$ = this.controlDialogSubject$.asObservable();
     this.routes$ = this.routesBackend.getRoutes();
     this.selectedInputType = [];
-    this.selectedGroup = "Group 1";  // ignore, this was to test default groups
+    this.selectedGroup = [];
     this.selectedInputType_stop = [];
-    this.selectedGroup_stop = "Group 1";  // ignore, this was to test default groups
+    this.selectedGroup_stop = [];
+    this.groups$ = this.routesBackend.getGroups();
     this.displayData = [
       {
         name: "Title",
@@ -85,7 +88,14 @@ export class ManageRoutesComponent implements OnInit {
       stops: this.fb.array([ this.createStop() ]),
       fields_stops: this.fb.array([ this.createField() ])
     });
-    this.groupTitles = ["Group 1", "Group 2"];
+  }
+
+  // This is a workaround for a bug with Angular / Angular Forms
+  // Without this, the dynamic [require] binding causes an error
+  // This may have performance impacts
+  // See https://github.com/angular/angular/issues/23657
+  ngAfterContentChecked(): void {
+    this.cdref.detectChanges();
   }
 
   public addField(): void {
@@ -101,12 +111,16 @@ export class ManageRoutesComponent implements OnInit {
   }
 
   public removeField(): void {
+    this.selectedInputType.pop();
+    this.selectedGroup.pop();
     if (this.fields.length > 1) {
       this.fields.removeAt(this.fields.length - 1);
     }
   }
 
   public removeField_Stop(): void {
+    this.selectedInputType_stop.pop();
+    this.selectedGroup_stop.pop();
     if (this.fields_stops.length > 1) {
       this.fields_stops.removeAt(this.fields_stops.length - 1);
     }
@@ -119,22 +133,24 @@ export class ManageRoutesComponent implements OnInit {
   }
 
   public createField(): FormGroup {
+    this.selectedGroup.push('');
     this.selectedInputType.push('');
     return this.fb.group({
       title: [''],
       optional: [false],
       type: [''],
-      groupid: ['']
+      groupId: ['']
     });
   }
 
   public createField_Stop(): FormGroup {
     this.selectedInputType_stop.push('');
+    this.selectedGroup_stop.push('');
     return this.fb.group({
       title: [''],
       optional: [false],
       type: [''],
-      groupid: ['']
+      groupId: ['']
     });
   }
 
