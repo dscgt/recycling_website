@@ -1,9 +1,10 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
-import { ICheckinModel, InputType, BackendCheckinService } from 'src/app/modules/backend';
+import { ICheckinModel, InputType, BackendCheckinService, ICheckinGroup } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormArray, FormBuilder } from '@angular/forms';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-manage-checkin',
@@ -25,8 +26,8 @@ export class ManageCheckinComponent implements OnInit {
   public fieldInputTypes: string[];
   public fieldInputTypeValues: string[];
   public selectedInputType: string[];
-  public groupTitles: string[];
-  public selectedGroup: string;
+  public groups$: Observable<ICheckinGroup[]>;
+  public selectedGroup: string[];
 
   get fields(): FormArray {
     return this.createModelForm.get('fields') as FormArray;
@@ -44,7 +45,8 @@ export class ManageCheckinComponent implements OnInit {
     this.controlDialog$ = this.controlDialogSubject$.asObservable();
     this.models$ = this.backend.getModels();
     this.selectedInputType = [];
-    this.selectedGroup = "Group 1";  // ignore, this was to test default groups
+    this.selectedGroup = [];  // ignore, this was to test default groups
+    this.groups$ = this.backend.getGroups();
     this.displayData = [
       {
         name: "Title",
@@ -61,7 +63,6 @@ export class ManageCheckinComponent implements OnInit {
       title: [''],
       fields: this.fb.array([ this.createField() ]),
     });
-    this.groupTitles = ["Group 1", "Group 2"];
   }
 
   public addField(): void {
@@ -76,12 +77,13 @@ export class ManageCheckinComponent implements OnInit {
 
   public createField(): FormGroup {
     this.selectedInputType.push("");
+    this.selectedGroup.push("");
     return this.fb.group({
       title: [''],
       type: [''],
       optional: [false],
       delay: [false],
-      groupid: ['']
+      groupId: ['']
     });
   }
 

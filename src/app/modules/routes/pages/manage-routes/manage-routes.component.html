@@ -58,7 +58,7 @@
                 <mat-label>Select Group</mat-label>
                 <mat-select formControlName="groupId" [(value)]="selectedGroup[i]">
                   <mat-option *ngFor="let group of groups$ | async" [value]="group.id">
-                    {{ (groupsMap$ | async )?.get(group.id) }}
+                    {{ group.title }}
                   </mat-option>
                 </mat-select>
               </mat-form-field>
@@ -134,7 +134,7 @@
                   <mat-label>Select Group</mat-label>
                   <mat-select formControlName="groupId" [(value)]="selectedGroup_stop[i]">
                     <mat-option *ngFor="let group of groups$ | async" [value]="group.id">
-                      {{ (groupsMap$ | async )?.get(group.id) }}
+                      {{ group.title }}
                     </mat-option>
                   </mat-select>
                 </mat-form-field>

@@ -27,7 +27,6 @@ export class ManageRoutesComponent implements OnInit {
   public fieldInputTypeValues: string[];
   public selectedInputType: string[];
   public groups$: Observable<IRouteGroup[]>;
-  public groupsMap$: Observable<Map<string, string>>;
   public selectedGroup: string[];
   public selectedInputType_stop: string[];
   public selectedGroup_stop: string[];
@@ -60,15 +59,6 @@ export class ManageRoutesComponent implements OnInit {
     this.selectedInputType_stop = [];
     this.selectedGroup_stop = [];
     this.groups$ = this.routesBackend.getGroups();
-    this.groupsMap$ = this.groups$.pipe(
-      map((groups: IRouteGroup[]) => {
-        const toReturn:Map<string, string> = new Map();
-        for (let group of groups) {
-          toReturn.set(group.id, group.title);
-        }
-        return toReturn;
-      })
-    )
     this.displayData = [
       {
         name: "Title",
