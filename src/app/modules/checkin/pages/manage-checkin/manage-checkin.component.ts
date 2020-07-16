@@ -86,9 +86,7 @@ export class ManageCheckinComponent implements OnInit {
 
     this.selectedInputType.splice(index, 1);
     this.selectedGroup.splice(index, 1);
-    if (this.fields.length > 1) {
-      this.fields.removeAt(index);
-    }
+    this.fields.removeAt(index);
   }
 
   // swaps the contents of the field at [index] with the field at [index - 1]
