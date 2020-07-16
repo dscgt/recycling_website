@@ -37,7 +37,7 @@
             <mat-card-subtitle>Fields</mat-card-subtitle>
           </mat-card-header>
           <div *ngFor="let field of fields.controls; let i = index;">
-            <div class='field-box-main-content'>
+            <div id='field-box-main-content'>
               <div [formGroupName]="i">
                 <mat-form-field>
                   <mat-label>Title of Field</mat-label>
@@ -63,14 +63,14 @@
                   </mat-select>
                 </mat-form-field>
               </div>
-              <div class='field-box-buttons-wrapper'>
+              <div id='field-box-buttons-wrapper'>
                 <button *ngIf="fields.length > 1" mat-icon-button aria-label="Remove a field" (click)="removeField(i)" type="button">
                   <mat-icon>clear</mat-icon>
                 </button>
-                <button *ngIf="fields.length > 1 && i !== 0" mat-icon-button aria-label="Remove a field" (click)="swapFieldUp(i)" type="button">
+                <button *ngIf="fields.length > 1 && i !== 0" mat-icon-button aria-label="Swap this field with the one above" (click)="swapField(i, i - 1)" type="button">
                   <mat-icon>keyboard_arrow_up</mat-icon>
                 </button>
-                <button *ngIf="fields.length > 1 && i !== fields.length - 1" mat-icon-button aria-label="Remove a field" (click)="swapFieldDown(i)" type="button">
+                <button *ngIf="fields.length > 1 && i !== fields.length - 1" mat-icon-button aria-label="Swap this field with the one below" (click)="swapField(i, i + 1)" type="button">
                   <mat-icon>keyboard_arrow_down</mat-icon>
                 </button>
               </div>

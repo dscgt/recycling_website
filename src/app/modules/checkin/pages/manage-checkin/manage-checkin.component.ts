@@ -89,24 +89,14 @@ export class ManageCheckinComponent implements OnInit {
     this.fields.removeAt(index);
   }
 
-  // swaps the contents of the field at [index] with the field at [index - 1]
-  swapFieldUp(index: number): void {
-    if (this.fields.length <= 1 || index === 0) {
+  // swaps the contents of the field at [a] with the field at [b]
+  swapField(a: number, b: number): void {
+    if (a < 0 || b < 0 || a >= this.fields.length || b >= this.fields.length) {
       return;
     }
-    this.utils.swap(this.selectedInputType, index, index - 1);
-    this.utils.swap(this.selectedGroup, index, index - 1);
-    this.utils.swapFormArray(this.fields, index, index - 1);
-  }
-
-  // swaps the contents of the field at [index] with the field at [index + 1]
-  swapFieldDown(index: number): void {
-    if (this.fields.length <= 1 || index === this.fields.length - 1) {
-      return;
-    }
-    this.utils.swap(this.selectedInputType, index, index + 1);
-    this.utils.swap(this.selectedGroup, index, index + 1);
-    this.utils.swapFormArray(this.fields, index, index + 1);
+    this.utils.swap(this.selectedInputType, a, b);
+    this.utils.swap(this.selectedGroup, a, b);
+    this.utils.swapFormArray(this.fields, a, b);
   }
 
   public createField(): FormGroup {

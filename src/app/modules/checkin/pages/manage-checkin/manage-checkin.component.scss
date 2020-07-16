@@ -14,12 +14,12 @@ mat-checkbox {
   margin-left: 10px;
 }
 
-.field-box-main-content {
+#field-box-main-content {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
 }
 
-.field-box-buttons-wrapper {
+#field-box-buttons-wrapper {
   display: flex;
   flex-direction: column;
   justify-content: center;
