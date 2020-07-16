@@ -1,10 +1,26 @@
 .spacer {
-    flex: 1 1
-  }
-  .mat-form-field {
-    margin-left: 8px;
-  }
-  
-  .mat-checkbox {
-    margin-left: 9px;
-  }
+  flex: 1 1
+}
+.mat-form-field {
+  margin-left: 8px;
+}
+
+.mat-checkbox {
+  margin-left: 9px;
+}
+
+#field-box-main-content {
+  display: flex;
+  justify-content: space-between;
+}
+
+#field-box-buttons-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#form-title {
+  display: flex;
+  justify-content: space-between;
+}

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FormArray } from '@angular/forms';
+import { FormArray, AbstractControl } from '@angular/forms';
 
 @Injectable({
   providedIn: 'root'
@@ -13,8 +13,12 @@ export class UtilsService {
   }
 
   public swapFormArray(arr: FormArray, a: number, b: number): void {
-    let asArr = arr.value;
-    this.swap(asArr, a, b);
-    arr.setValue(asArr);
+    if (arr.length < 2) {
+      return;
+    }
+
+    let temp:AbstractControl = Object.assign({}, arr.at(a).value);
+    arr.at(a).setValue(arr.at(b).value);
+    arr.at(b).setValue(temp);
   }
 }
