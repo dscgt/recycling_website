@@ -4,7 +4,7 @@ import { ICheckinModel, InputType, BackendCheckinService, ICheckinGroup } from '
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormArray, FormBuilder } from '@angular/forms';
-import { map } from 'rxjs/operators';
+import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
 
 @Component({
   selector: 'app-manage-checkin',
@@ -36,7 +36,8 @@ export class ManageCheckinComponent implements OnInit {
   constructor(
     private backend: BackendCheckinService,
     private fb: FormBuilder,
-    private cdref: ChangeDetectorRef
+    private cdref: ChangeDetectorRef,
+    private utils: UtilsService
   ) { }
 
   ngOnInit(): void {
@@ -78,12 +79,36 @@ export class ManageCheckinComponent implements OnInit {
     this.fields.push(this.createField());
   }
 
-  public removeField(): void {
-    this.selectedInputType.pop();
-    this.selectedGroup.pop();
-    if (this.fields.length > 1) {
-      this.fields.removeAt(this.fields.length - 1);
+  public removeField(index: number): void {
+    if (this.fields.length <= 1) {
+      return;
     }
+
+    this.selectedInputType.splice(index, 1);
+    this.selectedGroup.splice(index, 1);
+    if (this.fields.length > 1) {
+      this.fields.removeAt(index);
+    }
+  }
+
+  // swaps the contents of the field at [index] with the field at [index - 1]
+  swapFieldUp(index: number): void {
+    if (this.fields.length <= 1 || index === 0) {
+      return;
+    }
+    this.utils.swap(this.selectedInputType, index, index - 1);
+    this.utils.swap(this.selectedGroup, index, index - 1);
+    this.utils.swapFormArray(this.fields, index, index - 1);
+  }
+
+  // swaps the contents of the field at [index] with the field at [index + 1]
+  swapFieldDown(index: number): void {
+    if (this.fields.length <= 1 || index === this.fields.length - 1) {
+      return;
+    }
+    this.utils.swap(this.selectedInputType, index, index + 1);
+    this.utils.swap(this.selectedGroup, index, index + 1);
+    this.utils.swapFormArray(this.fields, index, index + 1);
   }
 
   public createField(): FormGroup {
