@@ -16,7 +16,7 @@ export class UtilsService {
     if (arr.length < 2) {
       return;
     }
-
+    // see comment above
     let temp:AbstractControl = Object.assign({}, arr.at(a).value);
     arr.at(a).setValue(arr.at(b).value);
     arr.at(b).setValue(temp);
