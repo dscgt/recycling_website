@@ -58,14 +58,14 @@
                 </mat-form-field>
               </div>
               <div id='field-box-buttons-wrapper'>
-                <button *ngIf="members.length > 1" mat-icon-button aria-label="Remove this group" (click)="removeMember(i)" type="button">
+                <button *ngIf="members.length > 1" mat-icon-button aria-label="Remove this member" (click)="removeMember(i)" type="button">
                   <mat-icon>clear</mat-icon>
                 </button>
-                <button *ngIf="members.length > 1 && i !== 0" mat-icon-button aria-label="Swap this group with the one above" (click)="swapMember(i, i - 1)"
+                <button *ngIf="members.length > 1 && i !== 0" mat-icon-button aria-label="Swap this member with the one above" (click)="swapMember(i, i - 1)"
                   type="button">
                   <mat-icon>keyboard_arrow_up</mat-icon>
                 </button>
-                <button *ngIf="members.length > 1 && i !== members.length - 1" mat-icon-button aria-label="Swap this group with the one below"
+                <button *ngIf="members.length > 1 && i !== members.length - 1" mat-icon-button aria-label="Swap this member with the one below"
                   (click)="swapMember(i, i + 1)" type="button">
                   <mat-icon>keyboard_arrow_down</mat-icon>
                 </button>
