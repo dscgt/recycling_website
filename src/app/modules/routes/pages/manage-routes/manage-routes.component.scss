@@ -1,5 +1,5 @@
 .spacer {
-  flex: 1 1
+  flex: 1 1;
 }
 mat-form-field {
   margin-left: 8px;
@@ -12,4 +12,26 @@ mat-checkbox {
 
 .selectGroup {
   margin-left: 10px;
+}
+
+// Angular has a "mat-card-footer" element, but it's display block
+.card-footer {
+  display: flex;
+  justify-content: right;
+}
+
+.field-box-main-content {
+  display: flex;
+  justify-content: space-between;
+}
+
+.field-box-buttons-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#form-title {
+  display: flex;
+  justify-content: space-between;
 }

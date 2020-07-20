@@ -1,3 +1,4 @@
+<!-- row content -->
 <app-expansion-table
   [defaultPageSize]="10"
   [pageSizeOptions]="[5, 10, 25, 50]"
@@ -7,18 +8,26 @@
     <pre>{{ route | json }}</pre>
   </ng-template>
 </app-expansion-table>
+<!-- END row content -->
+
 <app-fab
   icon="add"
   label="Create a route"
   (click)="createRoute()">
 </app-fab>
+
+<!-- creation form (modal content) -->
 <app-projection-dialog
   [control$]="controlDialog$"
   (onClose)="dialogClosed()"
   (getDialogRef)="receiveDialogRef($event)">
-  <h2 mat-dialog-title>Create a Route</h2>
+  <div id='form-title'>
+    <h2 mat-dialog-title>Create a Route</h2>
+    <button (click)="closeDialog()" mat-icon-button aria-label="Cancel creating this route" type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
   <mat-dialog-content>
-
     <form [formGroup]="createRouteForm" (ngSubmit)="onSubmit()">
       <mat-form-field appearance="outline">
         <mat-label>Name of Route</mat-label>
@@ -26,95 +35,14 @@
         <mat-icon matSuffix>navigation</mat-icon>
       </mat-form-field>
 
+      <!-- high-level route fields -->
       <mat-card mat-elevation-z1>
         <div formArrayName="fields">
           <mat-card-header>
             <mat-card-subtitle>Fields</mat-card-subtitle>
-            <span class="spacer"></span>
-            <button mat-icon-button aria-label="Add another field" (click)="addField()" type="button">
-              <mat-icon>add</mat-icon>
-            </button>
-            <button mat-icon-button aria-label="Remove a field" (click)="removeField()" type="button">
-              <mat-icon>clear</mat-icon>
-            </button>
           </mat-card-header>
           <div *ngFor="let field of fields.controls; let i = index;">
-            <div [formGroupName]="i">
-              <mat-form-field>
-                <mat-label>Name of Field</mat-label>
-                <input matInput placeholder="Insert name of field" formControlName="title" required>
-                <mat-icon matSuffix>edit</mat-icon>
-              </mat-form-field>
-              <mat-form-field>
-                <mat-label>Type of Field</mat-label>
-                <mat-select formControlName="type" [(value)]="selectedInputType[i]" required>
-                  <mat-option *ngFor="let type of fieldInputTypes; let i = index;" [value]="fieldInputTypeValues[i]">
-                    {{ type }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-              <mat-checkbox formControlName="optional">Optional</mat-checkbox>
-              <mat-form-field  *ngIf="selectedInputType[i] === 'select'" class="selectGroup">
-                <mat-label>Select Group</mat-label>
-                <mat-select formControlName="groupId" [(value)]="selectedGroup[i]" [required]="selectedInputType[i] === 'select'">
-                  <mat-option *ngFor="let group of groups$ | async" [value]="group.id">
-                    {{ group.title }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-            </div>
-            <div *ngIf="i < fields.length - 1">
-              <mat-divider></mat-divider><br>
-            </div>
-          </div>
-        </div>
-      </mat-card>
-
-      <br>
-
-      <mat-card mat-elevation-z1>
-        <div formArrayName="stops">
-          <mat-card-header>
-            <mat-card-subtitle>Stops</mat-card-subtitle>
-            <span class="spacer"></span>
-            <button mat-icon-button aria-label="Add another stop" (click)="addStop()" type="button">
-              <mat-icon>add</mat-icon>
-            </button>
-            <button mat-icon-button aria-label="Remove a stop" (click)="removeStop()" type="button">
-              <mat-icon>clear</mat-icon>
-            </button>
-          </mat-card-header>
-          <div *ngFor="let stop of stops.controls; let i = index;">
-            <div [formGroupName]="i">
-              <mat-form-field appearance="standard">
-                <mat-label>Name of Stop</mat-label>
-                <input matInput placeholder="E.g. CRC, West Village" formControlName="title" required>
-                <mat-icon matSuffix>place</mat-icon>
-              </mat-form-field>
-              <mat-form-field appearance="standard">
-                <mat-label>Description</mat-label>
-                <input matInput placeholder="Short description of stop" formControlName="description">
-                <mat-icon matSuffix>edit</mat-icon>
-              </mat-form-field>
-            </div>
-            <div *ngIf="i < stops.length - 1">
-              <mat-divider></mat-divider><br>
-            </div>
-          </div>
-        </div>
-        <mat-card mat-elevation-z1>
-          <div formArrayName="fields_stops">
-            <mat-card-header>
-              <mat-card-subtitle>Fields</mat-card-subtitle>
-              <span class="spacer"></span>
-              <button mat-icon-button aria-label="Add another field" (click)="addField_Stop()" type="button">
-                <mat-icon>add</mat-icon>
-              </button>
-              <button mat-icon-button aria-label="Remove a field" (click)="removeField_Stop()" type="button">
-                <mat-icon>clear</mat-icon>
-              </button>
-            </mat-card-header>
-            <div *ngFor="let field of fields_stops.controls; let i = index;">
+            <div class="field-box-main-content">
               <div [formGroupName]="i">
                 <mat-form-field>
                   <mat-label>Name of Field</mat-label>
@@ -123,38 +51,164 @@
                 </mat-form-field>
                 <mat-form-field>
                   <mat-label>Type of Field</mat-label>
-                  <mat-select formControlName="type" [(value)]="selectedInputType_stop[i]" required>
+                  <mat-select formControlName="type" required>
                     <mat-option *ngFor="let type of fieldInputTypes; let i = index;" [value]="fieldInputTypeValues[i]">
                       {{ type }}
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
                 <mat-checkbox formControlName="optional">Optional</mat-checkbox>
-                <mat-form-field  *ngIf="selectedInputType_stop[i] === 'select'" class="selectGroup">
+                <mat-form-field *ngIf="fields.get([i, 'type'])?.value === 'select'" class="selectGroup">
                   <mat-label>Select Group</mat-label>
-                  <mat-select formControlName="groupId" [(value)]="selectedGroup_stop[i]" [required]="selectedInputType_stop[i] === 'select'">
+                  <mat-select formControlName="groupId">
                     <mat-option *ngFor="let group of groups$ | async" [value]="group.id">
                       {{ group.title }}
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
               </div>
-              <div *ngIf="i < fields_stops.length - 1">
-                <mat-divider></mat-divider><br>
+              <div class='field-box-buttons-wrapper'>
+                <button *ngIf="fields.length > 1" mat-icon-button aria-label="Remove a field" (click)="removeField(i)" type="button">
+                  <mat-icon>clear</mat-icon>
+                </button>
+                <button *ngIf="fields.length > 1 && i !== 0" mat-icon-button aria-label="Swap this field with the one above"
+                  (click)="swapField(i, i - 1)" type="button">
+                  <mat-icon>keyboard_arrow_up</mat-icon>
+                </button>
+                <button *ngIf="fields.length > 1 && i !== fields.length - 1" mat-icon-button
+                  aria-label="Swap this field with the one below" (click)="swapField(i, i + 1)" type="button">
+                  <mat-icon>keyboard_arrow_down</mat-icon>
+                </button>
               </div>
             </div>
+            <div *ngIf="i < fields.length - 1">
+              <mat-divider></mat-divider><br>
+            </div>
           </div>
-        </mat-card>
+          <div class="card-footer">
+            <button mat-icon-button aria-label="Add another field" (click)="addField()" type="button">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+        </div>
       </mat-card>
+      <!-- END high-level route fields (non-stop) -->
+
+      <br>
+
+      <!-- route stops -->
+      <mat-card mat-elevation-z1>
+        <div formArrayName="stops">
+          <mat-card-header>
+            <mat-card-subtitle>Stops</mat-card-subtitle>
+          </mat-card-header>
+          <div *ngFor="let stop of stops.controls; let i = index;">
+            <div class='field-box-main-content'>
+              <div [formGroupName]="i">
+                <mat-form-field appearance="standard">
+                  <mat-label>Name of Stop</mat-label>
+                  <input matInput placeholder="E.g. CRC, West Village" formControlName="title" required>
+                  <mat-icon matSuffix>place</mat-icon>
+                </mat-form-field>
+                <mat-form-field appearance="standard">
+                  <mat-label>Description</mat-label>
+                  <input matInput placeholder="Short description of stop" formControlName="description">
+                  <mat-icon matSuffix>edit</mat-icon>
+                </mat-form-field>
+              </div>
+              <div class='field-box-buttons-wrapper'>
+                <button *ngIf="stops.length > 1" mat-icon-button aria-label="Remove this stop" (click)="removeStop(i)" type="button">
+                  <mat-icon>clear</mat-icon>
+                </button>
+                <button *ngIf="stops.length > 1 && i !== 0" mat-icon-button aria-label="Swap this stop with the one above"
+                  (click)="swapStop(i, i - 1)" type="button">
+                  <mat-icon>keyboard_arrow_up</mat-icon>
+                </button>
+                <button *ngIf="stops.length > 1 && i !== stops.length - 1" mat-icon-button
+                  aria-label="Swap this stop with the one below" (click)="swapStop(i, i + 1)" type="button">
+                  <mat-icon>keyboard_arrow_down</mat-icon>
+                </button>
+              </div>
+            </div>
+            <div *ngIf="i < stops.length - 1">
+              <mat-divider></mat-divider><br>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button mat-icon-button aria-label="Add another stop" (click)="addStop()" type="button">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-card>
+      <!-- END route stops -->
+
+      <br>
+
+      <!-- stop fields -->
+      <mat-card mat-elevation-z1>
+        <div formArrayName="fields_stops">
+          <mat-card-header>
+            <mat-card-subtitle>Stop Fields -- applied to every stop</mat-card-subtitle>            
+          </mat-card-header>
+          <div *ngFor="let field of fields_stops.controls; let i = index;">
+            <div class='field-box-main-content'>
+              <div [formGroupName]="i">
+                <mat-form-field>
+                  <mat-label>Name of Field</mat-label>
+                  <input matInput placeholder="Insert name of field" formControlName="title" required>
+                  <mat-icon matSuffix>edit</mat-icon>
+                </mat-form-field>
+                <mat-form-field>
+                  <mat-label>Type of Field</mat-label>
+                  <mat-select formControlName="type" required>
+                    <mat-option *ngFor="let type of fieldInputTypes; let i = index;" [value]="fieldInputTypeValues[i]">
+                      {{ type }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-checkbox formControlName="optional">Optional</mat-checkbox>
+                <mat-form-field *ngIf="fields_stops.get([i, 'type'])?.value === 'select'" class="selectGroup">
+                  <mat-label>Select Group</mat-label>
+                  <mat-select formControlName="groupId">
+                    <mat-option *ngFor="let group of groups$ | async" [value]="group.id">
+                      {{ group.title }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div class='field-box-buttons-wrapper'>
+                <button *ngIf="fields_stops.length > 1" mat-icon-button aria-label="Remove a field for stops" (click)="removeField_Stop(i)" type="button">
+                  <mat-icon>clear</mat-icon>
+                </button>
+                <button *ngIf="fields_stops.length > 1 && i !== 0" mat-icon-button aria-label="Swap this stop field with the one above"
+                  (click)="swapField_Stop(i, i - 1)" type="button">
+                  <mat-icon>keyboard_arrow_up</mat-icon>
+                </button>
+                <button *ngIf="fields_stops.length > 1 && i !== fields_stops.length - 1" mat-icon-button
+                  aria-label="Swap this stop field with the one below" (click)="swapField_Stop(i, i + 1)" type="button">
+                  <mat-icon>keyboard_arrow_down</mat-icon>
+                </button>
+              </div>
+            </div>
+            <div *ngIf="i < fields_stops.length - 1">
+              <mat-divider></mat-divider><br>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button mat-icon-button aria-label="Add another field for stops" (click)="addField_Stop()" type="button">
+              <mat-icon>add</mat-icon>  
+            </button>
+          </div>
+        </div>
+      </mat-card>
+      <!-- END stop fields -->
 
       <br>
     </form>
 
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button (click)="closeDialog()" mat-icon-button aria-label="Cancel creating route" type="button">
-      <mat-icon>close</mat-icon>
-    </button>
     <button mat-icon-button aria-label="Confirm creating route"
       [disabled]="(createRouteForm.valid === null) ? false : !createRouteForm.valid"
       type="submit" (click)="onSubmit()">
@@ -162,3 +216,4 @@
     </button>
   </mat-dialog-actions>
 </app-projection-dialog>
+<!-- END creation form (modal content) -->
