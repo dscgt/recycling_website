@@ -116,6 +116,10 @@
                   <input matInput placeholder="Short description of stop" formControlName="description">
                   <mat-icon matSuffix>edit</mat-icon>
                 </mat-form-field>
+                <mat-form-field appearance="standard">
+                  <mat-label>Exclusions (comma-separated)</mat-label>
+                  <input matInput placeholder="Stop fields to exclude" formControlName="exclude">
+                </mat-form-field>
               </div>
               <div class='field-box-buttons-wrapper'>
                 <button *ngIf="stops.length > 1" mat-icon-button aria-label="Remove this stop" (click)="removeStop(i)" type="button">
@@ -135,8 +139,9 @@
               <mat-divider></mat-divider><br>
             </div>
           </div>
+          <mat-divider></mat-divider><br>
           <div class="card-footer">
-            <mat-divider></mat-divider><br>
+            <p>Want to exclude a stop field below from being included in a stop? Type its name into 'Exclusions'. Separate multiple exclusions with commas.</p>
             <button mat-icon-button aria-label="Add another stop" (click)="addStop()" type="button">
               <mat-icon>add</mat-icon>
             </button>

@@ -2,9 +2,8 @@ import { Component, OnInit, ViewChild, TemplateRef, ChangeDetectorRef } from '@a
 import { Observable, BehaviorSubject } from 'rxjs';
 import { IRoute, BackendRoutesService, InputType, IField, IRouteStop, IRouteGroup } from 'src/app/modules/backend';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { FormGroup, FormControl, FormBuilder, FormArray } from '@angular/forms';
-import { map } from 'rxjs/operators';
+import { MatDialogRef } from '@angular/material/dialog';
+import { FormGroup, FormBuilder, FormArray } from '@angular/forms';
 import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
 
 @Component({
@@ -171,7 +170,8 @@ export class ManageRoutesComponent implements OnInit {
   public createStop(): FormGroup {
     return this.fb.group({
       title: [''],
-      description: ['']
+      description: [''],
+      exclude: ['']
     });
   }
 
@@ -211,6 +211,19 @@ export class ManageRoutesComponent implements OnInit {
       return;
     }
 
+    // ensure stop field titles don't have commas
+    // this makes sure the comma-separated "excludes" input works
+    const violators: string[] = [];
+    this.fields_stops.value.forEach((obj: any) => {
+      if (obj.title.indexOf(',') !== -1) {
+        violators.push(obj.title);
+      }
+    });
+    if (violators.length > 0) {
+      alert(`Please remove commas from: ${violators.join(', ')}`);
+      return;
+    }
+
     const vals: any = this.createRouteForm.value;
     const route: IRoute = {
       title: vals["title"],
@@ -230,7 +243,13 @@ export class ManageRoutesComponent implements OnInit {
     }
 
     for (let stop of vals["stops"]) {
-      route.stopData.stops.push(stop as IRouteStop);
+      // convert exclusions string into array of exclusions
+      const stopCopy = Object.assign({}, stop);
+      const excludeAsString: string = stopCopy.exclude;
+      stopCopy.exclude = excludeAsString
+        .split(',')
+        .map(s => s.trim());
+      route.stopData.stops.push(stopCopy as IRouteStop);
     }
 
     this.routesBackend.addRoute(route);

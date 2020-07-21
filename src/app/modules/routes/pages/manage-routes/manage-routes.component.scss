@@ -17,7 +17,12 @@ mat-checkbox {
 // Angular has a "mat-card-footer" element, but it's display block
 .card-footer {
   display: flex;
-  justify-content: right;
+  justify-content: space-between;
+}
+
+.card-footer > p {
+  font-size: 11px;
+  width: 50%;
 }
 
 .field-box-main-content {
