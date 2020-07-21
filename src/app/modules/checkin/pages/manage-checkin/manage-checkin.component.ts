@@ -4,7 +4,7 @@ import { ICheckinModel, InputType, BackendCheckinService, ICheckinGroup } from '
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormArray, FormBuilder } from '@angular/forms';
-import { map } from 'rxjs/operators';
+import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
 
 @Component({
   selector: 'app-manage-checkin',
@@ -25,9 +25,7 @@ export class ManageCheckinComponent implements OnInit {
   public createModelForm: FormGroup;
   public fieldInputTypes: string[];
   public fieldInputTypeValues: string[];
-  public selectedInputType: string[];
   public groups$: Observable<ICheckinGroup[]>;
-  public selectedGroup: string[];
 
   get fields(): FormArray {
     return this.createModelForm.get('fields') as FormArray;
@@ -36,7 +34,8 @@ export class ManageCheckinComponent implements OnInit {
   constructor(
     private backend: BackendCheckinService,
     private fb: FormBuilder,
-    private cdref: ChangeDetectorRef
+    private cdref: ChangeDetectorRef,
+    private utils: UtilsService
   ) { }
 
   ngOnInit(): void {
@@ -45,8 +44,6 @@ export class ManageCheckinComponent implements OnInit {
     this.controlDialogSubject$ = new BehaviorSubject<boolean>(false);
     this.controlDialog$ = this.controlDialogSubject$.asObservable();
     this.models$ = this.backend.getModels();
-    this.selectedInputType = [];
-    this.selectedGroup = [];  // ignore, this was to test default groups
     this.groups$ = this.backend.getGroups();
     this.displayData = [
       {
@@ -68,7 +65,7 @@ export class ManageCheckinComponent implements OnInit {
 
   // This is a workaround for a bug with Angular / Angular Forms
   // Without this, the dynamic [require] binding causes an error
-  // This may have performance impacts
+  // However, this workaround may have performance impacts
   // See https://github.com/angular/angular/issues/23657
   ngAfterContentChecked(): void {
     this.cdref.detectChanges();
@@ -78,17 +75,24 @@ export class ManageCheckinComponent implements OnInit {
     this.fields.push(this.createField());
   }
 
-  public removeField(): void {
-    this.selectedInputType.pop();
-    this.selectedGroup.pop();
-    if (this.fields.length > 1) {
-      this.fields.removeAt(this.fields.length - 1);
+  public removeField(index: number): void {
+    if (this.fields.length <= 1) {
+      return;
     }
+
+    this.fields.removeAt(index);
+  }
+
+  // swaps the contents of the field at [a] with the field at [b]
+  public swapField(a: number, b: number): void {
+    if (a < 0 || b < 0 || a >= this.fields.length || b >= this.fields.length) {
+      return;
+    }
+
+    this.utils.swapFormArray(this.fields, a, b);
   }
 
   public createField(): FormGroup {
-    this.selectedInputType.push("");
-    this.selectedGroup.push("");
     return this.fb.group({
       title: [''],
       type: [''],
@@ -115,6 +119,21 @@ export class ManageCheckinComponent implements OnInit {
   }
 
   public onSubmit(): void {
+    // check for empty groupIds where they are required
+    // this is a WORKAROUND. Ideally, groupIds are automatically validated
+    // by Angular Forms as intended. However, that is currently bugged. See ticket
+    const fieldsToScan:any[] = this.fields.value;
+    const missings:string[] = [];
+    fieldsToScan.forEach((obj) => {
+      if (obj.type === 'select'  && obj.groupId.trim().length === 0) {
+        missings.push(obj.title);
+      }
+    });
+    if (missings.length > 0) {
+      alert(`Please enter a groupId for: ${missings.join(', ')}`);
+      return;
+    }
+
     const model: ICheckinModel = this.createModelForm.value;
     this.backend.addModel(model);
     this.closeDialog();

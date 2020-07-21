@@ -7,6 +7,7 @@ import { ICheckinRecord, ICheckinModel, ICheckinGroup, IField } from 'src/app/mo
 import { IFirestoreCheckinRecord } from '../types';
 import { map } from 'rxjs/operators';
 import { CheckinAngularFirestore } from '../../../factory/factory.service';
+import { AbstractFormGroupDirective } from '@angular/forms';
 
 @Injectable({
   providedIn: 'root'
@@ -57,7 +58,7 @@ export class FirebaseCheckinService implements IBackendCheckin {
     const toAdd = Object.assign({}, checkin);
     // change groupIds to DocumentReference's before sending to Firestore
     toAdd.fields.forEach((field: IField) => {
-      if (typeof field.groupId === 'string') {
+      if (typeof field.groupId === 'string' && field.groupId.trim().length > 0) {
         field.groupId = this.groupsCollection.doc(field.groupId).ref;
       }
     })

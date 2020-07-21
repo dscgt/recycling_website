@@ -5,6 +5,7 @@ import { ICheckinGroup, ICheckinGroupMember, BackendCheckinService, ICheckinMode
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormArray, FormBuilder } from '@angular/forms';
+import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
 
 @Component({
   selector: 'app-manage-checkin',
@@ -39,7 +40,8 @@ export class CheckinGroupComponent implements OnInit {
 
   constructor(
     private backend: BackendCheckinService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private utils: UtilsService
   ) { }
 
   ngOnInit(): void {
@@ -72,10 +74,19 @@ export class CheckinGroupComponent implements OnInit {
     this.members.push(this.createMember());
   }
 
-  public removeMember(): void {
-    if (this.members.length > 1) {
-      this.members.removeAt(this.members.length - 1);
+  public removeMember(index: number): void {
+    if (this.members.length <= 1) {
+      return;
     }
+
+    this.members.removeAt(index);
+  }
+
+  public swapMember(a: number, b: number): void {
+    if (a < 0 || b < 0 || a >= this.members.length || b >= this.members.length) {
+      return;
+    }
+    this.utils.swapFormArray(this.members, a, b);
   }
 
   public createMember(): FormGroup {

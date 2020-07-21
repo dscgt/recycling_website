@@ -16,7 +16,12 @@
   [control$]="controlDialog$"
   (onClose)="dialogClosed()"
   (getDialogRef)="receiveDialogRef($event)">
-  <h2 mat-dialog-title>Create a Checkin Item</h2>
+  <div id='form-title'>
+    <h2 mat-dialog-title>Create a Checkin Item</h2>
+    <button (click)="closeDialog()" mat-icon-button aria-label="Cancel creating checkin item" type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
   <mat-dialog-content>
 
     <form [formGroup]="createModelForm" (ngSubmit)="onSubmit()">
@@ -30,39 +35,45 @@
         <div formArrayName="fields">
           <mat-card-header>
             <mat-card-subtitle>Fields</mat-card-subtitle>
-            <span class="spacer"></span>
-            <button mat-icon-button aria-label="Add another field" (click)="addField()" type="button">
-              <mat-icon>add</mat-icon>
-            </button>
-            <button mat-icon-button aria-label="Remove a field" (click)="removeField()" type="button">
-              <mat-icon>clear</mat-icon>
-            </button>
           </mat-card-header>
           <div *ngFor="let field of fields.controls; let i = index;">
-            <div [formGroupName]="i">
-              <mat-form-field>
-                <mat-label>Title of Field</mat-label>
-                <input matInput placeholder="Insert title of field" formControlName="title" required>
-                <mat-icon matSuffix>edit</mat-icon>
-              </mat-form-field>
-              <mat-form-field>
-                <mat-label>Type of Field</mat-label>
-                <mat-select formControlName="type" [(value)]="selectedInputType[i]" required>
-                  <mat-option *ngFor="let type of fieldInputTypes; let i = index;" [value]="fieldInputTypeValues[i]">
-                    {{ type }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
-              <mat-checkbox formControlName="optional">Optional?</mat-checkbox>
-              <mat-checkbox formControlName="delay">Delay?</mat-checkbox>
-              <mat-form-field  *ngIf="selectedInputType[i] === 'select'" class="selectGroup">
-                <mat-label>Select Group</mat-label>
-                <mat-select formControlName="groupId" [(value)]="selectedGroup[i]" [required]="selectedInputType[i] === 'select'">
-                  <mat-option *ngFor="let group of groups$ | async" [value]="group.id">
-                    {{ group.title }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
+            <div id='field-box-main-content'>
+              <div [formGroupName]="i">
+                <mat-form-field>
+                  <mat-label>Title of Field</mat-label>
+                  <input matInput placeholder="Insert title of field" formControlName="title" required>
+                  <mat-icon matSuffix>edit</mat-icon>
+                </mat-form-field>
+                <mat-form-field>
+                  <mat-label>Type of Field</mat-label>
+                  <mat-select formControlName="type" required>
+                    <mat-option *ngFor="let type of fieldInputTypes; index as j;" [value]="fieldInputTypeValues[j]">
+                      {{ type }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-checkbox formControlName="optional">Optional?</mat-checkbox>
+                <mat-checkbox formControlName="delay">Delay?</mat-checkbox>
+                <mat-form-field  *ngIf="fields.get([i, 'type'])?.value === 'select'" class="selectGroup">
+                  <mat-label>Select Group</mat-label>
+                  <mat-select formControlName="groupId">
+                    <mat-option *ngFor="let group of groups$ | async" [value]="group.id">
+                      {{ group.title }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <div id='field-box-buttons-wrapper'>
+                <button *ngIf="fields.length > 1" mat-icon-button aria-label="Remove a field" (click)="removeField(i)" type="button">
+                  <mat-icon>clear</mat-icon>
+                </button>
+                <button *ngIf="fields.length > 1 && i !== 0" mat-icon-button aria-label="Swap this field with the one above" (click)="swapField(i, i - 1)" type="button">
+                  <mat-icon>keyboard_arrow_up</mat-icon>
+                </button>
+                <button *ngIf="fields.length > 1 && i !== fields.length - 1" mat-icon-button aria-label="Swap this field with the one below" (click)="swapField(i, i + 1)" type="button">
+                  <mat-icon>keyboard_arrow_down</mat-icon>
+                </button>
+              </div>
             </div>
             <div *ngIf="i < fields.length - 1">
               <mat-divider></mat-divider><br>
@@ -76,9 +87,10 @@
 
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button (click)="closeDialog()" mat-icon-button aria-label="Cancel creating checkin item" type="button">
-      <mat-icon>close</mat-icon>
+    <button mat-icon-button aria-label="Add another field" (click)="addField()" type="button">
+      <mat-icon>add</mat-icon>
     </button>
+    <span class="spacer"></span>
     <button mat-icon-button aria-label="Confirm creating checkin item"
       [disabled]="(createModelForm.valid === null) ? false : !createModelForm.valid"
       type="submit" (click)="onSubmit()">

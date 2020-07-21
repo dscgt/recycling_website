@@ -28,7 +28,12 @@
   [control$]="controlCreationDialog$"
   (onClose)="creationDialogClosed()"
   (getDialogRef)="receiveCreationDialogRef($event)">
-  <h2 mat-dialog-title>Create a Route Group</h2>
+  <div id='form-title'>
+    <h2 mat-dialog-title>Create a Route Group</h2>
+    <button (click)="closeCreationDialog()" mat-icon-button aria-label="Cancel creating route group" type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
   <mat-dialog-content>
 
     <form [formGroup]="createGroupForm" (ngSubmit)="onSubmit()">
@@ -42,21 +47,30 @@
         <div formArrayName="members">
           <mat-card-header>
             <mat-card-subtitle>Members</mat-card-subtitle>
-            <span class="spacer"></span>
-            <button mat-icon-button aria-label="Add another member" (click)="addMember()" type="button">
-              <mat-icon>add</mat-icon>
-            </button>
-            <button mat-icon-button aria-label="Remove a member" (click)="removeMember()" type="button">
-              <mat-icon>clear</mat-icon>
-            </button>
           </mat-card-header>
           <div *ngFor="let member of members.controls; let i = index;">
-            <div [formGroupName]="i">
-              <mat-form-field>
-                <mat-label>Member name</mat-label>
-                <input matInput placeholder="Insert name of member" formControlName="title" required>
-                <mat-icon matSuffix>edit</mat-icon>
-              </mat-form-field>
+            <div id='field-box-main-content'>
+              <div [formGroupName]="i">
+                <mat-form-field>
+                  <mat-label>Member name</mat-label>
+                  <input matInput placeholder="Insert name of member" formControlName="title" required>
+                  <mat-icon matSuffix>edit</mat-icon>
+                </mat-form-field>
+              </div>
+              <div id='field-box-buttons-wrapper'>
+                <button *ngIf="members.length > 1" mat-icon-button aria-label="Remove this member" (click)="removeMember(i)"
+                  type="button">
+                  <mat-icon>clear</mat-icon>
+                </button>
+                <button *ngIf="members.length > 1 && i !== 0" mat-icon-button aria-label="Swap this member with the one above"
+                  (click)="swapMember(i, i - 1)" type="button">
+                  <mat-icon>keyboard_arrow_up</mat-icon>
+                </button>
+                <button *ngIf="members.length > 1 && i !== members.length - 1" mat-icon-button
+                  aria-label="Swap this member with the one below" (click)="swapMember(i, i + 1)" type="button">
+                  <mat-icon>keyboard_arrow_down</mat-icon>
+                </button>
+              </div>
             </div>
             <div *ngIf="i < members.length - 1">
               <mat-divider></mat-divider><br>
@@ -70,9 +84,10 @@
 
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button (click)="closeCreationDialog()" mat-icon-button aria-label="Cancel creating route group" type="button">
-      <mat-icon>close</mat-icon>
+    <button mat-icon-button aria-label="Add another member" (click)="addMember()" type="button">
+      <mat-icon>add</mat-icon>
     </button>
+    <span class="spacer"></span>
     <button mat-icon-button aria-label="Confirm creating route group"
       [disabled]="(createGroupForm.valid === null) ? false : !createGroupForm.valid"
       type="submit" (click)="onSubmit()">

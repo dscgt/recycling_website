@@ -5,6 +5,7 @@ import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-mat
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormControl, FormBuilder, FormArray } from '@angular/forms';
 import { map } from 'rxjs/operators';
+import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
 
 @Component({
   selector: 'app-manage-routes',
@@ -25,11 +26,7 @@ export class ManageRoutesComponent implements OnInit {
   public createRouteForm: FormGroup;
   public fieldInputTypes: string[];
   public fieldInputTypeValues: string[];
-  public selectedInputType: string[];
   public groups$: Observable<IRouteGroup[]>;
-  public selectedGroup: string[];
-  public selectedInputType_stop: string[];
-  public selectedGroup_stop: string[];
 
   get fields(): FormArray {
     return this.createRouteForm.get('fields') as FormArray;
@@ -46,7 +43,8 @@ export class ManageRoutesComponent implements OnInit {
   constructor(
     private routesBackend: BackendRoutesService,
     private fb: FormBuilder,
-    private cdref: ChangeDetectorRef
+    private cdref: ChangeDetectorRef,
+    private utils: UtilsService
   ) { }
 
   ngOnInit(): void {
@@ -55,10 +53,6 @@ export class ManageRoutesComponent implements OnInit {
     this.controlDialogSubject$ = new BehaviorSubject<boolean>(false);
     this.controlDialog$ = this.controlDialogSubject$.asObservable();
     this.routes$ = this.routesBackend.getRoutes();
-    this.selectedInputType = [];
-    this.selectedGroup = [];
-    this.selectedInputType_stop = [];
-    this.selectedGroup_stop = [];
     this.groups$ = this.routesBackend.getGroups();
     this.displayData = [
       {
@@ -110,31 +104,53 @@ export class ManageRoutesComponent implements OnInit {
     this.stops.push(this.createStop());
   }
 
-  public removeField(): void {
-    this.selectedInputType.pop();
-    this.selectedGroup.pop();
-    if (this.fields.length > 1) {
-      this.fields.removeAt(this.fields.length - 1);
+  public removeField(i: number): void {
+    if (this.fields.length <= 1) {
+      return;
     }
+    this.fields.removeAt(i);
   }
 
-  public removeField_Stop(): void {
-    this.selectedInputType_stop.pop();
-    this.selectedGroup_stop.pop();
-    if (this.fields_stops.length > 1) {
-      this.fields_stops.removeAt(this.fields_stops.length - 1);
+  public removeField_Stop(i: number): void {
+    if (this.fields_stops.length <= 1) {
+      return;
     }
+
+    this.fields_stops.removeAt(i);
   }
 
-  public removeStop(): void {
-    if (this.stops.length > 1) {
-      this.stops.removeAt(this.stops.length - 1);
+  public removeStop(i: number): void {
+    if (this.stops.length <= 1) {
+      return;
     }
+    this.stops.removeAt(i);
+  }
+
+  public swapField(a: number, b: number): void {
+    if (a < 0 || b < 0 || a >= this.fields.length || b >= this.fields.length) {
+      return;
+    }
+
+    this.utils.swapFormArray(this.fields, a, b);
+  }
+
+  public swapField_Stop(a: number, b: number): void {
+    if (a < 0 || b < 0 || a >= this.fields_stops.length || b >= this.fields_stops.length) {
+      return;
+    }
+
+    this.utils.swapFormArray(this.fields_stops, a, b);
+  }
+
+  public swapStop(a: number, b: number): void {
+    if (a < 0 || b < 0 || a >= this.stops.length || b >= this.stops.length) {
+      return;
+    }
+
+    this.utils.swapFormArray(this.stops, a, b);
   }
 
   public createField(): FormGroup {
-    this.selectedGroup.push('');
-    this.selectedInputType.push('');
     return this.fb.group({
       title: [''],
       optional: [false],
@@ -144,8 +160,6 @@ export class ManageRoutesComponent implements OnInit {
   }
 
   public createField_Stop(): FormGroup {
-    this.selectedInputType_stop.push('');
-    this.selectedGroup_stop.push('');
     return this.fb.group({
       title: [''],
       optional: [false],
@@ -178,6 +192,25 @@ export class ManageRoutesComponent implements OnInit {
   }
 
   public onSubmit(): void {
+    // check for empty groupIds where they are required
+    // this is a WORKAROUND. Ideally, groupIds are automatically validated
+    // by Angular Forms as intended. However, that is currently bugged. See ticket
+    const missings: string[] = [];
+    this.fields.value.forEach((obj:any) => {
+      if (obj.type === 'select' && obj.groupId.trim().length === 0) {
+        missings.push(obj.title);
+      }
+    });
+    this.fields_stops.value.forEach((obj: any) => {
+      if (obj.type === 'select' && obj.groupId.trim().length === 0) {
+        missings.push(obj.title);
+      }
+    });
+    if (missings.length > 0) {
+      alert(`Please enter a groupId for: ${missings.join(', ')}`);
+      return;
+    }
+
     const vals: any = this.createRouteForm.value;
     const route: IRoute = {
       title: vals["title"],
