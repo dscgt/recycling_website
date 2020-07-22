@@ -1,3 +1,4 @@
+<!-- row content -->
 <app-expansion-table
   [defaultPageSize]="10"
   [pageSizeOptions]="[5, 10, 25, 50]"
@@ -7,6 +8,9 @@
     <button mat-raised-button color="warn" aria-label="Delete This Group" (click)="confirmDeleteGroup(group)" type="button">Delete This Group</button>
   </ng-template>
 </app-expansion-table>
+<!-- END row content -->
+
+<!-- deletion confirmation modal -->
 <app-projection-dialog [control$]="controlConfirmationDialog$" (onClose)="confirmationDialogClosed()"
   (getDialogRef)="receiveConfirmationDialogRef($event)">
   <h2 mat-dialog-title>Are you sure you want to delete this group?</h2>
@@ -19,11 +23,15 @@
     </button>
   </mat-dialog-actions>
 </app-projection-dialog>
+<!-- END deletion confirmation modal -->
+
 <app-fab
   icon="add"
   label="Create a checkin item"
-  (click)="createGroup()">
+  (click)="openCreationDialog()">
 </app-fab>
+
+<!-- creation form modal -->
 <app-projection-dialog
   [control$]="controlCreationDialog$"
   (onClose)="creationDialogClosed()"
@@ -93,3 +101,4 @@
     </button>
   </mat-dialog-actions>
 </app-projection-dialog>
+<!-- END creation form modal -->

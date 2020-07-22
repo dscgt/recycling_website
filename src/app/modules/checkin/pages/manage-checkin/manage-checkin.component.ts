@@ -16,16 +16,22 @@ export class ManageCheckinComponent implements OnInit {
   @ViewChild(ExpansionTableComponent)
   private expansionTable: ExpansionTableComponent<ICheckinModel>;
 
-  private controlDialogSubject$: BehaviorSubject<boolean>;
+  private controlCreationDialogSubject$: BehaviorSubject<boolean>;
+  private controlDeletionDialogSubject$: BehaviorSubject<boolean>;
 
   public models$: Observable<ICheckinModel[]>;
   public displayData: IDisplayData<ICheckinModel>[];
-  public controlDialog$: Observable<boolean>;
-  public dialogRef: MatDialogRef<TemplateRef<any>>;
+  public controlCreationDialog$: Observable<boolean>;
+  public controlDeletionDialog$: Observable<boolean>;
+  public creationDialogRef: MatDialogRef<TemplateRef<any>>;
+  public deletionDialogRef: MatDialogRef<TemplateRef<any>>;
   public createModelForm: FormGroup;
   public fieldInputTypes: string[];
   public fieldInputTypeValues: string[];
   public groups$: Observable<ICheckinGroup[]>;
+
+  // workaround, see checkin-groups component for explanation
+  public modelToDelete: ICheckinModel;
 
   get fields(): FormArray {
     return this.createModelForm.get('fields') as FormArray;
@@ -41,8 +47,10 @@ export class ManageCheckinComponent implements OnInit {
   ngOnInit(): void {
     this.fieldInputTypes = Object.keys(InputType);
     this.fieldInputTypeValues = Object.values(InputType);
-    this.controlDialogSubject$ = new BehaviorSubject<boolean>(false);
-    this.controlDialog$ = this.controlDialogSubject$.asObservable();
+    this.controlCreationDialogSubject$ = new BehaviorSubject<boolean>(false);
+    this.controlDeletionDialogSubject$ = new BehaviorSubject<boolean>(false);
+    this.controlCreationDialog$ = this.controlCreationDialogSubject$.asObservable();
+    this.controlDeletionDialog$ = this.controlDeletionDialogSubject$.asObservable();
     this.models$ = this.backend.getModels();
     this.groups$ = this.backend.getGroups();
     this.displayData = [
@@ -102,20 +110,14 @@ export class ManageCheckinComponent implements OnInit {
     });
   }
 
-  public dialogClosed(): void {
-    // console.log("Dialog closed in child");
+  public confirmDeleteModel(model: ICheckinModel): void {
+    this.modelToDelete = model;
+    this.controlDeletionDialogSubject$.next(true);
   }
 
-  public createModel(): void {
-    this.controlDialogSubject$.next(true);
-  }
-
-  public receiveDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
-    this.dialogRef = ref;
-  }
-
-  public closeDialog(): void {
-    this.dialogRef?.close();
+  public onDelete(): void {
+    this.closeDeletionDialog();
+    this.backend.deleteModel(this.modelToDelete.id);
   }
 
   public onSubmit(): void {
@@ -136,7 +138,38 @@ export class ManageCheckinComponent implements OnInit {
 
     const model: ICheckinModel = this.createModelForm.value;
     this.backend.addModel(model);
-    this.closeDialog();
+    this.closeCreationDialog();
   }
 
+  public openCreationDialog(): void {
+    this.controlCreationDialogSubject$.next(true);
+  }
+
+  public openDeletionDialog(): void {
+    this.controlDeletionDialogSubject$.next(true);
+  }
+
+  public creationDialogClosed(): void {
+    // console.log("Dialog closed in child");
+  }
+
+  public deletionDialogClosed(): void {
+    // console.log("Dialog closed in child");
+  }
+
+  public receiveCreationDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
+    this.creationDialogRef = ref;
+  }
+
+  public receiveDeletionDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
+    this.deletionDialogRef = ref;
+  }
+
+  public closeCreationDialog(): void {
+    this.creationDialogRef?.close();
+  }
+
+  public closeDeletionDialog(): void {
+    this.deletionDialogRef?.close();
+  }
 }

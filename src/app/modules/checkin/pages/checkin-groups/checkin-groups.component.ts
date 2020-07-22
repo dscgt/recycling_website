@@ -30,8 +30,9 @@ export class CheckinGroupComponent implements OnInit {
   public fieldInputTypes: string[];
   public fieldInputTypeValues: string[];
 
-  // workaround. app-expansion-table contains information for a group, and uses these to populate
-  // each row, however this bugs out with app-projection-dialog. 
+  // workaround. there is no way for deletion method to know which group to delete without this reference.
+  // ideally, this is passed to the deletion method directly--but the nesting required to do so causes
+  // bugs with expansion tables.
   public groupToDelete: ICheckinGroup;
 
   get members(): FormArray {
@@ -95,10 +96,6 @@ export class CheckinGroupComponent implements OnInit {
     });
   }
 
-  public createGroup(): void {
-    this.controlCreationDialogSubject$.next(true);
-  }
-
   public confirmDeleteGroup(group: ICheckinGroup): void {
     this.groupToDelete = group;
     this.controlConfirmationDialogSubject$.next(true);
@@ -113,6 +110,10 @@ export class CheckinGroupComponent implements OnInit {
     const group: ICheckinGroup = this.createGroupForm.value;
     this.backend.addGroup(group);
     this.closeCreationDialog();
+  }
+
+  public openCreationDialog(): void {
+    this.controlCreationDialogSubject$.next(true);
   }
 
   public creationDialogClosed(): void {

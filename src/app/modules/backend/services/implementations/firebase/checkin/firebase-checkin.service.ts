@@ -38,19 +38,15 @@ export class FirebaseCheckinService implements IBackendCheckin {
     );
   }
 
-  // Currently, all DocumentReference-type groups within fields are converted to empty strings.
-  // This is not ideal, and is meant to be a temporary workaround for crashes.
   public getModels(): Observable<ICheckinModel[]> {
-    return this.modelsCollection.valueChanges().pipe(
-      map((models:ICheckinModel[]) => models.map((model:ICheckinModel) => {
-        model.fields.forEach((field) => {
-          if (typeof field.groupId !== "string") {
-            field.groupId = "";
-          }
-          field.groupId = "";
+    return this.modelsCollection.snapshotChanges().pipe(
+      map((snapshots:DocumentChangeAction<ICheckinModel>[]) =>
+        snapshots.map((snapshot: DocumentChangeAction<ICheckinModel>) => {
+          const toReturn: ICheckinModel = snapshot.payload.doc.data();
+          toReturn.id = snapshot.payload.doc.id;
+          return toReturn;
         })
-        return model;
-      }))
+      )
     );
   }
 
@@ -63,6 +59,10 @@ export class FirebaseCheckinService implements IBackendCheckin {
       }
     })
     this.modelsCollection.add(toAdd);
+  }
+
+  public deleteModel(id: string): void {
+    this.modelsCollection.doc(id).delete();
   }
 
   public getGroups(): Observable<ICheckinGroup[]> {
