@@ -5,25 +5,40 @@
   [data$]="routes$"
   [displayData]="displayData">
   <ng-template let-route>
-    <pre>{{ route | json }}</pre>
+    <button mat-raised-button color="warn" aria-label="Delete This Route" (click)="confirmDeleteRoute(route)" type="button">Delete This Route Option</button>
   </ng-template>
 </app-expansion-table>
 <!-- END row content -->
 
+<!-- deletion confirmation modal -->
+<app-projection-dialog [control$]="controlDeletionDialog$" (onClose)="deletionDialogClosed()"
+  (getDialogRef)="receiveDeletionDialogRef($event)">
+  <h2 mat-dialog-title>Are you sure you want to delete this route option?</h2>
+  <mat-dialog-actions align="end">
+    <button (click)="closeDeletionDialog()" mat-icon-button aria-label="Cancel deleting route option" type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+    <button mat-icon-button aria-label="Confirm deleting check-in option" type="submit" (click)="onDelete()">
+      <mat-icon>check</mat-icon>
+    </button>
+  </mat-dialog-actions>
+</app-projection-dialog>
+<!-- END deletion confirmation modal -->
+
 <app-fab
   icon="add"
   label="Create a route"
-  (click)="createRoute()">
+  (click)="openCreationDialog()">
 </app-fab>
 
 <!-- creation form (modal content) -->
 <app-projection-dialog
-  [control$]="controlDialog$"
-  (onClose)="dialogClosed()"
-  (getDialogRef)="receiveDialogRef($event)">
+  [control$]="controlCreationDialog$"
+  (onClose)="creationDialogClosed()"
+  (getDialogRef)="receiveCreationDialogRef($event)">
   <div id='form-title'>
     <h2 mat-dialog-title>Create a Route</h2>
-    <button (click)="closeDialog()" mat-icon-button aria-label="Cancel creating this route" type="button">
+    <button (click)="closeCreationDialog()" mat-icon-button aria-label="Cancel creating this route" type="button">
       <mat-icon>close</mat-icon>
     </button>
   </div>

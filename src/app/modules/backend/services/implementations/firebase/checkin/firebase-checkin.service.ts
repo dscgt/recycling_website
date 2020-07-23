@@ -61,7 +61,10 @@ export class FirebaseCheckinService implements IBackendCheckin {
     this.modelsCollection.add(toAdd);
   }
 
-  public deleteModel(id: string): void {
+  public deleteModel(id?: string): void {
+    if (!id) {
+      return;
+    }
     this.modelsCollection.doc(id).delete();
   }
 
@@ -81,7 +84,10 @@ export class FirebaseCheckinService implements IBackendCheckin {
     this.groupsCollection.add(group);
   }
 
-  public deleteGroup(id: string): void {
+  public deleteGroup(id?: string): void {
+    if (!id) {
+      return;
+    }
     this.groupsCollection.doc(id).delete();
   }
 

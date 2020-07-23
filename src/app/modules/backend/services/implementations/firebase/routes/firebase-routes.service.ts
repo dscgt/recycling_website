@@ -79,20 +79,14 @@ export class FirebaseRoutesService implements IBackendRoutes {
   // Currently, all DocumentReference-type groups within fields are converted to empty strings.
   // This is not ideal, and is meant to be a temporary workaround for crashes.
   public getRoutes(): Observable<IRoute[]> {
-    return this.routesCollection.valueChanges().pipe(
-      map((routes:IRoute[]) => routes.map((route:IRoute) => {
-        route.fields.forEach((field: IField) => {
-          if (typeof field.groupId !== "string") {
-            field.groupId = "";
-          }
+    return this.routesCollection.snapshotChanges().pipe(
+      map((snapshots: DocumentChangeAction<IRoute>[]) =>
+        snapshots.map((snapshot: DocumentChangeAction<IRoute>) => {
+          const toReturn: IRoute = snapshot.payload.doc.data();
+          toReturn.id = snapshot.payload.doc.id;
+          return toReturn;
         })
-        route.stopData.fields.forEach((field: IField) => {
-          if (typeof field.groupId !== "string") {
-            field.groupId = "";
-          }
-        })
-        return route;
-      }))
+      )
     );
   }
 
@@ -113,7 +107,15 @@ export class FirebaseRoutesService implements IBackendRoutes {
         field.groupId = this.groupsCollection.doc(field.groupId).ref;
       }
     })
+
     this.routesCollection.add(route);
+  }
+
+  public deleteRoute(id?: string): void {
+    if (!id) {
+      return;
+    }
+    this.routesCollection.doc(id).delete();
   }
 
   public getGroups(): Observable<IRouteGroup[]> {
@@ -132,7 +134,10 @@ export class FirebaseRoutesService implements IBackendRoutes {
     this.groupsCollection.add(group);
   }
 
-  public deleteGroup(id: string): void {
+  public deleteGroup(id?: string): void {
+    if (!id) {
+      return;
+    }
     this.groupsCollection.doc(id).delete();
   }
   

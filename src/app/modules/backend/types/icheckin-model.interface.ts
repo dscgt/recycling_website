@@ -10,5 +10,5 @@ export interface ICheckinModel {
     delay: boolean;
   }[];
   title: string;
-  id: string;
+  id?: string;
 }

@@ -8,4 +8,5 @@ export interface IRoute {
     fields: IField[];
     stops: IRouteStop[];
   };
+  id?: string;
 }

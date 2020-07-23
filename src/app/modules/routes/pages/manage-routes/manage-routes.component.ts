@@ -16,16 +16,22 @@ export class ManageRoutesComponent implements OnInit {
   @ViewChild(ExpansionTableComponent)
   private expansionTable: ExpansionTableComponent<IRoute>;
 
-  private controlDialogSubject$: BehaviorSubject<boolean>;
+  private controlCreationDialogSubject$: BehaviorSubject<boolean>;
+  private controlDeletionDialogSubject$: BehaviorSubject<boolean>;
 
   public routes$: Observable<IRoute[]>;
   public displayData: IDisplayData<IRoute>[];
-  public controlDialog$: Observable<boolean>;
-  public dialogRef: MatDialogRef<TemplateRef<any>>;
+  public controlCreationDialog$: Observable<boolean>;
+  public controlDeletionDialog$: Observable<boolean>;
+  public creationDialogRef: MatDialogRef<TemplateRef<any>>;
+  public deletionDialogRef: MatDialogRef<TemplateRef<any>>;
   public createRouteForm: FormGroup;
   public fieldInputTypes: string[];
   public fieldInputTypeValues: string[];
   public groups$: Observable<IRouteGroup[]>;
+
+  // workaround, see checkin groups component for explanation
+  public routeToDelete: IRoute;
 
   get fields(): FormArray {
     return this.createRouteForm.get('fields') as FormArray;
@@ -49,8 +55,10 @@ export class ManageRoutesComponent implements OnInit {
   ngOnInit(): void {
     this.fieldInputTypes = Object.keys(InputType);
     this.fieldInputTypeValues = Object.values(InputType);
-    this.controlDialogSubject$ = new BehaviorSubject<boolean>(false);
-    this.controlDialog$ = this.controlDialogSubject$.asObservable();
+    this.controlCreationDialogSubject$ = new BehaviorSubject<boolean>(false);
+    this.controlCreationDialog$ = this.controlCreationDialogSubject$.asObservable();
+    this.controlDeletionDialogSubject$ = new BehaviorSubject<boolean>(false);
+    this.controlDeletionDialog$ = this.controlDeletionDialogSubject$.asObservable();
     this.routes$ = this.routesBackend.getRoutes();
     this.groups$ = this.routesBackend.getGroups();
     this.displayData = [
@@ -175,20 +183,14 @@ export class ManageRoutesComponent implements OnInit {
     });
   }
 
-  public dialogClosed(): void {
-    // console.log("Dialog closed in child");
+  public confirmDeleteRoute(route: IRoute): void {
+    this.routeToDelete = route;
+    this.controlDeletionDialogSubject$.next(true);
   }
 
-  public createRoute(): void {
-    this.controlDialogSubject$.next(true);
-  }
-
-  public receiveDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
-    this.dialogRef = ref;
-  }
-
-  public closeDialog(): void {
-    this.dialogRef?.close();
+  public onDelete(): void {
+    this.closeDeletionDialog();
+    this.routesBackend.deleteRoute(this.routeToDelete.id);
   }
 
   public onSubmit(): void {
@@ -253,7 +255,39 @@ export class ManageRoutesComponent implements OnInit {
     }
 
     this.routesBackend.addRoute(route);
-    this.closeDialog();
+    this.closeCreationDialog();
+  }
+
+  public receiveCreationDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
+    this.creationDialogRef = ref;
+  }
+
+  public receiveDeletionDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
+    this.deletionDialogRef = ref;
+  }
+
+  public openCreationDialog(): void {
+    this.controlCreationDialogSubject$.next(true);
+  }
+
+  public openDeletionDialog(): void {
+    this.controlDeletionDialogSubject$.next(true);
+  }
+
+  public closeCreationDialog(): void {
+    this.creationDialogRef?.close();
+  }
+
+  public closeDeletionDialog(): void {
+    this.deletionDialogRef?.close();
+  }
+
+  public creationDialogClosed(): void {
+    // console.log("Dialog closed in child");
+  }
+
+  public deletionDialogClosed(): void {
+    // console.log("Dialog closed in child");
   }
 
 }
