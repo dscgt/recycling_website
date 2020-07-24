@@ -3,8 +3,8 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ExpansionTableComponent } from './expansion-table.component';
 
 describe('ExpansionTableComponent', () => {
-  let component: ExpansionTableComponent;
-  let fixture: ComponentFixture<ExpansionTableComponent>;
+  let component: ExpansionTableComponent<any>;
+  let fixture: ComponentFixture<ExpansionTableComponent<any>>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({

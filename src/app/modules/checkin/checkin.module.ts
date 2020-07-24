@@ -20,8 +20,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ExtraMaterialModule } from '../extra-material';
 import { SharedModule } from '../shared';
 
-
-
 @NgModule({
   declarations: [
     ManageCheckinComponent,

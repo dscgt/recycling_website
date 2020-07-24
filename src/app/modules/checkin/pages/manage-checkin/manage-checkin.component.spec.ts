@@ -1,5 +1,4 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { ManageCheckinComponent } from './manage-checkin.component';
 
 describe('ManageCheckinComponent', () => {

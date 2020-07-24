@@ -20,16 +20,15 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'recycling-frontend'`, () => {
+  it(`should have correct title`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
     expect(app.title).toEqual('recycling-frontend');
   });
 
-  it('should render title', () => {
+  it('should render correct title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
-    const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.content span').textContent).toContain('recycling-frontend app is running!');
+    expect(fixture.nativeElement.querySelector('span, .overflow').textContent).toContain('Georgia Tech Office of Solid Waste Management & Recycling Admin Demo Website');
   });
 });
