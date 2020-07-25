@@ -84,6 +84,10 @@ export class FirebaseCheckinService implements IBackendCheckin {
     this.groupsCollection.add(group);
   }
 
+  public updateGroup(group: ICheckinGroup): void {
+    this.groupsCollection.doc(group.id).set(group);
+  }
+
   public deleteGroup(id?: string): void {
     if (!id) {
       return;

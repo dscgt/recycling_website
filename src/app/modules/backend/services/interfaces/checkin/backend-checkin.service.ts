@@ -21,6 +21,7 @@ export abstract class BackendCheckinService implements IBackendCheckin {
   public abstract getRecords(): Observable<ICheckinRecord[]>;
   public abstract addGroup(group: ICheckinGroup): void;
   public abstract addModel(model: ICheckinModel): void;
+  public abstract updateGroup(model: ICheckinGroup): void;
   public abstract deleteGroup(id?:string): void;
   public abstract deleteModel(id?: string): void;
 }
