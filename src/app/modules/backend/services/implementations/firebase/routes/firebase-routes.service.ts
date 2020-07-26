@@ -111,13 +111,6 @@ export class FirebaseRoutesService implements IBackendRoutes {
     this.routesCollection.add(route);
   }
 
-  public deleteRoute(id?: string): void {
-    if (!id) {
-      return;
-    }
-    this.routesCollection.doc(id).delete();
-  }
-
   public getGroups(): Observable<IRouteGroup[]> {
     return this.groupsCollection.snapshotChanges().pipe(
       map((snapshots: DocumentChangeAction<IRouteGroup>[]) =>
@@ -132,6 +125,27 @@ export class FirebaseRoutesService implements IBackendRoutes {
 
   public addGroup(group: IRouteGroup): void {
     this.groupsCollection.add(group);
+  }
+
+  public updateRoute(route: IRoute): void {
+    const forUpdate = Object.assign({}, route);
+    const id:string = forUpdate.id as string;
+    delete forUpdate.id;
+    this.routesCollection.doc(id).set(forUpdate);
+  }
+
+  public updateGroup(group: IRouteGroup): void {
+    const forUpdate = Object.assign({}, group);
+    const id:string = forUpdate.id as string;
+    delete forUpdate.id;
+    this.groupsCollection.doc(id).set(forUpdate);
+  }
+
+  public deleteRoute(id?: string): void {
+    if (!id) {
+      return;
+    }
+    this.routesCollection.doc(id).delete();
   }
 
   public deleteGroup(id?: string): void {

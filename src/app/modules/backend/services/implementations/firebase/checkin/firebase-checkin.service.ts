@@ -77,18 +77,23 @@ export class FirebaseCheckinService implements IBackendCheckin {
   }
 
   public updateModel(model: ICheckinModel): void {
-    const toAdd = Object.assign({}, model);
+    const forUpdate = Object.assign({}, model);
     // change groupIds to DocumentReference's before sending to Firestore
-    toAdd.fields.forEach((field: IField) => {
+    forUpdate.fields.forEach((field: IField) => {
       if (typeof field.groupId === 'string' && field.groupId.trim().length > 0) {
         field.groupId = this.groupsCollection.doc(field.groupId).ref;
       }
     });
-    this.modelsCollection.doc(model.id).set(model);
+    const id:string = (forUpdate.id) as string;
+    delete forUpdate.id;
+    this.modelsCollection.doc(id).set(forUpdate);
   }
 
   public updateGroup(group: ICheckinGroup): void {
-    this.groupsCollection.doc(group.id).set(group);
+    const forUpdate = Object.assign({}, group);
+    const id:string = (forUpdate.id) as string;
+    delete forUpdate.id;
+    this.groupsCollection.doc(id).set(forUpdate);
   }
 
   public deleteModel(id?: string): void {
