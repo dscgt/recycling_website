@@ -167,7 +167,6 @@ export class CheckinGroupComponent implements OnInit {
   }
 
   public clearCreationDialog(): void {
-    console.log("clearing");
     this.createGroupForm.reset();
   }
 
