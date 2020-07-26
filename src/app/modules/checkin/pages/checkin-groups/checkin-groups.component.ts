@@ -123,12 +123,13 @@ export class CheckinGroupComponent implements OnInit {
 
   public onSubmit(): void {
     const group: ICheckinGroup = this.createGroupForm.value;
-    group.id = this.currentlyUpdatingGroupId;
 
     if (this.editMode) {
+      group.id = this.currentlyUpdatingGroupId;
       this.backend.updateGroup(group);
     } else {
       this.backend.addGroup(group);
+      this.clearCreationDialog();
     }
     this.closeCreationDialog();
   }
@@ -166,6 +167,7 @@ export class CheckinGroupComponent implements OnInit {
   }
 
   public clearCreationDialog(): void {
+    console.log("clearing");
     this.createGroupForm.reset();
   }
 

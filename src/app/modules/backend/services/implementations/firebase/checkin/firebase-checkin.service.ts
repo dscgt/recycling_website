@@ -7,7 +7,6 @@ import { ICheckinRecord, ICheckinModel, ICheckinGroup, IField } from 'src/app/mo
 import { IFirestoreCheckinRecord } from '../types';
 import { map } from 'rxjs/operators';
 import { CheckinAngularFirestore } from '../../../factory/factory.service';
-import { AbstractFormGroupDirective } from '@angular/forms';
 
 @Injectable({
   providedIn: 'root'
@@ -50,29 +49,11 @@ export class FirebaseCheckinService implements IBackendCheckin {
     );
   }
 
-  public addModel(checkin: ICheckinModel): void {
-    const toAdd = Object.assign({}, checkin);
-    // change groupIds to DocumentReference's before sending to Firestore
-    toAdd.fields.forEach((field: IField) => {
-      if (typeof field.groupId === 'string' && field.groupId.trim().length > 0) {
-        field.groupId = this.groupsCollection.doc(field.groupId).ref;
-      }
-    })
-    this.modelsCollection.add(toAdd);
-  }
-
-  public deleteModel(id?: string): void {
-    if (!id) {
-      return;
-    }
-    this.modelsCollection.doc(id).delete();
-  }
-
   public getGroups(): Observable<ICheckinGroup[]> {
     return this.groupsCollection.snapshotChanges().pipe(
       map((snapshots: DocumentChangeAction<ICheckinGroup>[]) =>
         snapshots.map((snapshot: DocumentChangeAction<ICheckinGroup>) => {
-          const toReturn:ICheckinGroup = snapshot.payload.doc.data();
+          const toReturn: ICheckinGroup = snapshot.payload.doc.data();
           toReturn.id = snapshot.payload.doc.id;
           return toReturn;
         })
@@ -80,12 +61,41 @@ export class FirebaseCheckinService implements IBackendCheckin {
     );
   }
 
+  public addModel(checkin: ICheckinModel): void {
+    const toAdd = Object.assign({}, checkin);
+    // change groupIds to DocumentReference's before sending to Firestore
+    toAdd.fields.forEach((field: IField) => {
+      if (typeof field.groupId === 'string' && field.groupId.trim().length > 0) {
+        field.groupId = this.groupsCollection.doc(field.groupId).ref;
+      }
+    });
+    this.modelsCollection.add(toAdd);
+  }
+
   public addGroup(group: ICheckinGroup): void {
     this.groupsCollection.add(group);
   }
 
+  public updateModel(model: ICheckinModel): void {
+    const toAdd = Object.assign({}, model);
+    // change groupIds to DocumentReference's before sending to Firestore
+    toAdd.fields.forEach((field: IField) => {
+      if (typeof field.groupId === 'string' && field.groupId.trim().length > 0) {
+        field.groupId = this.groupsCollection.doc(field.groupId).ref;
+      }
+    });
+    this.modelsCollection.doc(model.id).set(model);
+  }
+
   public updateGroup(group: ICheckinGroup): void {
     this.groupsCollection.doc(group.id).set(group);
+  }
+
+  public deleteModel(id?: string): void {
+    if (!id) {
+      return;
+    }
+    this.modelsCollection.doc(id).delete();
   }
 
   public deleteGroup(id?: string): void {
