@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
-// different model
-import { IRouteGroup, IRouteGroupMember, BackendRoutesService } from 'src/app/modules/backend';
+import { IRouteGroup, BackendRoutesService } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormArray, FormBuilder } from '@angular/forms';
@@ -29,6 +28,11 @@ export class RouteGroupComponent implements OnInit {
   public createGroupForm: FormGroup;
   public fieldInputTypes: string[];
   public fieldInputTypeValues: string[];
+
+  // fields related to editing groups; see openCreationDialog
+  public editMode: boolean = false;
+  public storedCreationForm: FormGroup;
+  public currentlyUpdatingGroupId: string | undefined;
 
   // workaround. app-expansion-table contains information for a group, and uses these to populate
   // each row, however this bugs out with app-projection-dialog. 
@@ -70,6 +74,16 @@ export class RouteGroupComponent implements OnInit {
     });
   }
 
+  // Replaces the existing content of the form with the content of [group]
+  public prepopulateCreationForm(group: IRouteGroup) {
+    this.createGroupForm = this.fb.group({
+      title: [group.title],
+      members: this.fb.array(group.members.map((member) => this.fb.group({
+        title: [member.title]
+      }))),
+    });
+  }
+
   public addMember(): void {
     this.members.push(this.createMember());
   }
@@ -96,8 +110,20 @@ export class RouteGroupComponent implements OnInit {
     });
   }
 
-  public createGroup(): void {
+  public openCreationDialog(group?: IRouteGroup, editMode?: boolean): void {
+    this.editMode = editMode || false;
+    if (editMode && group) {
+      // save the old state of the form before replacing with group to update
+      // also save the group-to-update's ID so that we can refer to it on confirm
+      this.storedCreationForm = this.createGroupForm;
+      this.currentlyUpdatingGroupId = group.id;
+      this.prepopulateCreationForm(group);
+    }
     this.controlCreationDialogSubject$.next(true);
+  }
+
+  public clearCreationDialog(): void {
+    this.createGroupForm.reset();
   }
 
   public confirmDeleteGroup(group: IRouteGroup): void {
@@ -112,7 +138,13 @@ export class RouteGroupComponent implements OnInit {
 
   public onSubmit(): void {
     const group: IRouteGroup = this.createGroupForm.value;
-    this.backend.addGroup(group);
+    if (this.editMode) {
+      group.id = this.currentlyUpdatingGroupId;
+      this.backend.updateGroup(group);
+    } else {
+      this.backend.addGroup(group);
+      this.clearCreationDialog();
+    }
     this.closeCreationDialog();
   }
 
@@ -125,7 +157,9 @@ export class RouteGroupComponent implements OnInit {
   }
 
   public creationDialogClosed(): void {
-    // console.log("Dialog closed in child");
+    if (this.editMode && this.storedCreationForm) {
+      this.createGroupForm = this.storedCreationForm;
+    }
   }
 
   public confirmationDialogClosed(): void {

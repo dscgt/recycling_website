@@ -1,12 +1,19 @@
+<!-- Row content -->
 <app-expansion-table
   [defaultPageSize]="10"
   [pageSizeOptions]="[5, 10, 25, 50]"
   [data$]="groups$"
   [displayData]="displayData">
   <ng-template let-group>
-    <button mat-raised-button color="warn" aria-label="Delete This Group" (click)="confirmDeleteGroup(group)" type="button">Delete This Group</button>
+    <div class='row-buttons-wrapper'>
+      <button mat-raised-button color="primary" aria-label="Edit This Group" (click)="openCreationDialog(group, true)" type="button">Edit This Group</button>
+      <button mat-raised-button color="warn" aria-label="Delete This Group" (click)="confirmDeleteGroup(group)" type="button">Delete This Group</button>
+    </div>
   </ng-template>
 </app-expansion-table>
+<!-- END row content -->
+
+<!-- Deletion confirmation dialog -->
 <app-projection-dialog [control$]="controlConfirmationDialog$" (onClose)="confirmationDialogClosed()"
   (getDialogRef)="receiveConfirmationDialogRef($event)">
   <h2 mat-dialog-title>Are you sure you want to delete this group?</h2>
@@ -19,18 +26,22 @@
     </button>
   </mat-dialog-actions>
 </app-projection-dialog>
+<!-- END deletion confirmation dialog -->
+
 <app-fab
   icon="add"
   label="Create a route group"
-  (click)="createGroup()">
+  (click)="openCreationDialog()">
 </app-fab>
+
+<!-- Creation form -->
 <app-projection-dialog
   [control$]="controlCreationDialog$"
   (onClose)="creationDialogClosed()"
   (getDialogRef)="receiveCreationDialogRef($event)">
   <div id='form-title'>
     <h2 mat-dialog-title>Create a Route Group</h2>
-    <button (click)="closeCreationDialog()" mat-icon-button aria-label="Cancel creating route group" type="button">
+    <button (click)="closeCreationDialog()" mat-icon-button aria-label="Close group form" type="button">
       <mat-icon>close</mat-icon>
     </button>
   </div>
@@ -88,10 +99,9 @@
       <mat-icon>add</mat-icon>
     </button>
     <span class="spacer"></span>
-    <button mat-icon-button aria-label="Confirm creating route group"
-      [disabled]="(createGroupForm.valid === null) ? false : !createGroupForm.valid"
-      type="submit" (click)="onSubmit()">
+    <button mat-icon-button [attr.aria-label]="editMode ? 'Confirm updating check-in item' : 'Confirm creating check-in item'" [disabled]="(createGroupForm.valid === null) ? false : !createGroupForm.valid" type="submit" (click)="onSubmit()">
       <mat-icon>check</mat-icon>
     </button>
   </mat-dialog-actions>
 </app-projection-dialog>
+<!-- END creation form -->

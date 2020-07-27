@@ -5,7 +5,10 @@
   [data$]="models$"
   [displayData]="displayData">
   <ng-template let-model>
-    <button mat-raised-button color="warn" aria-label="Delete This Check-in Option" (click)="confirmDeleteModel(model)" type="button">Delete This Check-in Option</button>
+    <div class='row-buttons-wrapper'>
+      <button mat-raised-button color="primary" aria-label="Edit This Check-in Option" (click)="openCreationDialog(model, true)" type="button">Edit This Check-in Option</button>
+      <button mat-raised-button color="warn" aria-label="Delete This Check-in Option" (click)="confirmDeleteModel(model)" type="button">Delete This Check-in Option</button>
+    </div>
   </ng-template>
 </app-expansion-table>
 <!-- END row content -->
@@ -38,7 +41,7 @@
   (getDialogRef)="receiveCreationDialogRef($event)">
   <div id='form-title'>
     <h2 mat-dialog-title>Create a Checkin Item</h2>
-    <button (click)="closeCreationDialog()" mat-icon-button aria-label="Cancel creating checkin item" type="button">
+    <button (click)="closeCreationDialog()" mat-icon-button aria-label="Close check-in option form" type="button">
       <mat-icon>close</mat-icon>
     </button>
   </div>
@@ -111,9 +114,7 @@
       <mat-icon>add</mat-icon>
     </button>
     <span class="spacer"></span>
-    <button mat-icon-button aria-label="Confirm creating checkin item"
-      [disabled]="(createModelForm.valid === null) ? false : !createModelForm.valid"
-      type="submit" (click)="onSubmit()">
+    <button mat-icon-button [attr.aria-label]="editMode ? 'Confirm updating check-in item' : 'Confirm creating check-in item'" [disabled]="(createModelForm.valid === null) ? false : !createModelForm.valid" type="submit" (click)="onSubmit()">
       <mat-icon>check</mat-icon>
     </button>
   </mat-dialog-actions>

@@ -30,6 +30,11 @@ export class CheckinGroupComponent implements OnInit {
   public fieldInputTypes: string[];
   public fieldInputTypeValues: string[];
 
+  // fields related to editing groups; see openCreationDialog
+  public editMode: boolean = false;
+  public storedCreationForm: FormGroup;
+  public currentlyUpdatingGroupId: string | undefined;
+
   // workaround. there is no way for deletion method to know which group to delete without this reference.
   // ideally, this is passed to the deletion method directly--but the nesting required to do so causes
   // bugs with expansion tables.
@@ -71,6 +76,16 @@ export class CheckinGroupComponent implements OnInit {
     });
   }
 
+  // Replaces the existing content of the form with the content of [group]
+  public prepopulateCreationForm(group: ICheckinGroup) {
+    this.createGroupForm = this.fb.group({
+      title: [group.title],
+      members: this.fb.array(group.members.map((member: ICheckinGroupMember) => this.fb.group({
+        title: [member.title]
+      }))),
+    });
+  }
+
   public addMember(): void {
     this.members.push(this.createMember());
   }
@@ -108,16 +123,39 @@ export class CheckinGroupComponent implements OnInit {
 
   public onSubmit(): void {
     const group: ICheckinGroup = this.createGroupForm.value;
-    this.backend.addGroup(group);
+
+    if (this.editMode) {
+      group.id = this.currentlyUpdatingGroupId;
+      this.backend.updateGroup(group);
+    } else {
+      this.backend.addGroup(group);
+      this.clearCreationDialog();
+    }
     this.closeCreationDialog();
   }
 
-  public openCreationDialog(): void {
+  public openCreationDialog(group?: ICheckinGroup, editMode?: boolean): void {
+    this.editMode = editMode || false;
+    if (editMode && group) {
+      // save the old state of the form
+      // ex. when a user is in the middle of creating a new group, then edits a group, this allows
+      // them to return to their new group
+      this.storedCreationForm = this.createGroupForm;
+
+      // save the ID of this group, so that update knows which ID to refer to
+      // this ID is otherwise lost in prepopulation
+      this.currentlyUpdatingGroupId = group.id;
+
+      // editing an existing group, so prepopulate the creation form with it
+      this.prepopulateCreationForm(group);
+    }
     this.controlCreationDialogSubject$.next(true);
   }
 
   public creationDialogClosed(): void {
-    // console.log("Dialog closed in child");
+    if (this.editMode && this.storedCreationForm) {
+      this.createGroupForm = this.storedCreationForm;
+    }
   }
 
   public receiveCreationDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
@@ -126,6 +164,10 @@ export class CheckinGroupComponent implements OnInit {
 
   public closeCreationDialog(): void {
     this.creationDialogRef?.close();
+  }
+
+  public clearCreationDialog(): void {
+    this.createGroupForm.reset();
   }
 
   public confirmationDialogClosed(): void {

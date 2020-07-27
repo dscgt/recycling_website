@@ -5,7 +5,10 @@
   [data$]="groups$"
   [displayData]="displayData">
   <ng-template let-group>
-    <button mat-raised-button color="warn" aria-label="Delete This Group" (click)="confirmDeleteGroup(group)" type="button">Delete This Group</button>
+    <div class='row-buttons-wrapper'>
+      <button mat-raised-button color="primary" aria-label="Edit This Group" (click)="openCreationDialog(group, true)" type="button">Edit This Group</button>
+      <button mat-raised-button color="warn" aria-label="Delete This Group" (click)="confirmDeleteGroup(group)" type="button">Delete This Group</button>
+    </div>
   </ng-template>
 </app-expansion-table>
 <!-- END row content -->
@@ -38,7 +41,7 @@
   (getDialogRef)="receiveCreationDialogRef($event)">
   <div id='form-title'>
     <h2 mat-dialog-title>Create a Checkin Group</h2>
-    <button (click)="closeCreationDialog()" mat-icon-button aria-label="Cancel creating checkin group" type="button">
+    <button (click)="closeCreationDialog()" mat-icon-button aria-label="Close check-in group form" type="button">
       <mat-icon>close</mat-icon>
     </button>
   </div>
@@ -94,7 +97,7 @@
       <mat-icon>add</mat-icon>
     </button>
     <span class="spacer"></span>
-    <button mat-icon-button aria-label="Confirm creating checkin group"
+    <button mat-icon-button [attr.aria-label]="editMode ? 'Confirm updating check-in group' : 'Submit new check-in group'"
       [disabled]="(createGroupForm.valid === null) ? false : !createGroupForm.valid"
       type="submit" (click)="onSubmit()">
       <mat-icon>check</mat-icon>

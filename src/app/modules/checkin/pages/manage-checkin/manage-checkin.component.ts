@@ -1,10 +1,11 @@
-import { Component, OnInit, ViewChild, TemplateRef, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef, ChangeDetectorRef, Input } from '@angular/core';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
 import { ICheckinModel, InputType, BackendCheckinService, ICheckinGroup } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormArray, FormBuilder } from '@angular/forms';
 import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
+import { DocumentReference } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-manage-checkin',
@@ -29,6 +30,11 @@ export class ManageCheckinComponent implements OnInit {
   public fieldInputTypes: string[];
   public fieldInputTypeValues: string[];
   public groups$: Observable<ICheckinGroup[]>;
+
+  // fields related to editing groups; see openCreationDialog
+  public editMode: boolean = false;
+  public storedCreationForm: FormGroup;
+  public currentlyUpdatingModelId: string | undefined;
 
   // workaround, see checkin-groups component for explanation
   public modelToDelete: ICheckinModel;
@@ -79,6 +85,20 @@ export class ManageCheckinComponent implements OnInit {
     this.cdref.detectChanges();
   }
 
+  // Replaces the existing content of the form with the content of [model]
+  public prepopulateCreationForm(model: ICheckinModel) {
+    this.createModelForm = this.fb.group({
+      title: [model.title],
+      fields: this.fb.array(model.fields.map((field) => this.fb.group({
+        title: [field.title],
+        type: [field.type],
+        optional: [field.optional],
+        delay: [field.delay],
+        groupId: [field.groupId ? (field.groupId as DocumentReference).id : ''],
+      }))),
+    });
+  }
+
   public addField(): void {
     this.fields.push(this.createField());
   }
@@ -98,6 +118,10 @@ export class ManageCheckinComponent implements OnInit {
     }
 
     this.utils.swapFormArray(this.fields, a, b);
+  }
+
+  public clearCreationDialog(): void {
+    this.createModelForm.reset();
   }
 
   public createField(): FormGroup {
@@ -137,11 +161,26 @@ export class ManageCheckinComponent implements OnInit {
     }
 
     const model: ICheckinModel = this.createModelForm.value;
-    this.backend.addModel(model);
+    if (this.editMode) {
+      model.id = this.currentlyUpdatingModelId;
+      this.backend.updateModel(model);
+    } else {
+      this.backend.addModel(model);
+      this.clearCreationDialog();
+    }
     this.closeCreationDialog();
   }
 
-  public openCreationDialog(): void {
+  public openCreationDialog(model?: ICheckinModel, editMode?: boolean): void {
+    this.editMode = editMode || false;
+    if (editMode && model) {
+      // save the old state of the form before replacing with model to update
+      // also save the model-to-update's ID so that we can refer to it on confirm
+      this.storedCreationForm = this.createModelForm;
+      this.currentlyUpdatingModelId = model.id;
+      this.prepopulateCreationForm(model);
+    }
+    
     this.controlCreationDialogSubject$.next(true);
   }
 
@@ -150,7 +189,9 @@ export class ManageCheckinComponent implements OnInit {
   }
 
   public creationDialogClosed(): void {
-    // console.log("Dialog closed in child");
+    if (this.editMode && this.storedCreationForm) {
+      this.createModelForm = this.storedCreationForm;
+    }
   }
 
   public deletionDialogClosed(): void {
