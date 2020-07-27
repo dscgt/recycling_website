@@ -76,8 +76,6 @@ export class FirebaseRoutesService implements IBackendRoutes {
     throw new Error("Method not implemented.");
   }
 
-  // Currently, all DocumentReference-type groups within fields are converted to empty strings.
-  // This is not ideal, and is meant to be a temporary workaround for crashes.
   public getRoutes(): Observable<IRoute[]> {
     return this.routesCollection.snapshotChanges().pipe(
       map((snapshots: DocumentChangeAction<IRoute>[]) =>
@@ -129,6 +127,19 @@ export class FirebaseRoutesService implements IBackendRoutes {
 
   public updateRoute(route: IRoute): void {
     const forUpdate = Object.assign({}, route);
+
+    // change groupIds to DocumentReference's before sending to Firestore
+    forUpdate.fields.forEach((field: IField) => {
+      if (typeof field.groupId === 'string' && field.groupId.trim().length > 0) {
+        field.groupId = this.groupsCollection.doc(field.groupId).ref;
+      }
+    });
+    forUpdate.stopData.fields.forEach((field: IField) => {
+      if (typeof field.groupId === 'string' && field.groupId.trim().length > 0) {
+        field.groupId = this.groupsCollection.doc(field.groupId).ref;
+      }
+    });
+
     const id:string = forUpdate.id as string;
     delete forUpdate.id;
     this.routesCollection.doc(id).set(forUpdate);

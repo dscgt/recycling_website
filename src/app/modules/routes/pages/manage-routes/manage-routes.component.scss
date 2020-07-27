@@ -14,6 +14,10 @@ mat-checkbox {
   margin-left: 10px;
 }
 
+.row-buttons-wrapper button {
+  margin: 5px;
+}
+
 // Angular has a "mat-card-footer" element, but it's display block
 .card-footer {
   display: flex;

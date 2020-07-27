@@ -5,7 +5,10 @@
   [data$]="routes$"
   [displayData]="displayData">
   <ng-template let-route>
-    <button mat-raised-button color="warn" aria-label="Delete This Route" (click)="confirmDeleteRoute(route)" type="button">Delete This Route Option</button>
+    <div class='row-buttons-wrapper'>
+      <button mat-raised-button color="primary" aria-label="Edit This Route" (click)="openCreationDialog(route, true)" type="button">Edit This Route</button>
+      <button mat-raised-button color="warn" aria-label="Delete This Route" (click)="confirmDeleteRoute(route)" type="button">Delete This Route</button>
+    </div>
   </ng-template>
 </app-expansion-table>
 <!-- END row content -->
@@ -38,7 +41,7 @@
   (getDialogRef)="receiveCreationDialogRef($event)">
   <div id='form-title'>
     <h2 mat-dialog-title>Create a Route</h2>
-    <button (click)="closeCreationDialog()" mat-icon-button aria-label="Cancel creating this route" type="button">
+    <button (click)="closeCreationDialog()" mat-icon-button aria-label="Close route form" type="button">
       <mat-icon>close</mat-icon>
     </button>
   </div>
@@ -232,7 +235,7 @@
 
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button mat-icon-button aria-label="Confirm creating route"
+    <button mat-icon-button [attr.aria-label]="editMode ? 'Confirm updating route' : 'Confirm creating route'"
       [disabled]="(createRouteForm.valid === null) ? false : !createRouteForm.valid"
       type="submit" (click)="onSubmit()">
       <mat-icon>check</mat-icon>

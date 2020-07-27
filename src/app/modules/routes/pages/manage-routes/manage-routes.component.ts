@@ -5,6 +5,7 @@ import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-mat
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormBuilder, FormArray } from '@angular/forms';
 import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
+import { DocumentReference } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-manage-routes',
@@ -29,6 +30,11 @@ export class ManageRoutesComponent implements OnInit {
   public fieldInputTypes: string[];
   public fieldInputTypeValues: string[];
   public groups$: Observable<IRouteGroup[]>;
+
+  // fields related to editing groups; see openCreationDialog
+  public editMode: boolean = false;
+  public storedCreationForm: FormGroup;
+  public currentlyUpdatingModelId: string | undefined;
 
   // workaround, see checkin groups component for explanation
   public routeToDelete: IRoute;
@@ -97,6 +103,30 @@ export class ManageRoutesComponent implements OnInit {
   // See https://github.com/angular/angular/issues/23657
   ngAfterContentChecked(): void {
     this.cdref.detectChanges();
+  }
+
+  // Replaces the existing content of the form with the content of [model]
+  public prepopulateCreationForm(model: IRoute) {
+    this.createRouteForm = this.fb.group({
+      title: [model.title],
+      fields: this.fb.array(model.fields.map((field: IField) => this.fb.group({
+        title: [field.title],
+        optional: [field.groupId],
+        type: [field.type],
+        groupId: [field.groupId ? (field.groupId as DocumentReference).id : '']
+      }))),
+      stops: this.fb.array(model.stopData.stops.map((stop: IRouteStop) => this.fb.group({
+        title: [stop.title],
+        description: [stop.description || ''],
+        exclude: [stop.exclude?.join(',') || '']
+      }))),
+      fields_stops: this.fb.array(model.stopData.fields.map((field: IField) => this.fb.group({
+        title: [field.title],
+        optional: [field.groupId],
+        type: [field.type],
+        groupId: [field.groupId ? (field.groupId as DocumentReference).id : '']
+      }))),
+    });
   }
 
   public addField(): void {
@@ -182,6 +212,10 @@ export class ManageRoutesComponent implements OnInit {
       exclude: ['']
     });
   }
+  
+  public clearCreationDialog(): void {
+    this.createRouteForm.reset();
+  }
 
   public confirmDeleteRoute(route: IRoute): void {
     this.routeToDelete = route;
@@ -226,6 +260,7 @@ export class ManageRoutesComponent implements OnInit {
       return;
     }
 
+    // build Route from form data
     const vals: any = this.createRouteForm.value;
     const route: IRoute = {
       title: vals["title"],
@@ -235,15 +270,12 @@ export class ManageRoutesComponent implements OnInit {
         stops: []
       }
     };
-
     for (let field of vals["fields"]) {
       route.fields.push(field as IField);
     }
-
     for (let field of vals["fields_stops"]) {
       route.stopData.fields.push(field as IField);
     }
-
     for (let stop of vals["stops"]) {
       // convert exclusions string into array of exclusions
       const stopCopy = Object.assign({}, stop);
@@ -254,7 +286,13 @@ export class ManageRoutesComponent implements OnInit {
       route.stopData.stops.push(stopCopy as IRouteStop);
     }
 
-    this.routesBackend.addRoute(route);
+    if (this.editMode) {
+      route.id = this.currentlyUpdatingModelId;
+      this.routesBackend.updateRoute(route);
+    } else {
+      this.routesBackend.addRoute(route);
+      this.clearCreationDialog();
+    }
     this.closeCreationDialog();
   }
 
@@ -266,7 +304,15 @@ export class ManageRoutesComponent implements OnInit {
     this.deletionDialogRef = ref;
   }
 
-  public openCreationDialog(): void {
+  public openCreationDialog(model?: IRoute, editMode?: boolean): void {
+    this.editMode = editMode || false;
+    if (editMode && model) {
+      // save the old state of the form before replacing with group to update
+      // also save the group-to-update's ID so that we can refer to it on confirm
+      this.storedCreationForm = this.createRouteForm;
+      this.currentlyUpdatingModelId = model.id;
+      this.prepopulateCreationForm(model);
+    }
     this.controlCreationDialogSubject$.next(true);
   }
 
@@ -283,7 +329,9 @@ export class ManageRoutesComponent implements OnInit {
   }
 
   public creationDialogClosed(): void {
-    // console.log("Dialog closed in child");
+    if (this.editMode && this.storedCreationForm) {
+      this.createRouteForm = this.storedCreationForm;
+    }
   }
 
   public deletionDialogClosed(): void {
