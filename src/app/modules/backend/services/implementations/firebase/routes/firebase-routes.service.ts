@@ -25,9 +25,9 @@ export class FirebaseRoutesService implements IBackendRoutes {
     private readonly firestore: RoutesAngularFirestore,
     private helper: FirebaseHelperService,
   ) {
-    this.recordsCollection = this.firestore.collection<IFirestoreRouteRecord>('records');
-    this.routesCollection = this.firestore.collection<IRoute>('models');
-    this.groupsCollection = this.firestore.collection<IRouteGroup>('groups');
+    this.recordsCollection = this.firestore.collection<IFirestoreRouteRecord>('route_records');
+    this.routesCollection = this.firestore.collection<IRoute>('route_models');
+    this.groupsCollection = this.firestore.collection<IRouteGroup>('route_groups');
   }
 
   private convertRecord(rawRecord: IFirestoreRouteRecord): Observable<IRouteRecord> {

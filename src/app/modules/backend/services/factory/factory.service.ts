@@ -13,8 +13,8 @@ export class RoutesAngularFirestore extends AngularFirestore { }
 export class CheckinAngularFirestore extends AngularFirestore { }
 
 export function RoutesAngularFirestoreFactory(platformId: Object, zone: NgZone): RoutesAngularFirestore {
-  return new RoutesAngularFirestore(environment.firebaseConfigRoutes, 'route-recorder', false, null, platformId, zone, null);
+  return new RoutesAngularFirestore(environment.firebaseConfigRoutes, 'gt-recycling', false, null, platformId, zone, null);
 }
 export function CheckinAngularFirestoreFactory(platformId: Object, zone: NgZone): CheckinAngularFirestore {
-  return new RoutesAngularFirestore(environment.firebaseConfigCheckin, 'recycling-checkin', false, null, platformId, zone, null);
+  return new CheckinAngularFirestore(environment.firebaseConfigCheckin, 'gt-recycling', false, null, platformId, zone, null);
 }

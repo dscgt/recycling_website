@@ -19,9 +19,9 @@ export class FirebaseCheckinService implements IBackendCheckin {
   constructor(
     private readonly firestore: CheckinAngularFirestore
   ) {
-    this.groupsCollection = this.firestore.collection<ICheckinGroup>('groups');
-    this.modelsCollection = this.firestore.collection<ICheckinModel>('models');
-    this.recordsCollection = this.firestore.collection<IFirestoreCheckinRecord>('records');
+    this.groupsCollection = this.firestore.collection<ICheckinGroup>('checkin_groups');
+    this.modelsCollection = this.firestore.collection<ICheckinModel>('checkin_models');
+    this.recordsCollection = this.firestore.collection<IFirestoreCheckinRecord>('checkin_records');
   }
 
   public getRecords(): Observable<ICheckinRecord[]> {
