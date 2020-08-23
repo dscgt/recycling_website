@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AngularFirestoreCollection, DocumentChangeAction } from '@angular/fire/firestore';
+import { AngularFirestoreCollection, DocumentChangeAction, AngularFirestore } from '@angular/fire/firestore';
 import { IBackendRoutes } from '../../../interfaces/routes';
 import { Observable, zip, of } from 'rxjs';
 import { IRoute, IRouteRecord, ICrewmember, IRouteGroup, IField } from 'src/app/modules/backend/types';
@@ -7,8 +7,6 @@ import 'firebase/firestore';
 import { switchMap, map } from 'rxjs/operators';
 import { IFirestoreRouteRecord, IFirestoreCrewmember } from '../types';
 import { FirebaseHelperService } from '../helper';
-import { RoutesAngularFirestore } from '../../../factory/factory.service';
-import { DocumentReference } from '@angular/fire/firestore';
 
 // NOTE: w/ RxJS for some reason zip([observable1, observable2]) does not behave correctly
 //               instead do zip(...[observable1, observable2]) instead to unroll array
@@ -22,7 +20,7 @@ export class FirebaseRoutesService implements IBackendRoutes {
   private groupsCollection: AngularFirestoreCollection<IRouteGroup>;
 
   constructor(
-    private readonly firestore: RoutesAngularFirestore,
+    private readonly firestore: AngularFirestore,
     private helper: FirebaseHelperService,
   ) {
     this.recordsCollection = this.firestore.collection<IFirestoreRouteRecord>('route_records');

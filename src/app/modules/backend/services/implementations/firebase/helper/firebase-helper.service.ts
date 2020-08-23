@@ -1,11 +1,10 @@
 import { Injectable } from '@angular/core';
-import { DocumentReference } from '@angular/fire/firestore';
+import { DocumentReference, AngularFirestore } from '@angular/fire/firestore';
 // import respective AngularFirestore versions and use?
 import { Observable, of, EMPTY } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { ICrewmember } from 'src/app/modules/backend/types';
 import { ITimestamp, IFirestoreCrewmember } from '../types';
-import { RoutesAngularFirestore, CheckinAngularFirestore } from '../../../factory/factory.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,12 +12,11 @@ import { RoutesAngularFirestore, CheckinAngularFirestore } from '../../../factor
 export class FirebaseHelperService {
 
   constructor(
-    private readonly routesFirestore: RoutesAngularFirestore,
-    private readonly checkinFirestore: CheckinAngularFirestore
+    private readonly firestore: AngularFirestore,
   ) { }
 
   public getReference$<T>(ref: DocumentReference): Observable<T> {
-    return this.routesFirestore.doc<T>(ref).valueChanges().pipe(
+    return this.firestore.doc<T>(ref).valueChanges().pipe(
       switchMap((val: T | undefined): Observable<T> => {
         if (val) {
           return of(val);

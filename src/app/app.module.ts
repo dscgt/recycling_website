@@ -10,10 +10,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatCardModule } from '@angular/material/card';
 
+// Firebase tooling
+import { AngularFireModule } from '@angular/fire';
+import { AngularFirestoreModule } from '@angular/fire/firestore';
+
 import { APP_ROUTES } from './app.routes';
 import { SharedModule } from './modules/shared';
 import { AppComponent, NavigationComponent, PageNotFoundComponent, HomeComponent } from './core';
-import { RoutesAngularFirestore, CheckinAngularFirestore, RoutesAngularFirestoreFactory, CheckinAngularFirestoreFactory } from './modules/backend/services/factory/factory.service';
+import { environment } from '../environments/environment';
 
 // multiple-app Firebase solution taken from https://github.com/angular/angularfire/issues/1026#issuecomment-387328730
 
@@ -35,19 +39,11 @@ import { RoutesAngularFirestore, CheckinAngularFirestore, RoutesAngularFirestore
     MatSidenavModule,
     MatIconModule,
     MatListModule,
-    MatCardModule
-  ],
-  providers: [
-    {
-      provide: RoutesAngularFirestore,
-      deps: [PLATFORM_ID, NgZone],
-      useFactory: RoutesAngularFirestoreFactory
-    },
-    {
-      provide: CheckinAngularFirestore,
-      deps: [PLATFORM_ID, NgZone],
-      useFactory: CheckinAngularFirestoreFactory
-    }
+    MatCardModule,
+
+    // Firebase tooling
+    AngularFireModule.initializeApp(environment.firebase),
+    AngularFirestoreModule
   ],
   bootstrap: [AppComponent]
 })

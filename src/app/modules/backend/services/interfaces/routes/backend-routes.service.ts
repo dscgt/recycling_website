@@ -3,15 +3,15 @@ import { FirebaseRoutesService, FirebaseHelperService } from '../../implementati
 import { Observable } from 'rxjs';
 import { IBackendRoutes } from './ibackend-routes.interface';
 import { IRoute, IRouteRecord, IRouteGroup } from '../../../types';
-import { RoutesAngularFirestore } from '../../factory/factory.service';
+import { AngularFirestore } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root',
-  useFactory: (firestore: RoutesAngularFirestore, helper: FirebaseHelperService) => {
+  useFactory: (firestore: AngularFirestore, helper: FirebaseHelperService) => {
     return new FirebaseRoutesService(firestore, helper);
   },
   deps: [
-    RoutesAngularFirestore,
+    AngularFirestore,
     FirebaseHelperService
   ]
 })

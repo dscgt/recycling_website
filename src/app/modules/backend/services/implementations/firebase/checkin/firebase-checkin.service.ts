@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
-import { AngularFirestoreCollection, DocumentChangeAction } from '@angular/fire/firestore';
+import { AngularFirestoreCollection, DocumentChangeAction, AngularFirestore } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import 'firebase/firestore';
 import { IBackendCheckin } from '../../../interfaces/checkin';
 import { ICheckinRecord, ICheckinModel, ICheckinGroup, IField } from 'src/app/modules/backend/types';
 import { IFirestoreCheckinRecord } from '../types';
 import { map } from 'rxjs/operators';
-import { CheckinAngularFirestore } from '../../../factory/factory.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +16,7 @@ export class FirebaseCheckinService implements IBackendCheckin {
   private groupsCollection: AngularFirestoreCollection<ICheckinGroup>;
 
   constructor(
-    private readonly firestore: CheckinAngularFirestore
+    private readonly firestore: AngularFirestore
   ) {
     this.groupsCollection = this.firestore.collection<ICheckinGroup>('checkin_groups');
     this.modelsCollection = this.firestore.collection<ICheckinModel>('checkin_models');
