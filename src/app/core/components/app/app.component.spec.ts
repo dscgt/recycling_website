@@ -29,6 +29,6 @@ describe('AppComponent', () => {
   it('should render correct title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('span, .overflow').textContent).toContain('Georgia Tech Office of Solid Waste Management & Recycling Admin Demo Website');
+    expect(fixture.nativeElement.querySelector('span, .overflow').textContent).toContain('Georgia Tech OSWM&R Admin Website');
   });
 });

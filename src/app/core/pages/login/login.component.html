@@ -1,0 +1,36 @@
+<div id='login-wrapper'>
+
+  <!-- Login form -->
+  <form (ngSubmit)="signIn()">
+    <h2>Sign In</h2>
+    <p>
+      <mat-form-field>
+        <mat-label>Email</mat-label>
+        <input [(ngModel)]="username" matInput name="username" required>
+      </mat-form-field>
+    </p>
+    <p>
+      <mat-form-field>
+        <mat-label>Password</mat-label>
+        <input [(ngModel)]="password" matInput type="password" name="password" required>
+      </mat-form-field>
+    </p>
+    <button mat-raised-button color="primary" type="submit">Sign in</button>
+  </form>
+  
+  <!-- Reset password form -->
+  <div id='forgot-password-form'>
+    <form (ngSubmit)="resetPassword()">
+      <p>Forgot your password? Enter the email you use to log in, and we'll send you an email to reset your password.</p>
+      <p>
+        <mat-form-field>
+          <mat-label>Email</mat-label>
+          <input [(ngModel)]="forgotPasswordUsername" matInput name="forgotPasswordUsername" required>
+        </mat-form-field>
+      </p>
+      <button mat-raised-button color="primary" type="submit">Send email</button>
+    </form>
+  </div>
+
+</div>
+
