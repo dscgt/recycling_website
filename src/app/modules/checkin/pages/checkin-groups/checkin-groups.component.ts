@@ -163,8 +163,6 @@ export class CheckinGroupComponent implements OnInit {
   }
 
   public closeCreationDialog(): void {
-    console.log(this.creationDialogRef);
-    console.log(this.creationDialogRef?.close);
     this.creationDialogRef?.close();
   }
 

@@ -2,10 +2,6 @@ import { Component, OnInit, NgZone } from '@angular/core';
 import { AuthService } from 'src/app/modules/backend/services/implementations/firebase';
 import { Router } from '@angular/router';
 
-// TODO: canActivate in routes seems to be affecting styles. Styles on initial page load don't apply and seem weird (to repro, refresh the page and poke around).
-// try routing the conventional way with app routing module? have to verify that this will conform with the current weird standard of routing.
-// Or, see what your own AuthGuard does.
-
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
