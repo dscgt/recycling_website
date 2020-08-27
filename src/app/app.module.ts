@@ -9,6 +9,9 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
 
 // Firebase tooling
 import { AngularFireModule } from '@angular/fire';
@@ -16,17 +19,16 @@ import { AngularFirestoreModule } from '@angular/fire/firestore';
 
 import { APP_ROUTES } from './app.routes';
 import { SharedModule } from './modules/shared';
-import { AppComponent, NavigationComponent, PageNotFoundComponent, HomeComponent } from './core';
+import { AppComponent, NavigationComponent, PageNotFoundComponent, HomeComponent, LoginComponent } from './core';
 import { environment } from '../environments/environment';
-
-// multiple-app Firebase solution taken from https://github.com/angular/angularfire/issues/1026#issuecomment-387328730
 
 @NgModule({
   declarations: [
     AppComponent,
     NavigationComponent,
     PageNotFoundComponent,
-    HomeComponent
+    HomeComponent,
+    LoginComponent
   ],
   imports: [
     RouterModule.forRoot(APP_ROUTES),
@@ -40,11 +42,17 @@ import { environment } from '../environments/environment';
     MatIconModule,
     MatListModule,
     MatCardModule,
+    MatInputModule,
+    MatFormFieldModule,
+    FormsModule,
 
     // Firebase tooling
     AngularFireModule.initializeApp(environment.firebase),
-    AngularFirestoreModule
+    AngularFirestoreModule,
+    // DON'T include AngularFireAuth here, or it causes an error
+    // https://github.com/angular/angularfire/issues/2351
   ],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
