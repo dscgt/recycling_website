@@ -1,46 +1,46 @@
 <mat-card>
     <p>Welcome to the administrator portal for recycling administrators.</p>
-    <p>Select an option from the menu on the left, or click a button below to begin!</p>
+    <p>Select an option from the menu, or click a button below to begin!</p>
 </mat-card>
 
 <mat-card>
     <h2>Recycling Routes</h2>
     <div class="actions">
-        <form action="routes/manage">
+        <a routerLink="/routes/manage">
             <button mat-button>
                 Manage Routes
             </button>
-        </form>
-        <form action="routes/records">
+        </a>
+        <a routerLink="/routes/records">
             <button mat-button>
                 View Route Records
             </button>
-        </form>
-        <form action="routes/groups">
+        </a>
+        <a routerLink="/routes/groups">
             <button mat-button>
                 Control Route Groups
             </button>
-        </form>
+        </a>
     </div>
 </mat-card>
 
 <mat-card>
     <h2>Recycling Checkins</h2>
     <div class="actions">
-        <form action="checkin/manage">
+        <a routerLink="/checkin/manage">
             <button mat-button>
                 Manage Checkins
             </button>
-        </form>
-        <form action="checkin/records">
+        </a>
+        <a routerLink="/checkin/records">
             <button mat-button>
                 View Checkin Records
             </button>
-        </form>
-        <form action="checkin/groups">
+        </a>
+        <a routerLink="/checkin/groups">
             <button mat-button>
                 Control Checkin Groups
             </button>
-        </form>
+        </a>
     </div>
 </mat-card>
