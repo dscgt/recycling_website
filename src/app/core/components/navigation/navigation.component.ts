@@ -1,17 +1,18 @@
-import { Component, Input, NgZone } from '@angular/core';
+import { Component, Input, NgZone, OnInit } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import { map, shareReplay, tap, catchError } from 'rxjs/operators';
 import { ILink, DrawerService } from 'src/app/modules/navigation';
 import { AuthService } from 'src/app/modules/backend/services/implementations/firebase';
 import { Router } from '@angular/router';
+import { User } from 'firebase';
 
 @Component({
   selector: 'app-navigation',
   templateUrl: './navigation.component.html',
   styleUrls: ['./navigation.component.scss']
 })
-export class NavigationComponent {
+export class NavigationComponent implements OnInit {
 
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
     .pipe(
@@ -23,21 +24,42 @@ export class NavigationComponent {
 
   @Input()
   public title: string;
+  public authenticated: Observable<boolean>;
 
   constructor(
     public drawer: DrawerService,
     private breakpointObserver: BreakpointObserver,
-    private auth: AuthService,
+    private authService: AuthService,
     private router: Router,
     private ngZone: NgZone
   ) {}
 
+  ngOnInit() {
+    // setup observable for authentication states; subscribed to receive events of logins and outs
+    this.authenticated = this.authService.authState().pipe(
+      map((data: User|null) => {
+        return data != null;
+      }),
+      catchError((err: any, caught: Observable<boolean>) => {
+        window.alert("There was an error:\n" + err.message);
+        return caught;
+      })
+    );
+
+    // change sidenav links depending on authentication states
+    this.authenticated.subscribe((loggedIn: boolean) => {
+      this.links$ = loggedIn
+        ? this.drawer.links$
+        : this.drawer.unauthenticatedLinks$
+    })
+  }
+
   logout(): void {
-    this.auth.signOut().then(() => {
+    this.authService.signOut().then(() => {
       this.ngZone.run(() => {
         this.router.navigate(['login']);
       });
-    }).catch((err) => {
+    }).catch((err: any) => {
       window.alert(err.message)
     });
   }

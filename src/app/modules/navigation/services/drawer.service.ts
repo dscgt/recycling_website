@@ -7,6 +7,16 @@ import { ILink } from '../types';
 })
 export class DrawerService {
 
+  public get unauthenticatedLinks$(): Observable<ILink[]> {
+    return new BehaviorSubject([
+      {
+        icon: 'vpn_key',
+        path: '/login',
+        name: 'Login'
+      }
+    ]).asObservable();
+  }
+
   public get links$(): Observable<ILink[]> {
     if (!this.linksSource) {
       this.linksSource = new BehaviorSubject(this.linksBacking);

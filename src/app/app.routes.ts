@@ -13,7 +13,8 @@ export const APP_ROUTES = [
     canActivate: [AngularFireAuthGuard],
     data: { authGuardPipe: redirectAuthorizedToHome }
   },
-  { path: 'home', component: HomeComponent, 
+  { path: 'home',
+    component: HomeComponent, 
     canActivate: [AngularFireAuthGuard],
     data: { authGuardPipe: redirectUnauthorizedToLogin } 
   },

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from "@angular/fire/auth";
+import { User } from 'firebase';
 
 @Injectable({
   providedIn: 'root'
@@ -9,6 +10,10 @@ export class AuthService {
   constructor(
     public auth: AngularFireAuth
   ) { }
+
+  authState() {
+    return this.auth.authState;
+  }
 
   // Sign in with email/password
   signIn(email: string, password: string) {
