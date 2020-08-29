@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AngularFirestoreCollection, DocumentChangeAction, AngularFirestore } from '@angular/fire/firestore';
 import { IBackendRoutes } from '../../../interfaces/routes';
 import { Observable, zip, of } from 'rxjs';
-import { IRoute, IRouteRecord, ICrewmember, IRouteGroup, IField } from 'src/app/modules/backend/types';
+import { IRoute, IRouteRecord, ICrewmember, IRouteGroup, IField, InputType } from 'src/app/modules/backend/types';
 import 'firebase/firestore';
 import { switchMap, map } from 'rxjs/operators';
 import { IFirestoreRouteRecord, IFirestoreCrewmember } from '../types';
@@ -92,18 +92,7 @@ export class FirebaseRoutesService implements IBackendRoutes {
 
   public addRoute(route: IRoute): void {
     const toAdd = Object.assign({}, route);
-    // change groupIds to DocumentReference's before sending to Firestore
-    toAdd.fields.forEach((field:IField) => {
-      if (typeof field.groupId === 'string' && field.groupId.trim().length > 0) {
-        field.groupId = this.groupsCollection.doc(field.groupId).ref;
-      }
-    })
-    toAdd.stopData.fields.forEach((field:IField) => {
-      if (typeof field.groupId === 'string' && field.groupId.trim().length > 0) {
-        field.groupId = this.groupsCollection.doc(field.groupId).ref;
-      }
-    })
-
+    this.cleanModel(toAdd);
     this.routesCollection.add(route);
   }
 
@@ -125,21 +114,8 @@ export class FirebaseRoutesService implements IBackendRoutes {
 
   public updateRoute(route: IRoute): void {
     const forUpdate = Object.assign({}, route);
-
-    // change groupIds to DocumentReference's before sending to Firestore
-    forUpdate.fields.forEach((field: IField) => {
-      if (typeof field.groupId === 'string' && field.groupId.trim().length > 0) {
-        field.groupId = this.groupsCollection.doc(field.groupId).ref;
-      }
-    });
-    forUpdate.stopData.fields.forEach((field: IField) => {
-      if (typeof field.groupId === 'string' && field.groupId.trim().length > 0) {
-        field.groupId = this.groupsCollection.doc(field.groupId).ref;
-      }
-    });
-
     const id:string = forUpdate.id as string;
-    delete forUpdate.id;
+    this.cleanModel(forUpdate);
     this.routesCollection.doc(id).set(forUpdate);
   }
 
@@ -163,5 +139,32 @@ export class FirebaseRoutesService implements IBackendRoutes {
     }
     this.groupsCollection.doc(id).delete();
   }
-  
+
+  /**
+   * Mutates the model passed in to conform with Firebase data model standards.
+   * Changes made:
+   * - fields and stop fields not of dropdown type will be cleaned to ensure no groupId is passed
+   * - string groupIds will be changed to DocumentReference's
+   * - id will be deleted; preserve the ID before calling if you need it
+   */
+  public cleanModel(model: IRoute) {
+    model.fields.forEach((field: IField) => {
+      if (field.type !== InputType.Dropdown) {
+        // remove groupIds for non-select fields, since this is not handled by the Angular forms
+        delete field.groupId;
+      } else if (typeof field.groupId === 'string') {
+        // change groupIds to DocumentReference's before sending to Firestore
+        field.groupId = this.groupsCollection.doc(field.groupId).ref;
+      }
+    })
+    // do the same as above, but for stops' fields
+    model.stopData.fields.forEach((field: IField) => {
+      if (field.type !== InputType.Dropdown) {
+        delete field.groupId;
+      } else if (typeof field.groupId === 'string') {
+        field.groupId = this.groupsCollection.doc(field.groupId).ref;
+      }
+    })
+    delete model.id;
+  }
 }

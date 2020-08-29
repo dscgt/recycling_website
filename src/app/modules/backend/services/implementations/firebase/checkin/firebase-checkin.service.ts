@@ -3,7 +3,7 @@ import { AngularFirestoreCollection, DocumentChangeAction, AngularFirestore } fr
 import { Observable } from 'rxjs';
 import 'firebase/firestore';
 import { IBackendCheckin } from '../../../interfaces/checkin';
-import { ICheckinRecord, ICheckinModel, ICheckinGroup, IField } from 'src/app/modules/backend/types';
+import { ICheckinRecord, ICheckinModel, ICheckinGroup, InputType } from 'src/app/modules/backend/types';
 import { IFirestoreCheckinRecord } from '../types';
 import { map } from 'rxjs/operators';
 
@@ -62,12 +62,7 @@ export class FirebaseCheckinService implements IBackendCheckin {
 
   public addModel(checkin: ICheckinModel): void {
     const toAdd = Object.assign({}, checkin);
-    // change groupIds to DocumentReference's before sending to Firestore
-    toAdd.fields.forEach((field: IField) => {
-      if (typeof field.groupId === 'string' && field.groupId.trim().length > 0) {
-        field.groupId = this.groupsCollection.doc(field.groupId).ref;
-      }
-    });
+    this.cleanModel(toAdd);
     this.modelsCollection.add(toAdd);
   }
 
@@ -77,14 +72,8 @@ export class FirebaseCheckinService implements IBackendCheckin {
 
   public updateModel(model: ICheckinModel): void {
     const forUpdate = Object.assign({}, model);
-    // change groupIds to DocumentReference's before sending to Firestore
-    forUpdate.fields.forEach((field: IField) => {
-      if (typeof field.groupId === 'string' && field.groupId.trim().length > 0) {
-        field.groupId = this.groupsCollection.doc(field.groupId).ref;
-      }
-    });
-    const id:string = (forUpdate.id) as string;
-    delete forUpdate.id;
+    const id: string = (forUpdate.id) as string;
+    this.cleanModel(forUpdate);
     this.modelsCollection.doc(id).set(forUpdate);
   }
 
@@ -107,6 +96,26 @@ export class FirebaseCheckinService implements IBackendCheckin {
       return;
     }
     this.groupsCollection.doc(id).delete();
+  }
+
+  /**
+   * Mutates the model passed in to conform with Firebase data model standards.
+   * Changes made:
+   * - fields not of dropdown type will be cleaned to ensure no groupId is passed
+   * - string groupIds will be changed to DocumentReference's
+   * - id will be deleted; preserve the ID before calling if you need it
+   */
+  public cleanModel(model: ICheckinModel): void {
+    model.fields.forEach((field) => {
+      if (field.type !== InputType.Dropdown) {
+        // remove groupIds for non-select fields, since this is not handled by the Angular forms
+        delete field.groupId;
+      } else if (typeof field.groupId === 'string') {
+        // change groupIds to DocumentReference's before sending to Firestore
+        field.groupId = this.groupsCollection.doc(field.groupId).ref;
+      }
+    });
+    delete model.id;
   }
 
 }

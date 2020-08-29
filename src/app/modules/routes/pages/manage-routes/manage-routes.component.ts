@@ -111,7 +111,7 @@ export class ManageRoutesComponent implements OnInit {
       title: [model.title],
       fields: this.fb.array(model.fields.map((field: IField) => this.fb.group({
         title: [field.title],
-        optional: [field.groupId],
+        optional: [field.optional],
         type: [field.type],
         groupId: [field.groupId ? (field.groupId as DocumentReference).id : '']
       }))),
@@ -122,7 +122,7 @@ export class ManageRoutesComponent implements OnInit {
       }))),
       fields_stops: this.fb.array(model.stopData.fields.map((field: IField) => this.fb.group({
         title: [field.title],
-        optional: [field.groupId],
+        optional: [field.optional],
         type: [field.type],
         groupId: [field.groupId ? (field.groupId as DocumentReference).id : '']
       }))),
@@ -282,7 +282,8 @@ export class ManageRoutesComponent implements OnInit {
       const excludeAsString: string = stopCopy.exclude;
       stopCopy.exclude = excludeAsString
         .split(',')
-        .map(s => s.trim());
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
       route.stopData.stops.push(stopCopy as IRouteStop);
     }
 
