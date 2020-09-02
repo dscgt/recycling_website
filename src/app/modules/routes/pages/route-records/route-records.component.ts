@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { BackendRoutesService } from 'src/app/modules/backend';
+import { FbFunctionsService } from 'src/app/modules/backend/services/implementations/firebase';
 
 @Component({
   selector: 'app-route-records',
@@ -8,15 +8,29 @@ import { BackendRoutesService } from 'src/app/modules/backend';
 })
 export class RouteRecordsComponent implements OnInit {
 
+  public disableButton = false;
+
   constructor(
-    private routesBackend: BackendRoutesService
+    private fbFunctionsService: FbFunctionsService
   ) { }
 
-  ngOnInit(): void {
-    
-  }
+  ngOnInit(): void { }
 
   handleDownload(): void {
-    console.log('handleDownload run');
+    this.disableButton = true;
+    this.fbFunctionsService.getRouteRecords()
+      .then((res) => res.blob())
+      .then((res) => {
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(res);
+        a.setAttribute("download", 'data.xlsx');
+        a.click();
+      }).then(() => {
+        this.disableButton = false;
+      })
+      .catch((err) => {
+        window.alert("There was an error:\n" + err.message);
+        this.disableButton = false;
+      });
   }
 }

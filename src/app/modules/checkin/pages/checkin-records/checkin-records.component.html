@@ -1,9 +1,4 @@
-<app-expansion-table
-  [defaultPageSize]="10"
-  [pageSizeOptions]="[5, 10, 25, 50]"
-  [data$]="records$"
-  [displayData]="displayData">
-  <ng-template let-record>
-    <pre>{{ record | json }}</pre>
-  </ng-template>
-</app-expansion-table>
+<div id='checkin-records-wrapper'>
+  <p>Click the button below to download records as a CSV file, compatible with Excel. </p>
+  <button mat-raised-button color="primary" (click)="handleDownload()" [disabled]="disableButton">Download</button>
+</div>

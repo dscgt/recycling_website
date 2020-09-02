@@ -1,4 +1,4 @@
 <div id='route-records-wrapper'>
-  <p>Click the button below to download route records as a CSV file, compatible with Excel. </p>
-  <button mat-raised-button color="primary" (click)="handleDownload()">Download</button>
+  <p>Click the button below to download records as a CSV file, compatible with Excel. </p>
+  <button mat-raised-button color="primary" (click)="handleDownload()" [disabled]="disableButton">Download</button>
 </div>

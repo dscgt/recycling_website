@@ -1,10 +1,11 @@
 const functions = require("firebase-functions");
 const xlsx = require('xlsx');
 const FileSaver = require('file-saver');
-
 const admin = require("firebase-admin");
-admin.initializeApp();
+// https://stackoverflow.com/questions/42755131/enabling-cors-in-cloud-functions-for-firebase
+const cors = require('cors')({ origin: true }); 
 
+admin.initializeApp();
 var db = admin.firestore();
 
 exports.seedRouteData = functions.https.onRequest(async (req, res) => {
@@ -157,5 +158,7 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
 
   let wbout = xlsx.write(wb, {bookType: 'xlsx', type: 'buffer'});
   res.type('blob');
-  res.status(200).send(wbout);
+  cors(req, res, () => {
+    res.status(200).send(wbout);
+  })
 })

@@ -1,37 +1,26 @@
 import { Injectable } from '@angular/core';
-import { AuthService } from 'src/app/modules/backend/services/implementations/firebase';
+import { AuthService } from '../auth/auth.service'; // relative import, otherwise circular dependency issue due to importing from barrel file
 
 @Injectable({
   providedIn: "root",
 })
 export class FbFunctionsService {
-  private ROUTE_RECORDS_FUNCTION_PATH: string =
-    "http://localhost:5001/recycling-checkin/us-central1/generateExcelSheet";
-  private CHECKIN_RECORDS_FUNCTION_PATH: string = "";
+  // localhost:5001/recycling-checkin/us-central1/generateExcelSheet?filename=MyTest&sheetTitle=Records&collectionName=route
+  private SHEET_TITLE = "sheet";
+  private BASE_URL = "https://us-central1-gt-recycling.cloudfunctions.net/generateExcelSheet";
+  private ROUTES_TYPE = "route";
+  private CHECKIN_TYPE = "checkin";
+  private ROUTES_FUNCTION_PATH = `${this.BASE_URL}/?filename=MyFile&sheetTitle=${this.SHEET_TITLE}&recordType=${this.ROUTES_TYPE}`;
+  private CHECKIN_FUNCTION_PATH = `${this.BASE_URL}/?filename=MyFile&sheetTitle=${this.SHEET_TITLE}&recordType=${this.CHECKIN_TYPE}`;
 
   constructor(private authService: AuthService) {}
 
   getRouteRecords() {
-    // fetch(this.ROUTE_RECORDS_FUNCTION_PATH)
-    //   .then((res) => res.blob())
-    //   .
-    //   .catch((err) => {
-    //     window.alert("There was an error:\n" + err.message);
-    //   });
-
-    // const res = await fetch(url);
-    // const fileStream = fs.createWriteStream(path);
-    // await new Promise((resolve, reject) => {
-    //   res.body.pipe(fileStream);
-    //   res.body.on("error", (err) => {
-    //     reject(err);
-    //   });
-    //   fileStream.on("finish", function() {
-    //     resolve();
-    //   });
-    // });
+    return fetch(this.ROUTES_FUNCTION_PATH);
   }
 
-  getCheckinRecords() {}
+  getCheckinRecords() {
+    return fetch(this.CHECKIN_FUNCTION_PATH);
+  }
 
 }

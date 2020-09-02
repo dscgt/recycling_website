@@ -3,6 +3,7 @@ import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-mat
 import { ICheckinRecord } from 'src/app/modules/backend';
 import { Observable } from 'rxjs';
 import { BackendCheckinService } from 'src/app/modules/backend/services/interfaces/checkin';
+import { FbFunctionsService } from 'src/app/modules/backend/services/implementations/firebase';
 
 @Component({
   selector: 'app-checkin-records',
@@ -11,42 +12,29 @@ import { BackendCheckinService } from 'src/app/modules/backend/services/interfac
 })
 export class CheckinRecordsComponent implements OnInit {
 
-  @ViewChild(ExpansionTableComponent)
-  private expansionTable: ExpansionTableComponent<ICheckinRecord>;
-
-  public records$: Observable<ICheckinRecord[]>;
-  public displayData: IDisplayData<ICheckinRecord>[];
+  public disableButton = false;
 
   constructor(
-    private backend: BackendCheckinService
+    private fbFunctionsService: FbFunctionsService
   ) { }
 
-  ngOnInit(): void {
-    this.displayData = [
-      {
-        name: "Model",
-        property: "modelTitle",
-        accessor: (record: ICheckinRecord) => record.modelTitle
-      },
-      {
-        name: "Checkout Time",
-        property: "checkoutTime",
-        accessor: (record: ICheckinRecord) => record.checkoutTime.toLocaleString()
-      },
-      {
-        name: "Checkin Time",
-        property: "checkinTime",
-        accessor: (record: ICheckinRecord) => record.checkinTime.toLocaleString()
-      },
-      {
-        name: "# of Hours",
-        property: "hours",
-        accessor: (record: ICheckinRecord) => {
-          const hours: number = (record.checkinTime.valueOf() - record.checkoutTime.valueOf()) / (1000 * 60 * 60);
-          return hours.toString();
-        }
-      },
-    ];
-    this.records$ = this.backend.getRecords();
+  ngOnInit(): void { }
+
+  handleDownload(): void {
+    this.disableButton = true;
+    this.fbFunctionsService.getCheckinRecords()
+      .then((res) => res.blob())
+      .then((res) => {
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(res);
+        a.setAttribute("download", 'data.xlsx');
+        a.click();
+      }).then(() => {
+        this.disableButton = false;
+      })
+      .catch((err) => {
+        window.alert("There was an error:\n" + err.message);
+        this.disableButton = false;
+      });
   }
 }
