@@ -64,6 +64,8 @@ const propertiesListFormatter = (obj, length) => {
   return ret;
 }
 
+const convertDate = (timestampJSON) => new Date(timestampJSON._seconds * 1000);
+
 /**
  * Function that generates an excel sheet for the records databases
  * Query params:
@@ -112,17 +114,19 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
     // Add in all of the properties for the record
     maxGeneralProperties = Math.max(maxGeneralProperties, Object.keys(record.properties).length);
     // Add in all properties for the particular stop numbers
-    for (let i = 0; i < record.stops.length; i++) {
-      if (i >= maxStopProperties.length) {
-        maxStopProperties.push(Object.keys(record.stops[i].properties).length);
-      } else {
-        maxStopProperties[i] = Object.keys(record.stops[i].properties).length;
+    if (record.stops) {
+      for (let i = 0; i < record.stops.length; i++) {
+        if (i >= maxStopProperties.length) {
+          maxStopProperties.push(Object.keys(record.stops[i].properties).length);
+        } else {
+          maxStopProperties[i] = Object.keys(record.stops[i].properties).length;
+        }
       }
     }
   })
 
   // Add in headers
-  const headers = ["Title", "Checkout Time", "Checkin Time"];
+  const headers = ["Title", "Start Time", "End Time"];
   for (let i = 0; i < maxGeneralProperties; i++) {
     headers.push(`Property ${i}`);
   }
@@ -138,14 +142,19 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
   data.forEach((record) => {
     const properties = propertiesListFormatter(record.properties, maxGeneralProperties);
     let stops = []
-    for (let i = 0; i < record.stops.length; i++) {
-      stops.push(record.stops[i].title);
-      stops = stops.concat(propertiesListFormatter(record.stops[i].properties, maxStopProperties[i]));
+    if (record.stops) {
+      for (let i = 0; i < record.stops.length; i++) {
+        stops.push(record.stops[i].title);
+        stops = stops.concat(propertiesListFormatter(record.stops[i].properties, maxStopProperties[i]));
+      }
     }
+    console.log(record);
+    console.log(record.checkinTime)
+    console.log(record.checkoutTime)
     let row = [
       record.modelTitle,
-      record.startTime,
-      record.endTime,
+      record.startTime ? convertDate(record.startTime) : convertDate(record.checkoutTime),
+      record.endTime ? convertDate(record.endTime) : convertDate(record.checkinTime),
     ];
     row = row.concat(properties);
     row = row.concat(stops);
