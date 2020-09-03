@@ -2,7 +2,6 @@
 
 #Firebase
 .firebase
-.firebaserc
 
 # compiled output
 /dist

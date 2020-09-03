@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "gt-recycling": {
+      "hosting": {
+        "recycling-frontend": [
+          "gt-recycling"
+        ]
+      }
+    }
+  }
+}
