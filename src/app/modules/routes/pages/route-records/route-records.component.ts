@@ -1,7 +1,5 @@
-import { Component, ViewChild, OnInit } from '@angular/core';
-import { BackendRoutesService, IRouteRecord } from 'src/app/modules/backend';
-import { Observable } from 'rxjs';
-import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
+import { Component, OnInit } from '@angular/core';
+import { FbFunctionsService } from 'src/app/modules/backend/services/implementations/firebase';
 
 @Component({
   selector: 'app-route-records',
@@ -10,47 +8,29 @@ import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-mat
 })
 export class RouteRecordsComponent implements OnInit {
 
-  @ViewChild(ExpansionTableComponent)
-  private expansionTable: ExpansionTableComponent<IRouteRecord>;
-
-  public records$: Observable<IRouteRecord[]>;
-  public displayData: IDisplayData<IRouteRecord>[];
+  public disableButton = false;
 
   constructor(
-    private routesBackend: BackendRoutesService
+    private fbFunctionsService: FbFunctionsService
   ) { }
 
-  ngOnInit(): void {
-    this.displayData = [
-      {
-        name: "Crewmember",
-        property: "crewmember",
-        accessor: (record: IRouteRecord) => record.crewmember.name
-      },
-      {
-        name: "Route",
-        property: "route",
-        accessor: (record: IRouteRecord) => record.route.title
-      },
-      {
-        name: "Start Time",
-        property: "startTime",
-        accessor: (record: IRouteRecord) => record.startTime.toLocaleString()
-      },
-      {
-        name: "End Time",
-        property: "endTime",
-        accessor: (record: IRouteRecord) => record.endTime.toLocaleString()
-      },
-      {
-        name: "# of Hours",
-        property: "hours",
-        accessor: (record: IRouteRecord) => {
-          const hours: number = (record.endTime.valueOf() - record.startTime.valueOf()) / (1000 * 60 * 60);
-          return hours.toString();
-        }
-      },
-    ];
-    this.records$ = this.routesBackend.getRecords();
+  ngOnInit(): void { }
+
+  handleDownload(): void {
+    this.disableButton = true;
+    this.fbFunctionsService.getRouteRecords()
+      .then((res) => res.blob())
+      .then((res) => {
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(res);
+        a.setAttribute("download", 'data.xlsx');
+        a.click();
+      }).then(() => {
+        this.disableButton = false;
+      })
+      .catch((err) => {
+        window.alert("There was an error:\n" + err.message);
+        this.disableButton = false;
+      });
   }
 }
