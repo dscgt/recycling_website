@@ -1,9 +1,9 @@
-import { Component, Input, AfterViewInit, ViewChild, ContentChild, TemplateRef } from '@angular/core';
+import { Component, Input, AfterViewInit, ViewChild, ContentChild, TemplateRef, SimpleChanges } from '@angular/core';
 import { Observable } from 'rxjs';
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatDataService } from '../../services';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { IDisplayData } from '../../types';
 
 @Component({
@@ -29,23 +29,39 @@ export class ExpansionTableComponent<T> implements AfterViewInit {
     [property: string]: (datum: T) => string;
   };
 
+  private canSetRows: boolean = false;
+
   constructor(
     private matData: MatDataService
   ) { }
 
   ngAfterViewInit(): void {
+    this.setRows();
+    this.canSetRows = true;
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Set new rows on input change
+    // However, if done too early some things may not be initialized, so we wait until after ngAfterViewInit
+    if (this.canSetRows) {
+      this.setRows();
+    }
+  }
+
+  setRows(): void {
+    // gather data accessors to give to row sorting algorithm
     this.accessors = {};
     for (let displayDatum of this.displayData) {
       this.accessors[displayDatum.property] = displayDatum.accessor;
     }
     const sort$: Observable<Sort> = this.matData.toSort$(this.sort);
     const pageEvent$: Observable<PageEvent> = this.matData.toPaginator$(this.paginator);
-    this.totalRows$ = this.data$.pipe(
-      map((data: T[]): number => data.length)
-    );
     this.displayRows$ = this.data$.pipe(
       this.matData.sortData$<T>(sort$, this.accessors),
       this.matData.paginateData$(pageEvent$)
+    );
+    this.totalRows$ = this.data$.pipe(
+      map((data: T[]): number => data.length)
     );
   }
 }
