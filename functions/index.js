@@ -2,50 +2,103 @@ const functions = require("firebase-functions");
 const xlsx = require('xlsx');
 const FileSaver = require('file-saver');
 const admin = require("firebase-admin");
-// https://stackoverflow.com/questions/42755131/enabling-cors-in-cloud-functions-for-firebase
+// From https://stackoverflow.com/questions/42755131/enabling-cors-in-cloud-functions-for-firebase
 const cors = require('cors')({ origin: true }); 
 
 admin.initializeApp();
 var db = admin.firestore();
 
-exports.seedRouteData = functions.https.onRequest(async (req, res) => {
-  const writeResult = await admin
-    .firestore()
-    .collection("route_records")
-    .add({
-      "startTime": "startTime_here",
-      "endTime": "endTime_here",
-      "properties": {
-        "key1": "value1",
-        "key2": "value2",
-        "key3": "value3",
-      },
-      "stops": [
-        {
-          "title": "title_here",
-          "properties": {
-            "key1": "value1",
-            "key2": "value2",
-            "key3": "value3",
-          }
+exports.seedRouteRecords = functions.https.onRequest(async (req, res) => {
+  const testRecord = {
+    "startTime": "startTime_here",
+    "endTime": "endTime_here",
+    "properties": {
+      "key1": "value1",
+      "key2": "value2",
+      "key3": "value3",
+    },
+    "stops": [
+      {
+        "title": "title_here",
+        "properties": {
+          "key1": "value1",
+          "key2": "value2",
+          "key3": "value3",
         }
-      ],
-      "modelId": "modelId_here",
-      "modelTitle": "modelTitle numero dos",
-    });
+      }
+    ],
+    "modelId": "modelId_here",
+    "modelTitle": "modelTitle1",
+  };
+  const testRecord2 = {
+    "startTime": "startTime_here",
+    "endTime": "endTime_here",
+    "properties": {
+      "key1": "value1",
+      "key2": "value2",
+      "key3": "value3",
+    },
+    "stops": [
+      {
+        "title": "title_here",
+        "properties": {
+          "key1": "value1",
+          "key2": "value2",
+          "key3": "value3",
+        }
+      }
+    ],
+    "modelId": "modelId_here",
+    "modelTitle": "modelTitle2",
+  }
 
-    res.json({ result: `Message with ID: ${writeResult.id} added.` });
+  const writeResults = await Promise.all([
+    admin.firestore().collection("route_records").add(testRecord),
+    admin.firestore().collection("route_records").add(testRecord),
+    admin.firestore().collection("route_records").add(testRecord),
+    admin.firestore().collection("route_records").add(testRecord2),
+    admin.firestore().collection("route_records").add(testRecord2),
+    admin.firestore().collection("route_records").add(testRecord2),
+  ]);
+  
+  res.json({ result: `Added route records with IDs ${writeResults.map(x => x.id).toString()}.` });
 })
 
-exports.testDBRead = functions.https.onRequest(async (req, res) => {
-  try {
-    let snapshot = await db.collection("route_records").get();
-    console.log(snapshot);
-    res.send(snapshot.docs.map(doc => doc.data()));
-  } catch (e) {
-    console.log('ERROR');
-    console.log(e);
+exports.seedCheckinRecords = functions.https.onRequest(async (req, res) => {
+
+  const testRecord = {
+    "checkoutTime": new Date(),
+    "checkinTime": new Date(),
+    "properties": {
+      "key1": "value1",
+      "key2": "value2",
+      "key3": "value3",
+    },
+    "modelId": "modelId_here",
+    "modelTitle": "modelTitle1",
+  };
+  const testRecord2 = {
+    "checkoutTime": new Date(),
+    "checkinTime": new Date(),
+    "properties": {
+      "key1": "value1",
+      "key2": "value2",
+      "key3": "value3",
+    },
+    "modelId": "modelId_here",
+    "modelTitle": "modelTitle2",
   }
+
+  const writeResults = await Promise.all([
+    admin.firestore().collection("checkin_records").add(testRecord),
+    admin.firestore().collection("checkin_records").add(testRecord),
+    admin.firestore().collection("checkin_records").add(testRecord),
+    admin.firestore().collection("checkin_records").add(testRecord2),
+    admin.firestore().collection("checkin_records").add(testRecord2),
+    admin.firestore().collection("checkin_records").add(testRecord2),
+  ]);
+
+  res.json({ result: `Added checkin records with IDs ${writeResults.map(x => x.id).toString()}.` });
 })
 
 /*
@@ -65,6 +118,9 @@ const propertiesListFormatter = (obj, length) => {
 }
 
 const convertDate = (timestampJSON) => new Date(timestampJSON._seconds * 1000);
+
+// since sheet names cannot contain: \ / ? * [ ] 
+const cleanSheetName = (name) => name.replace(/[/\\?*[\]]/g, '');
 
 /**
  * Function that generates an excel sheet for the records databases
@@ -148,9 +204,6 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
         stops = stops.concat(propertiesListFormatter(record.stops[i].properties, maxStopProperties[i]));
       }
     }
-    console.log(record);
-    console.log(record.checkinTime)
-    console.log(record.checkoutTime)
     let row = [
       record.modelTitle,
       record.startTime ? convertDate(record.startTime) : convertDate(record.checkoutTime),
@@ -166,6 +219,105 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
   wb.Sheets[sheetTitle] = ws;
 
   let wbout = xlsx.write(wb, {bookType: 'xlsx', type: 'buffer'});
+  res.type('blob');
+  cors(req, res, () => {
+    res.status(200).send(wbout);
+  })
+})
+
+/**
+ * Function that generates an excel sheet for checkout records.
+ * 
+ * A blob will be sent back, which can be turned into a file download on the client. Here is an example:
+ * https://stackoverflow.com/questions/19327749/javascript-blob-filename-without-link
+ * Note that this Firebase Function does not handle file name; this should be set on the client.
+ */
+exports.generateCheckoutRecordsExcelSheet = functions.https.onRequest(async (req, res) => {
+  // sheet initialization from https://redstapler.co/sheetjs-tutorial-create-xlsx/
+
+  // uncomment for future restrictions, such as controlled by query parameters
+  // const foo = req.query.foo;
+
+  const wb = xlsx.utils.book_new();
+
+  // read data from Firebase
+  let data;
+  try {
+    let snapshot = await db.collection('checkin_records').get();
+    data = snapshot.docs.map(doc => doc.data());
+  } catch (e) {
+    console.log('ERROR');
+    console.log(e);
+    res.sendStatus(500);
+    return;
+  }
+
+  /* 
+  The objective here is to separate data by model name; data points will be separated into Excel sheets as determined by the model name.
+  */
+
+  // preprocess all records to separate them by model title, and do null checks
+  // modelTitles is a map of model name to array of data points
+  const modelTitles = new Map();
+  data.forEach((record) => {
+    // null checks
+    if (record.modelTitle === null || record.checkoutTime === null || record.checkinTime === null) {
+      console.log(`record is missing vital modelTitle, checkoutTime, and/or checkinTime, aborting`);
+      res.sendStatus(500);
+      return;
+    }
+    // handle model titles not seen before
+    if (!modelTitles.has(record.modelTitle)) {
+      modelTitles.set(record.modelTitle, []);
+    }
+    // push this record under this model title
+    modelTitles.get(record.modelTitle).push(record);
+  })
+
+  // generate all rows for all sheets.
+  for (let [modelTitle, records] of modelTitles) {
+    const ws_data = [];
+
+    // preprocess records to determine needed headers
+    // for checkout records, properties within "properties" key should be considered for headers
+    let headers = new Set();
+    for (let record of records) {
+      const allProperties = Object.keys(record.properties);
+      for (let property of allProperties) {
+        headers.add(property);
+      }
+    }
+    headers = Array.from(headers);
+
+    // add header row
+    const headerRow = ['Start Time', 'End Time'].concat(headers);
+    ws_data.push(headerRow);
+    
+    // add the rest of the rows
+    for (let record of records) {
+      const thisRow = [
+        convertDate(record.checkoutTime),
+        convertDate(record.checkinTime)
+      ];
+      for (let header of headers) {
+        // eslint-disable-next-line
+        thisRow.push(record.properties[header] != null
+            ? record.properties[header]
+            : 'N/A'
+        )
+      }
+      ws_data.push(thisRow);
+    }
+
+    // convert rows to Excel format
+    let ws = xlsx.utils.aoa_to_sheet(ws_data);
+    const thisSheetName = cleanSheetName(modelTitle);
+    wb.SheetNames.push(thisSheetName);
+    wb.Sheets[thisSheetName] = ws;
+  }
+
+  // send back as blob
+  let wbout = xlsx.write(wb, { bookType: 'xlsx', type: 'buffer' });
   res.type('blob');
   cors(req, res, () => {
     res.status(200).send(wbout);

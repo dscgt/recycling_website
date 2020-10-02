@@ -29,3 +29,9 @@ Send to Firebase Hosting:
 ```
 ng run recycling-frontend:deploy
 ```
+
+Start emulators (Functions, Firestore, Hosting).
+Due to how the project is set up, the emulated website (Hosting) will use the production Firestore instance, but emulated Functions will use the emulated Firestore instance.
+```
+firebase emulators:start
+```
