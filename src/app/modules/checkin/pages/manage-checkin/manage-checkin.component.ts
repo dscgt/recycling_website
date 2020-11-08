@@ -71,10 +71,7 @@ export class ManageCheckinComponent implements OnInit {
         accessor: (model: ICheckinModel) => model.fields.length.toString()
       },
     ];
-    this.createModelForm = this.fb.group({
-      title: [''],
-      fields: this.fb.array([ this.createField() ]),
-    });
+    this.clearCreationDialog();
   }
 
   // This is a workaround for a bug with Angular / Angular Forms
@@ -121,7 +118,10 @@ export class ManageCheckinComponent implements OnInit {
   }
 
   public clearCreationDialog(): void {
-    this.createModelForm.reset();
+    this.createModelForm = this.fb.group({
+      title: [''],
+      fields: this.fb.array([this.createField()]),
+    });
   }
 
   public createField(): FormGroup {

@@ -12,7 +12,7 @@ For development, this code can be run locally:
 
 1. Fork this branch and clone your fork to your local machine
 1. In a CLI, navigate to the project and install dependencies with `npm i`
-1. Start a local instance with `npm run serve`
+1. Start a local instance with `npm start`
 1. In a web browser, navigate to `localhost:4200` to browse the local instance
 
 ## About

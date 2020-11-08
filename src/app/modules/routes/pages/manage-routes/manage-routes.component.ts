@@ -89,12 +89,7 @@ export class ManageRoutesComponent implements OnInit {
         accessor: (route: IRoute) => route.stopData.stops.length.toString()
       },
     ];
-    this.createRouteForm = this.fb.group({
-      title: [''],
-      fields: this.fb.array([ this.createField() ]),
-      stops: this.fb.array([ this.createStop() ]),
-      fields_stops: this.fb.array([ this.createField() ])
-    });
+    this.clearCreationDialog();
   }
 
   // This is a workaround for a bug with Angular / Angular Forms
@@ -103,6 +98,15 @@ export class ManageRoutesComponent implements OnInit {
   // See https://github.com/angular/angular/issues/23657
   ngAfterContentChecked(): void {
     this.cdref.detectChanges();
+  }
+
+  public clearCreationDialog() {
+    this.createRouteForm = this.fb.group({
+      title: [''],
+      fields: this.fb.array([this.createField()]),
+      stops: this.fb.array([this.createStop()]),
+      fields_stops: this.fb.array([this.createField()])
+    });
   }
 
   // Replaces the existing content of the form with the content of [model]
@@ -211,10 +215,6 @@ export class ManageRoutesComponent implements OnInit {
       description: [''],
       exclude: ['']
     });
-  }
-  
-  public clearCreationDialog(): void {
-    this.createRouteForm.reset();
   }
 
   public confirmDeleteRoute(route: IRoute): void {

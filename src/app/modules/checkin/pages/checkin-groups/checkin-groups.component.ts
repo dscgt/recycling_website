@@ -70,10 +70,7 @@ export class CheckinGroupComponent implements OnInit {
         accessor: (group: ICheckinGroup) => group.members.length.toString()
       },
     ];
-    this.createGroupForm = this.fb.group({
-      title: [''],
-      members: this.fb.array([ this.createMember() ]),
-    });
+    this.clearCreationDialog();
   }
 
   // Replaces the existing content of the form with the content of [group]
@@ -167,7 +164,10 @@ export class CheckinGroupComponent implements OnInit {
   }
 
   public clearCreationDialog(): void {
-    this.createGroupForm.reset();
+    this.createGroupForm = this.fb.group({
+      title: [''],
+      members: this.fb.array([this.createMember()]),
+    });
   }
 
   public confirmationDialogClosed(): void {
