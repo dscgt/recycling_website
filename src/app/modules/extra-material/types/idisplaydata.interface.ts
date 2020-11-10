@@ -1,5 +1,6 @@
 export interface IDisplayData<T> {
   name: string;
   property: string;
-  accessor: (datum: T) => string;
+  accessorAsString: (datum: T) => string;
+  accessor: (datum: T) => any;
 }

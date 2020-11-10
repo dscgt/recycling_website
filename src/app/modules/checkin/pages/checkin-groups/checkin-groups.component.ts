@@ -62,12 +62,14 @@ export class CheckinGroupComponent implements OnInit {
       {
         name: "Title",
         property: "title",
-        accessor: (group: ICheckinGroup) => group.title
+        accessor: (group: ICheckinGroup) => group.title,
+        accessorAsString: (group: ICheckinGroup) => group.title,
       },
       {
         name: "# of Members",
         property: "members",
-        accessor: (group: ICheckinGroup) => group.members.length.toString()
+        accessor: (group: ICheckinGroup) => group.members.length,
+        accessorAsString: (group: ICheckinGroup) => group.members.length.toString(),
       },
     ];
     this.clearCreationDialog();

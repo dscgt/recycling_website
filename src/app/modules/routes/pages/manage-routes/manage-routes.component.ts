@@ -71,22 +71,26 @@ export class ManageRoutesComponent implements OnInit {
       {
         name: "Title",
         property: "title",
-        accessor: (route: IRoute) => route.title
+        accessor: (route: IRoute) => route.title,
+        accessorAsString: (route: IRoute) => route.title
       },
       {
         name: "# of Fields in Route",
         property: "fields",
-        accessor: (route: IRoute) => route.fields.length.toString()
+        accessor: (route: IRoute) => route.fields.length,
+        accessorAsString: (route: IRoute) => route.fields.length.toString()
       },
       {
         name: "# of Fields in Stops",
         property: "fields_stops",
-        accessor: (route: IRoute) => route.stopData.fields.length.toString()
+        accessor: (route: IRoute) => route.stopData.fields.length,
+        accessorAsString: (route: IRoute) => route.stopData.fields.length.toString()
       },
       {
         name: "# of Stops",
         property: "stops",
-        accessor: (route: IRoute) => route.stopData.stops.length.toString()
+        accessor: (route: IRoute) => route.stopData.stops.length,
+        accessorAsString: (route: IRoute) => route.stopData.stops.length.toString()
       },
     ];
     this.clearCreationDialog();

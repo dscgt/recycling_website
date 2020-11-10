@@ -41,15 +41,17 @@ export class CheckinRecordsComponent implements OnInit {
         
         // generate IDisplayData from columns
         const newDisplayData = Array.from(columns).map((columnName: string) => {
+          const thisAccessor = (record: ICheckinRecord):any => {
+            if (record.properties[columnName] == null) {
+              return 'N/A';
+            }
+            return record.properties[columnName];
+          };
           return {
             name: columnName,
             property: columnName,
-            accessor: (record: ICheckinRecord) => {
-              if (record.properties[columnName] == null) {
-                return 'N/A';
-              }
-              return record.properties[columnName];
-            }
+            accessor: thisAccessor,
+            accessorAsString: thisAccessor
           }
         });
 
@@ -60,17 +62,22 @@ export class CheckinRecordsComponent implements OnInit {
             property: "modelTitle",
             accessor: (record: ICheckinRecord) => {
               return record.modelTitle;
+            },
+            accessorAsString: (record: ICheckinRecord) => {
+              return record.modelTitle;
             }
           },
           {
             name: "Checkout Time",
             property: "checkoutTime",
-            accessor: (record: ICheckinRecord) => record.checkoutTime.toLocaleString()
+            accessor: (record: ICheckinRecord) => record.checkoutTime,
+            accessorAsString: (record: ICheckinRecord) => record.checkoutTime.toLocaleString()
           },
           {
             name: "Checkin Time",
             property: "checkinTime",
-            accessor: (record: ICheckinRecord) => record.checkinTime.toLocaleString()
+            accessor: (record: ICheckinRecord) => record.checkinTime,
+            accessorAsString: (record: ICheckinRecord) => record.checkinTime.toLocaleString()
           }
         )
 

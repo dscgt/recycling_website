@@ -60,12 +60,14 @@ export class RouteGroupComponent implements OnInit {
       {
         name: "Title",
         property: "title",
-        accessor: (group: IRouteGroup) => group.title
+        accessor: (group: IRouteGroup) => group.title,
+        accessorAsString: (group: IRouteGroup) => group.title
       },
       {
         name: "# of Members",
         property: "members",
-        accessor: (group: IRouteGroup) => group.members.length.toString()
+        accessor: (group: IRouteGroup) => group.members.length,
+        accessorAsString: (group: IRouteGroup) => group.members.length.toString()
       },
     ];
     this.clearCreationDialog();

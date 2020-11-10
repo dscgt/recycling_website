@@ -17,7 +17,7 @@
   <mat-expansion-panel *ngFor="let datum of displayRows$ | async">
     <mat-expansion-panel-header class="mat-row">
       <span *ngFor="let displayDatum of displayData" class="mat-cell overflow">
-        {{ displayDatum.accessor(datum) }}
+        {{ displayDatum.accessorAsString(datum) }}
       </span>
     </mat-expansion-panel-header>
     <ng-container

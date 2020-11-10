@@ -63,12 +63,14 @@ export class ManageCheckinComponent implements OnInit {
       {
         name: "Title",
         property: "title",
-        accessor: (model: ICheckinModel) => model.title
+        accessor: (model: ICheckinModel) => model.title,
+        accessorAsString: (model: ICheckinModel) => model.title
       },
       {
         name: "# of Fields",
         property: "fields",
-        accessor: (model: ICheckinModel) => model.fields.length.toString()
+        accessor: (model: ICheckinModel) => model.fields.length,
+        accessorAsString: (model: ICheckinModel) => model.fields.length.toString()
       },
     ];
     this.clearCreationDialog();
