@@ -15,6 +15,13 @@ For development, this code can be run locally:
 1. Start a local instance with `npm start`
 1. In a web browser, navigate to `localhost:4200` to browse the local instance
 
+## Deploying this code
+
+1. Log in to your Firebase account with the Firebase CLI: `firebase login`
+1. Deploy the app with `ng run recycling-frontend:deploy`
+
+Build is part of deploy process; no need to build beforehand.
+
 ## About
 Made by the [Developer Student Club at Georgia Tech](https://dscgt.club/). 
 
@@ -22,16 +29,15 @@ Made by the [Developer Student Club at Georgia Tech](https://dscgt.club/).
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.0.3.
 
-## Commands
-
-Send to Firebase Hosting:
-
-```
-ng run recycling-frontend:deploy
-```
+## Other Commands
 
 Start emulators (Functions, Firestore, Hosting).
 Due to how the project is set up, the emulated website (Hosting) will use the production Firestore instance, but emulated Functions will use the emulated Firestore instance.
 ```
 firebase emulators:start
+```
+
+Build the webapp
+```
+npm run build
 ```
