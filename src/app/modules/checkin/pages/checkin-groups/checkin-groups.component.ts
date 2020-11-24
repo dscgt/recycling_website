@@ -122,15 +122,32 @@ export class CheckinGroupComponent implements OnInit {
 
   public onSubmit(): void {
     const group: ICheckinGroup = this.createGroupForm.value;
+    
+    // check for duplicate group members, and notify if duplicates are found; unacceptable
+    const thisGroupTitle = group.title;
+    this.groups$.subscribe({
+      next: (groupsArray: Array<ICheckinGroup>) => {
+        let foundDups: boolean = false;
+        for (const group of groupsArray) {
+          if (thisGroupTitle.trim() === group.title.trim()) {
+            foundDups = true;
+          }
+        }
+        if (foundDups) {
+          alert('A group already exists with this title; please use a different title.');
+          return;
+        }
 
-    if (this.editMode) {
-      group.id = this.currentlyUpdatingGroupId;
-      this.backend.updateGroup(group);
-    } else {
-      this.backend.addGroup(group);
-      this.clearCreationDialog();
-    }
-    this.closeCreationDialog();
+        if (this.editMode) {
+          group.id = this.currentlyUpdatingGroupId;
+          this.backend.updateGroup(group);
+        } else {
+          this.backend.addGroup(group);
+          this.clearCreationDialog();
+        }
+        this.closeCreationDialog();
+      }
+    });
   }
 
   public openCreationDialog(group?: ICheckinGroup, editMode?: boolean): void {

@@ -234,7 +234,7 @@ export class ManageRoutesComponent implements OnInit {
   public onSubmit(): void {
     // check for empty groupIds where they are required
     // this is a WORKAROUND. Ideally, groupIds are automatically validated
-    // by Angular Forms as intended. However, that is currently bugged. See ticket
+    // by Angular Forms as intended. However, that is currently bugged.
     const missings: string[] = [];
     this.fields.value.forEach((obj:any) => {
       if (obj.type === 'select' && obj.groupId.trim().length === 0) {
