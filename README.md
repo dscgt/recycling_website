@@ -41,3 +41,14 @@ Build the webapp
 ```
 npm run build
 ```
+
+Deploy Firebase functions
+```
+firebase deploy --only functions:functionname1,functions:functionname2
+```
+
+For example, `firebase deploy --only functions:generateExcelSheet` will deploy only the generateExcelSheet() function. 
+
+More information:
+https://firebase.google.com/docs/functions/manage-functions#deploy_functions
+https://firebase.google.com/docs/cli#deploy_specific_functions

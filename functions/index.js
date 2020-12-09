@@ -1,6 +1,5 @@
 const functions = require("firebase-functions");
 const xlsx = require('xlsx');
-const FileSaver = require('file-saver');
 const admin = require("firebase-admin");
 // From https://stackoverflow.com/questions/42755131/enabling-cors-in-cloud-functions-for-firebase
 const cors = require('cors')({ origin: true }); 
@@ -311,11 +310,25 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
           record.saves.forEach((save, i) => {
             const saveTimeHeader = `Save ${i + 1} time`;
             if (!headers.has(saveTimeHeader)) {
-              headers.set(saveTimeHeader, record => convertDate(record.saves[i].saveTime));
+              headers.set(saveTimeHeader, (record) => {
+                // eslint-disable-next-line
+                if (record.saves[i] != null) {
+                  return convertDate(record.saves[i].saveTime)
+                } else {
+                  return  null;
+                }
+              });
             }
             const stopsHeader = `Save ${i + 1} stops`;
             if (!headers.has(stopsHeader)) {
-              headers.set(stopsHeader, record => record.saves[i].stops.toString());
+              headers.set(stopsHeader, (record) => {
+                // eslint-disable-next-line
+                if (record.saves[i] != null) {
+                  return record.saves[i].stops.toString();
+                } else {
+                  return null;
+                }
+              });
             }
           });
         }
