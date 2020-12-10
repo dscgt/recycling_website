@@ -48,6 +48,9 @@
   <mat-dialog-content>
 
     <form [formGroup]="createGroupForm" (ngSubmit)="onSubmit()">
+
+      <p [hidden]="!(this.createGroupForm.get('title')?.errors?.groupTitleExistsAlready)" style='color: red'>This name already exists; please choose another one.</p>
+
       <mat-form-field appearance="outline">
         <mat-label>Title of Checkin Group</mat-label>
         <input matInput placeholder="Insert title of checkin group" formControlName="title" required>

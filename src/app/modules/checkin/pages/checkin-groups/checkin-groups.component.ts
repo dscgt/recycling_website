@@ -2,10 +2,11 @@ import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
 // different model
 import { ICheckinGroup, ICheckinGroupMember, BackendCheckinService, ICheckinModel } from 'src/app/modules/backend';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
-import { FormGroup, FormArray, FormBuilder } from '@angular/forms';
+import { FormGroup, FormArray, FormBuilder, AsyncValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
+import { first, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-manage-checkin',
@@ -78,7 +79,7 @@ export class CheckinGroupComponent implements OnInit {
   // Replaces the existing content of the form with the content of [group]
   public prepopulateCreationForm(group: ICheckinGroup) {
     this.createGroupForm = this.fb.group({
-      title: [group.title],
+      title: [group.title, { asyncValidators: [this.groupTitleValidator(group.title)] }],
       members: this.fb.array(group.members.map((member: ICheckinGroupMember) => this.fb.group({
         title: [member.title]
       }))),
@@ -123,31 +124,14 @@ export class CheckinGroupComponent implements OnInit {
   public onSubmit(): void {
     const group: ICheckinGroup = this.createGroupForm.value;
     
-    // check for duplicate group members, and notify if duplicates are found; unacceptable
-    const thisGroupTitle = group.title;
-    this.groups$.subscribe({
-      next: (groupsArray: Array<ICheckinGroup>) => {
-        let foundDups: boolean = false;
-        for (const group of groupsArray) {
-          if (thisGroupTitle.trim() === group.title.trim()) {
-            foundDups = true;
-          }
-        }
-        if (foundDups) {
-          alert('A group already exists with this title; please use a different title.');
-          return;
-        }
-
-        if (this.editMode) {
-          group.id = this.currentlyUpdatingGroupId;
-          this.backend.updateGroup(group);
-        } else {
-          this.backend.addGroup(group);
-          this.clearCreationDialog();
-        }
-        this.closeCreationDialog();
-      }
-    });
+    if (this.editMode) {
+      group.id = this.currentlyUpdatingGroupId;
+      this.backend.updateGroup(group);
+    } else {
+      this.backend.addGroup(group);
+      this.clearCreationDialog();
+    }
+    this.closeCreationDialog();
   }
 
   public openCreationDialog(group?: ICheckinGroup, editMode?: boolean): void {
@@ -184,7 +168,7 @@ export class CheckinGroupComponent implements OnInit {
 
   public clearCreationDialog(): void {
     this.createGroupForm = this.fb.group({
-      title: [''],
+      title: ['', { asyncValidators: [this.groupTitleValidator()] }],
       members: this.fb.array([this.createMember()]),
     });
   }
@@ -200,5 +184,25 @@ export class CheckinGroupComponent implements OnInit {
   public closeConfirmationDialog(): void {
     this.confirmationDialogRef?.close();
   }
-
+  
+  /**
+   * For use with form controls which require validation to avoid duplicating a title which already exists among already-created groups.
+   * @param allow Group titles to allow. This excludes them from validation checks; if a title which already exists is specified here, then it will still pass validation. 
+   */
+  public groupTitleValidator = (allow: string|string[] = []): AsyncValidatorFn => {
+    const allowedTitles = Array.isArray(allow)
+      ? allow
+      : [allow];
+    
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      const thisValue = control.value.trim();
+      return this.groups$.pipe(
+        map(groups => !allowedTitles.includes(thisValue) && groups.map(g => g.title).includes(thisValue)
+          ? { groupTitleExistsAlready: true }
+          : null
+        ),
+        first()
+      );
+    }
+  }
 }
