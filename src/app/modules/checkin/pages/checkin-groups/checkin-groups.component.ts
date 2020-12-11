@@ -4,7 +4,7 @@ import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-mat
 import { ICheckinGroup, ICheckinGroupMember, BackendCheckinService, ICheckinModel } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
-import { FormGroup, FormArray, FormBuilder, AsyncValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormGroup, FormArray, FormBuilder, AsyncValidatorFn, AbstractControl, ValidationErrors, FormControl } from '@angular/forms';
 import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
 import { first, map } from 'rxjs/operators';
 
@@ -194,11 +194,11 @@ export class CheckinGroupComponent implements OnInit {
       ? allow
       : [allow];
     
-    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+    return (control: FormControl): Observable<ValidationErrors | null> => {
       const thisValue = control.value.trim();
       return this.groups$.pipe(
         map(groups => !allowedTitles.includes(thisValue) && groups.map(g => g.title).includes(thisValue)
-          ? { groupTitleExistsAlready: true }
+          ? { titleExistsAlready: true }
           : null
         ),
         first()

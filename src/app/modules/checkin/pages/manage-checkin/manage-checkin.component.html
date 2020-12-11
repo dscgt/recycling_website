@@ -48,6 +48,10 @@
   <mat-dialog-content>
 
     <form [formGroup]="createModelForm" (ngSubmit)="onSubmit()">
+
+      <p [hidden]="!(this.createModelForm.get('title')?.errors?.titleExistsAlready)" style='color: red'>This name already
+        exists; please choose another one.</p>
+
       <mat-form-field appearance="outline">
         <mat-label>Title of Checkin Item</mat-label>
         <input matInput placeholder="Insert title of checkin item" formControlName="title" required>
@@ -59,6 +63,9 @@
           <mat-card-header>
             <mat-card-subtitle>Fields</mat-card-subtitle>
           </mat-card-header>
+          <p [hidden]="this.createModelForm.get('fields')?.errors?.duplicateModelFields == null" style='color: red'>
+            The following names are duplicated, please delete or change: {{ this.createModelForm.get('fields')?.errors?.duplicateModelFields.join(', ') }}
+          </p>
           <div *ngFor="let field of fields.controls; let i = index;">
             <div id='field-box-main-content'>
               <div [formGroupName]="i">
