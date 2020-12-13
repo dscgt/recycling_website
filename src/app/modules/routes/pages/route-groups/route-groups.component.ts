@@ -3,8 +3,9 @@ import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-mat
 import { IRouteGroup, BackendRoutesService } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
-import { FormGroup, FormArray, FormBuilder } from '@angular/forms';
+import { FormGroup, FormArray, FormBuilder, AsyncValidatorFn, FormControl, ValidationErrors } from '@angular/forms';
 import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
+import { first, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-manage-route',
@@ -76,7 +77,7 @@ export class RouteGroupComponent implements OnInit {
   // Replaces the existing content of the form with the content of [group]
   public prepopulateCreationForm(group: IRouteGroup) {
     this.createGroupForm = this.fb.group({
-      title: [group.title],
+      title: [group.title, { asyncValidators: [this.groupTitleValidator(group.title)] }],
       members: this.fb.array(group.members.map((member) => this.fb.group({
         title: [member.title]
       }))),
@@ -123,7 +124,7 @@ export class RouteGroupComponent implements OnInit {
 
   public clearCreationDialog(): void {
     this.createGroupForm = this.fb.group({
-      title: [''],
+      title: ['', { asyncValidators: [this.groupTitleValidator()] }],
       members: this.fb.array([this.createMember()]),
     });
   }
@@ -175,5 +176,26 @@ export class RouteGroupComponent implements OnInit {
   public closeConfirmationDialog(): void {
     this.confirmationDialogRef?.close();
   }  
+
+  /**
+   * For use with form controls which require validation to avoid duplicating a title which already exists among already-created groups.
+   * @param allow Group titles to allow. This excludes them from validation checks; if a title which already exists is specified here, then it will still pass validation. 
+   */
+  public groupTitleValidator = (allow: string | string[] = []): AsyncValidatorFn => {
+    const allowedTitles = Array.isArray(allow)
+      ? allow
+      : [allow];
+
+    return (control: FormControl): Observable<ValidationErrors | null> => {
+      const thisValue = control.value.trim();
+      return this.groups$.pipe(
+        map(groups => !allowedTitles.includes(thisValue) && groups.map(g => g.title).includes(thisValue)
+          ? { titleExistsAlready: true }
+          : null
+        ),
+        first()
+      );
+    }
+  }
 
 }
