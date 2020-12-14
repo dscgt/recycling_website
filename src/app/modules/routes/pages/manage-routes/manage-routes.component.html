@@ -47,6 +47,10 @@
   </div>
   <mat-dialog-content>
     <form [formGroup]="createRouteForm" (ngSubmit)="onSubmit()">
+
+      <p [hidden]="!(this.createRouteForm.get('title')?.errors?.titleExistsAlready)" style='color: red'>This name already
+        exists; please choose another one.</p>
+
       <mat-form-field appearance="outline">
         <mat-label>Name of Route</mat-label>
         <input matInput placeholder="Insert name of route" formControlName="title" required>
@@ -59,6 +63,9 @@
           <mat-card-header>
             <mat-card-subtitle>Fields</mat-card-subtitle>
           </mat-card-header>
+          <p [hidden]="this.createRouteForm.get('fields')?.errors?.duplicateFields == null" style='color: red'>
+            The following field names are duplicated, please delete or change: {{ this.createRouteForm.get('fields')?.errors?.duplicateFields.join(', ') }}
+          </p>
           <div *ngFor="let field of fields.controls; let i = index;">
             <div class="field-box-main-content">
               <div [formGroupName]="i">
@@ -121,6 +128,9 @@
           <mat-card-header>
             <mat-card-subtitle>Stops</mat-card-subtitle>
           </mat-card-header>
+          <p [hidden]="this.createRouteForm.get('stops')?.errors?.duplicateFields == null" style='color: red'>
+            The following stop names are duplicated, please delete or change: {{ this.createRouteForm.get('stops')?.errors?.duplicateFields.join(', ') }}
+          </p>
           <div *ngFor="let stop of stops.controls; let i = index;">
             <div class='field-box-main-content'>
               <div [formGroupName]="i">
@@ -176,9 +186,15 @@
           <mat-card-header>
             <mat-card-subtitle>Stop Fields -- applied to every stop</mat-card-subtitle>            
           </mat-card-header>
+          <p [hidden]="this.createRouteForm.get('fields_stops')?.errors?.duplicateFields == null" style='color: red'>
+            The following names are duplicated, please delete or change: {{ this.createRouteForm.get('fields_stops')?.errors?.duplicateFields.join(', ') }}
+          </p>
           <div *ngFor="let field of fields_stops.controls; let i = index;">
             <div class='field-box-main-content'>
               <div [formGroupName]="i">
+                <p [hidden]="this.createRouteForm.get(['fields_stops', i, 'title'])?.errors?.stopFieldHasComma == null" style='color: red'>
+                  Commas are not allowed in stop field names, please remove or replace. 
+                </p>
                 <mat-form-field>
                   <mat-label>Name of Field</mat-label>
                   <input matInput placeholder="Insert name of field" formControlName="title" required>

@@ -3,9 +3,10 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { IRoute, BackendRoutesService, InputType, IField, IRouteStop, IRouteGroup } from 'src/app/modules/backend';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
 import { MatDialogRef } from '@angular/material/dialog';
-import { FormGroup, FormBuilder, FormArray } from '@angular/forms';
+import { FormGroup, FormBuilder, FormArray, AsyncValidatorFn, FormControl, ValidationErrors } from '@angular/forms';
 import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
 import { DocumentReference } from '@angular/fire/firestore';
+import { first, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-manage-routes',
@@ -106,34 +107,34 @@ export class ManageRoutesComponent implements OnInit {
 
   public clearCreationDialog() {
     this.createRouteForm = this.fb.group({
-      title: [''],
-      fields: this.fb.array([this.createField()]),
-      stops: this.fb.array([this.createStop()]),
-      fields_stops: this.fb.array([this.createField()])
+      title: ['', { asyncValidators: [this.routeTitleValidator()] } ],
+      fields: this.fb.array([this.createField()], { validators: [this.routeFieldsValidator] }),
+      stops: this.fb.array([this.createStop()], { validators: [this.routeFieldsValidator] }),
+      fields_stops: this.fb.array([this.createField_Stop()], { validators: [this.routeFieldsValidator] })
     });
   }
 
   // Replaces the existing content of the form with the content of [model]
   public prepopulateCreationForm(model: IRoute) {
     this.createRouteForm = this.fb.group({
-      title: [model.title],
+      title: [model.title, { asyncValidators: [this.routeTitleValidator(model.title)] }],
       fields: this.fb.array(model.fields.map((field: IField) => this.fb.group({
         title: [field.title],
         optional: [field.optional],
         type: [field.type],
         groupId: [field.groupId ? (field.groupId as DocumentReference).id : '']
-      }))),
+      }, { validators: [this.groupIdValidator] })), { validators: [this.routeFieldsValidator] }),
       stops: this.fb.array(model.stopData.stops.map((stop: IRouteStop) => this.fb.group({
         title: [stop.title],
         description: [stop.description || ''],
         exclude: [stop.exclude?.join(',') || '']
-      }))),
+      })), { validators: [this.routeFieldsValidator] }),
       fields_stops: this.fb.array(model.stopData.fields.map((field: IField) => this.fb.group({
-        title: [field.title],
+        title: [field.title, { validators: this.stopFieldTitleValidator }],
         optional: [field.optional],
         type: [field.type],
         groupId: [field.groupId ? (field.groupId as DocumentReference).id : '']
-      }))),
+      }, { validators: [this.groupIdValidator] })), { validators: [this.routeFieldsValidator] }),
     });
   }
 
@@ -201,16 +202,16 @@ export class ManageRoutesComponent implements OnInit {
       optional: [false],
       type: [''],
       groupId: ['']
-    });
+    }, { validators: [ this.groupIdValidator ] });
   }
 
   public createField_Stop(): FormGroup {
     return this.fb.group({
-      title: [''],
+      title: ['', { validators: this.stopFieldTitleValidator }],
       optional: [false],
       type: [''],
       groupId: ['']
-    });
+    }, { validators: [this.groupIdValidator] });
   }
 
   public createStop(): FormGroup {
@@ -232,38 +233,6 @@ export class ManageRoutesComponent implements OnInit {
   }
 
   public onSubmit(): void {
-    // check for empty groupIds where they are required
-    // this is a WORKAROUND. Ideally, groupIds are automatically validated
-    // by Angular Forms as intended. However, that is currently bugged.
-    const missings: string[] = [];
-    this.fields.value.forEach((obj:any) => {
-      if (obj.type === 'select' && obj.groupId.trim().length === 0) {
-        missings.push(obj.title);
-      }
-    });
-    this.fields_stops.value.forEach((obj: any) => {
-      if (obj.type === 'select' && obj.groupId.trim().length === 0) {
-        missings.push(obj.title);
-      }
-    });
-    if (missings.length > 0) {
-      alert(`Please enter a groupId for: ${missings.join(', ')}`);
-      return;
-    }
-
-    // ensure stop field titles don't have commas
-    // this makes sure the comma-separated "excludes" input works
-    const violators: string[] = [];
-    this.fields_stops.value.forEach((obj: any) => {
-      if (obj.title.indexOf(',') !== -1) {
-        violators.push(obj.title);
-      }
-    });
-    if (violators.length > 0) {
-      alert(`Please remove commas from: ${violators.join(', ')}`);
-      return;
-    }
-
     // build Route from form data
     const vals: any = this.createRouteForm.value;
     const route: IRoute = {
@@ -342,5 +311,77 @@ export class ManageRoutesComponent implements OnInit {
   public deletionDialogClosed(): void {
     // console.log("Dialog closed in child");
   }
+
+  /**
+   * For use with form controls which require validation to avoid duplicating a title which already exists among already-created routes.
+   * @param allow Group titles to allow. This excludes them from validation checks; if a title which already exists is specified here, then it will still pass validation. 
+   */
+  public routeTitleValidator = (allow: string | string[] = []): AsyncValidatorFn => {
+    const allowedTitles = Array.isArray(allow)
+      ? allow
+      : [allow];
+
+    return (control: FormControl): Observable<ValidationErrors | null> => {
+      const thisValue = control.value.trim();
+      return this.routes$.pipe(
+        map(routes => !allowedTitles.includes(thisValue) && routes.map(r => r.title).includes(thisValue)
+          ? { titleExistsAlready: true }
+          : null
+        ),
+        first()
+      );
+    }
+  }
+
+  /**
+   * For use with FormArrays which require validation to ensure no two FormControl's within it have the same 'title' property.
+   * In this context, this is used to prevent two fields, two stops, or two stop fields from having the same title. Also applies to more than two.
+   */
+  public routeFieldsValidator = (array: FormArray): ValidationErrors | null => {
+    // first, scan the array for duplicates. 
+    const dupFinder = new Map();
+    const dups = [];
+    for (let control of array.controls) {
+      const thisTitle = control.get('title')?.value;
+      if (thisTitle != null && thisTitle.length != 0) {
+        // only mark a duplicate once
+        if (dupFinder.get(thisTitle) === true) {
+          dups.push(thisTitle);
+          dupFinder.set(thisTitle, false);
+        } else {
+          dupFinder.set(thisTitle, true)
+        }
+      }
+    }
+
+    // then, return duplicates (or null) to the caller
+    if (dups.length != 0) {
+      return {
+        duplicateFields: dups
+      };
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Synchronous validator for use with FormControl's which represent fields and stop fields. 
+   * Ensures that groupId is required if type is specified. 
+   */
+  public groupIdValidator = (group: FormGroup): ValidationErrors | null => {
+    const thisGroupId = group.get('groupId')?.value;
+    const groupIdIsEmpty = thisGroupId == null || thisGroupId.trim().length === 0;
+    return group.get('type')?.value === 'select' && groupIdIsEmpty
+      ? { groupIdIsNeeded: true }
+      : null;
+  }
+
+  /**
+   * Ensures that stop fields don't have commas
+   */
+  public stopFieldTitleValidator = (control: FormControl): ValidationErrors | null =>
+    control.value.indexOf(',') === -1
+      ? null
+      : { stopFieldHasComma: true };
 
 }

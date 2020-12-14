@@ -95,7 +95,7 @@ export class ManageCheckinComponent implements OnInit {
         optional: [field.optional],
         delay: [field.delay],
         groupId: [field.groupId ? (field.groupId as DocumentReference).id : ''],
-      })), { validators: [this.modelFieldsValidator] }),
+      }, { validators: [this.groupIdValidator] })), { validators: [this.modelFieldsValidator] }),
     });
   }
 
@@ -134,7 +134,7 @@ export class ManageCheckinComponent implements OnInit {
       optional: [false],
       delay: [false],
       groupId: ['']
-    });
+    }, { validators: [this.groupIdValidator] });
   }
 
   public confirmDeleteModel(model: ICheckinModel): void {
@@ -148,21 +148,6 @@ export class ManageCheckinComponent implements OnInit {
   }
 
   public onSubmit(): void {
-    // check for empty groupIds where they are required
-    // this is a WORKAROUND. Ideally, groupIds are automatically validated
-    // by Angular Forms as intended. However, that is currently bugged. See ticket
-    const fieldsToScan:any[] = this.fields.value;
-    const missings:string[] = [];
-    fieldsToScan.forEach((obj) => {
-      if (obj.type === 'select'  && obj.groupId.trim().length === 0) {
-        missings.push(obj.title);
-      }
-    });
-    if (missings.length > 0) {
-      alert(`Please enter a groupId for: ${missings.join(', ')}`);
-      return;
-    }
-
     const model: ICheckinModel = this.createModelForm.value;
     if (this.editMode) {
       model.id = this.currentlyUpdatingModelId;
@@ -267,5 +252,17 @@ export class ManageCheckinComponent implements OnInit {
     } else {
       return null;
     }
+  }
+
+  /**
+   * Synchronous validator for use with FormControl's which represent fields. 
+   * Ensures that groupId is required if type is specified. 
+   */
+  public groupIdValidator = (group: FormGroup): ValidationErrors | null => {
+    const thisGroupId = group.get('groupId')?.value;
+    const groupIdIsEmpty = thisGroupId == null || thisGroupId.trim().length === 0;
+    return group.get('type')?.value === 'select' && groupIdIsEmpty
+      ? { groupIdIsNeeded: true }
+      : null;
   }
 }
