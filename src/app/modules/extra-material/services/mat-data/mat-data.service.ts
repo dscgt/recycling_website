@@ -12,9 +12,6 @@ import { startWith } from 'rxjs/operators';
 export class MatDataService {
 
   public compare(a: any, b: any): number {
-    console.log(`read ${a} of type ${typeof a}`);
-    console.log(`read ${b} of type ${typeof b}`);
-    
     a = (a === undefined) ? null : a;
     b = (b === undefined) ? null : b;
     if (a === b) {

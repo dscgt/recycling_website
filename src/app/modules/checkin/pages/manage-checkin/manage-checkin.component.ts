@@ -3,9 +3,10 @@ import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-mat
 import { ICheckinModel, InputType, BackendCheckinService, ICheckinGroup } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
-import { FormGroup, FormArray, FormBuilder } from '@angular/forms';
+import { FormGroup, FormArray, FormBuilder, AsyncValidatorFn, AbstractControl, ValidationErrors, FormControl } from '@angular/forms';
 import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
 import { DocumentReference } from '@angular/fire/firestore';
+import { first, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-manage-checkin',
@@ -87,14 +88,14 @@ export class ManageCheckinComponent implements OnInit {
   // Replaces the existing content of the form with the content of [model]
   public prepopulateCreationForm(model: ICheckinModel) {
     this.createModelForm = this.fb.group({
-      title: [model.title],
+      title: [model.title, { asyncValidators: [this.modelTitleValidator(model.title)] }],
       fields: this.fb.array(model.fields.map((field) => this.fb.group({
         title: [field.title],
         type: [field.type],
         optional: [field.optional],
         delay: [field.delay],
         groupId: [field.groupId ? (field.groupId as DocumentReference).id : ''],
-      }))),
+      }, { validators: [this.groupIdValidator] })), { validators: [this.modelFieldsValidator] }),
     });
   }
 
@@ -121,8 +122,8 @@ export class ManageCheckinComponent implements OnInit {
 
   public clearCreationDialog(): void {
     this.createModelForm = this.fb.group({
-      title: [''],
-      fields: this.fb.array([this.createField()]),
+      title: ['', { asyncValidators: [this.modelTitleValidator()] }],
+      fields: this.fb.array([this.createField()], { validators: [this.modelFieldsValidator] }),
     });
   }
 
@@ -133,7 +134,7 @@ export class ManageCheckinComponent implements OnInit {
       optional: [false],
       delay: [false],
       groupId: ['']
-    });
+    }, { validators: [this.groupIdValidator] });
   }
 
   public confirmDeleteModel(model: ICheckinModel): void {
@@ -147,21 +148,6 @@ export class ManageCheckinComponent implements OnInit {
   }
 
   public onSubmit(): void {
-    // check for empty groupIds where they are required
-    // this is a WORKAROUND. Ideally, groupIds are automatically validated
-    // by Angular Forms as intended. However, that is currently bugged. See ticket
-    const fieldsToScan:any[] = this.fields.value;
-    const missings:string[] = [];
-    fieldsToScan.forEach((obj) => {
-      if (obj.type === 'select'  && obj.groupId.trim().length === 0) {
-        missings.push(obj.title);
-      }
-    });
-    if (missings.length > 0) {
-      alert(`Please enter a groupId for: ${missings.join(', ')}`);
-      return;
-    }
-
     const model: ICheckinModel = this.createModelForm.value;
     if (this.editMode) {
       model.id = this.currentlyUpdatingModelId;
@@ -214,5 +200,69 @@ export class ManageCheckinComponent implements OnInit {
 
   public closeDeletionDialog(): void {
     this.deletionDialogRef?.close();
+  }
+
+  /**
+   * For use with form controls which require validation to avoid duplicating a title which already exists among already-created checkin models.
+   * @param allow Group titles to allow. This excludes them from validation checks; if a title which already exists is specified here, then it will still pass validation. 
+   */
+  public modelTitleValidator = (allow: string | string[] = []): AsyncValidatorFn => {
+    const allowedTitles = Array.isArray(allow)
+      ? allow
+      : [allow];
+
+    return (control: FormControl): Observable<ValidationErrors | null> => {
+      const thisValue = control.value.trim();
+      return this.models$.pipe(
+        map(models => !allowedTitles.includes(thisValue) && models.map(g => g.title).includes(thisValue)
+          ? { titleExistsAlready: true }
+          : null
+        ),
+        first()
+      );
+    }
+  }
+
+  /**
+   * For use with FormArrays which require validation to ensure no two FormControl's within it have the same 'title' property.
+   * In this context, this is used to prevent two fields from having the same title.
+   */
+  public modelFieldsValidator = (array: FormArray): ValidationErrors | null => {
+    // first, scan the array for duplicates. 
+    const dupFinder = new Map();
+    const dups = [];
+    for (let control of array.controls) {
+      const thisTitle = control.get('title')?.value;
+      if (thisTitle != null && thisTitle.length != 0) {
+        // only mark a duplicate once
+        if (dupFinder.get(thisTitle) === true) {
+          dups.push(thisTitle);
+          dupFinder.set(thisTitle, false);
+        } else {
+          dupFinder.set(thisTitle, true)
+        }
+      }
+    }
+
+    // then, return duplicates (or null) to the caller
+    if (dups.length != 0) {
+      return {
+        duplicateModelFields: dups
+      };
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Synchronous validator for use with FormControl's which represent fields. 
+   * Ensures that groupId is required if type is specified. 
+   */
+  public groupIdValidator = (group: FormGroup): ValidationErrors | null => {
+    const thisGroupId = group.get('groupId')?.value;
+    const groupIdIsEmpty = thisGroupId == null || thisGroupId.trim().length === 0;
+    return group.get('type')?.value === 'select' && groupIdIsEmpty
+      ? { groupIdIsNeeded: true }
+      : null;
   }
 }
