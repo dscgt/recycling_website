@@ -6,6 +6,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormArray, FormBuilder, AsyncValidatorFn, FormControl, ValidationErrors } from '@angular/forms';
 import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
 import { first, map } from 'rxjs/operators';
+import { Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-manage-route',
@@ -77,9 +78,10 @@ export class RouteGroupComponent implements OnInit {
   // Replaces the existing content of the form with the content of [group]
   public prepopulateCreationForm(group: IRouteGroup) {
     this.createGroupForm = this.fb.group({
-      title: [group.title, { asyncValidators: [this.groupTitleValidator(group.title)] }],
+      //Reactive form validator added
+      title: [group.title, Validators.required, [this.groupTitleValidator(group.title)] ],
       members: this.fb.array(group.members.map((member) => this.fb.group({
-        title: [member.title]
+        title: [member.title, Validators.required]
       }))),
     });
   }
