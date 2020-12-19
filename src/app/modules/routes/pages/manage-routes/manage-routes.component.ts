@@ -7,6 +7,7 @@ import { FormGroup, FormBuilder, FormArray, AsyncValidatorFn, FormControl, Valid
 import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
 import { DocumentReference } from '@angular/fire/firestore';
 import { first, map } from 'rxjs/operators';
+import { Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-manage-routes',
@@ -117,22 +118,22 @@ export class ManageRoutesComponent implements OnInit {
   // Replaces the existing content of the form with the content of [model]
   public prepopulateCreationForm(model: IRoute) {
     this.createRouteForm = this.fb.group({
-      title: [model.title, { asyncValidators: [this.routeTitleValidator(model.title)] }],
+      title: [model.title, Validators.required, [this.routeTitleValidator(model.title)] ],
       fields: this.fb.array(model.fields.map((field: IField) => this.fb.group({
-        title: [field.title],
+        title: [field.title, Validators.required],
         optional: [field.optional],
-        type: [field.type],
+        type: [field.type, Validators.required],
         groupId: [field.groupId ? (field.groupId as DocumentReference).id : '']
       }, { validators: [this.groupIdValidator] })), { validators: [this.routeFieldsValidator] }),
       stops: this.fb.array(model.stopData.stops.map((stop: IRouteStop) => this.fb.group({
-        title: [stop.title],
+        title: [stop.title, Validators.required],
         description: [stop.description || ''],
         exclude: [stop.exclude?.join(',') || '']
       })), { validators: [this.routeFieldsValidator] }),
       fields_stops: this.fb.array(model.stopData.fields.map((field: IField) => this.fb.group({
-        title: [field.title, { validators: this.stopFieldTitleValidator }],
+        title: [field.title, [Validators.required, this.stopFieldTitleValidator]],
         optional: [field.optional],
-        type: [field.type],
+        type: [field.type, Validators.required],
         groupId: [field.groupId ? (field.groupId as DocumentReference).id : '']
       }, { validators: [this.groupIdValidator] })), { validators: [this.routeFieldsValidator] }),
     });
