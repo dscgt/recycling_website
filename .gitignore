@@ -2,6 +2,7 @@
 
 #Firebase
 .firebase
+/src/environments/firebase.ts
 
 # compiled output
 /dist
