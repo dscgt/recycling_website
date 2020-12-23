@@ -1,0 +1,22 @@
+.mat-card {
+    text-align: center;
+    margin: 1em 0.5em;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+button {
+    margin: auto 10px;
+    transition: 0.2s;
+    background-color: #3D78CC;
+    color: #eeeeee;
+}
+
+button:hover {
+    transition: 0.2s;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+}
