@@ -178,6 +178,7 @@ const cleanSheetName = (name) => name.replace(/[/\\?*[\]]/g, '');
 
 /**
  * Function that generates an excel sheet for the records databases
+ * sheet initialization from https://redstapler.co/sheetjs-tutorial-create-xlsx/
  * 
  * Query params:
  * recordType - name of the firebase collection of records. Either 'checkin' or 'recorder'. Defaults to 'recorder'
@@ -187,9 +188,26 @@ const cleanSheetName = (name) => name.replace(/[/\\?*[\]]/g, '');
  * Note that this Firebase Function does not handle file name; this should be set on the client.
  */
 exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
-  // sheet initialization from https://redstapler.co/sheetjs-tutorial-create-xlsx/
+  // verify ID token
+  // Taken from https://stackoverflow.com/a/44500591
+  let idToken = (req.get('authorization') || req.get('Authorization'));
+  if (idToken) { // handle CORS preflight requests -- no ID token
+    idToken = idToken.split('Bearer ')[1];
+  } else {
+    cors(req, res, () => {
+      res.sendStatus(401);
+    });
+    return;
+  }
+  try {
+    let result = await admin.auth().verifyIdToken(idToken);
+  } catch(e) {
+    cors(req, res, () => {
+      res.status(401).send(e);
+    });
+    return;
+  }
 
-  // uncomment for future restrictions, such as controlled by query parameters
   let recordType = req.query.recordType;
   // default to recorder
   if (!recordType || recordType.trim() !== 'checkin' && recordType.trim() !== 'recorder') {
@@ -209,9 +227,9 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
     }
     data = snapshot.docs.map(doc => doc.data());
   } catch (e) {
-    console.log('ERROR');
-    console.log(e);
-    res.sendStatus(500);
+    cors(req, res, () => {
+      res.sendStatus(500);
+    });
     return;
   }
 
@@ -237,12 +255,6 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
   // modelTitles is a map of model name to array of data points
   const modelTitles = new Map();
   data.forEach((record) => {
-    // null checks
-    if (record.modelTitle === null || record.checkoutTime === null || record.checkinTime === null) {
-      console.log(`record is missing vital modelTitle, checkoutTime, and/or checkinTime, aborting`);
-      res.sendStatus(500);
-      return;
-    }
     // handle model titles not seen before
     if (!modelTitles.has(record.modelTitle)) {
       modelTitles.set(record.modelTitle, []);

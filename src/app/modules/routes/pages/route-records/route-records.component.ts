@@ -19,7 +19,13 @@ export class RouteRecordsComponent implements OnInit {
   handleDownload(): void {
     this.disableButton = true;
     this.fbFunctionsService.getRouteRecords()
-      .then((res) => res.blob())
+      .then((res) => {
+        if (res.ok) {
+          return res.blob();
+        } else {
+          throw new Error('Network call failed: internal server error. Try again another time, or contact the creators if this keeps happening.');
+        }
+      })
       .then((res) => {
         var a = document.createElement("a");
         a.href = URL.createObjectURL(res);
