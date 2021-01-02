@@ -2,7 +2,8 @@ const functions = require("firebase-functions");
 const xlsx = require('xlsx');
 const admin = require("firebase-admin");
 // From https://stackoverflow.com/questions/42755131/enabling-cors-in-cloud-functions-for-firebase
-const cors = require('cors')({ origin: true }); 
+const cors = require('cors')({ origin: true });
+const { DateTime } = require("luxon");
 
 admin.initializeApp();
 var db = admin.firestore();
@@ -173,15 +174,20 @@ exports.seedCheckinRecords = functions.https.onRequest(async (req, res) => {
 
 const convertDate = (timestampJSON) => new Date(timestampJSON._seconds * 1000);
 
-// since sheet names cannot contain: \ / ? * [ ] 
+// since sheet names cannot contain: \ / ? * [ ]. Removes these things.
 const cleanSheetName = (name) => name.replace(/[/\\?*[\]]/g, '');
 
 /**
  * Function that generates an excel sheet for the records databases
  * sheet initialization from https://redstapler.co/sheetjs-tutorial-create-xlsx/
  * 
+ * If neither rangeStart nor rangeEnd are provided, this function will retrieve records only from the current time to seven days prior. If one is not provided, this function will retrieve records towards the unprovided direction to a seven-day range. 
+ * If the date range is invalid (ex. rangeStart comes after rangeEnd), the result returned will not contain any data.
+ * 
  * Query params:
  * recordType - name of the firebase collection of records. Either 'checkin' or 'recorder'. Defaults to 'recorder'
+ * rangeStart - UNIX time number, in seconds. the beginning of the date range from which to retrieve records. Is day-inclusive; will retrieve records starting from the beginning (00:00) of the day. All done in EST.
+ * rangeEnd - UNIX time number, in seconds. the end of the date range from which to retrieve records. Is day-inclusive; will retrieve records until the end (23:59) of the day. All done in EST.
  * 
  * A blob will be sent back, which can be turned into a file download on the client. Here is an example:
  * https://stackoverflow.com/questions/19327749/javascript-blob-filename-without-link
@@ -203,7 +209,33 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
     let result = await admin.auth().verifyIdToken(idToken);
   } catch(e) {
     cors(req, res, () => {
-      res.status(401).send(e);
+      res.status(401).send(e)
+    });
+    return;
+  }
+
+  let rangeStart = req.query.rangeStart;
+  let rangeEnd = req.query.rangeEnd;
+  try {
+    if (!rangeStart && !rangeEnd) {
+      const now = DateTime.local().setZone('America/New_York'); // must set timezone to guarantee startOf, endOf work
+      rangeStart = now.minus({ weeks: 1 }).startOf('day').toJSDate();
+      rangeEnd = now.endOf('day').toJSDate();
+    } else if (!rangeStart) {
+      const end = DateTime.fromSeconds(parseInt(rangeEnd, 10)).setZone('America/New_York');
+      rangeStart = end.minus({ weeks: 1 }).startOf('day').toJSDate();
+      rangeEnd = end.endOf('day').toJSDate();
+    } else if (!rangeEnd) {
+      const start = DateTime.fromSeconds(parseInt(rangeStart, 10)).setZone('America/New_York');
+      rangeStart = start.startOf('day').toJSDate();
+      rangeEnd = start.plus({ weeks: 1 }).endOf('day').toJSDate();
+    } else {
+      rangeStart = DateTime.fromSeconds(parseInt(rangeStart, 10)).setZone('America/New_York').startOf('day').toJSDate();
+      rangeEnd = DateTime.fromSeconds(parseInt(rangeEnd, 10)).setZone('America/New_York').endOf('day').toJSDate();
+    }
+  } catch (e) {
+    cors(req, res, () => {
+      res.status(400).send(e.message);
     });
     return;
   }
@@ -221,9 +253,9 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
   try {
     let snapshot;
     if (recordType === 'recorder') {
-      snapshot = await db.collection('route_records').get();
+      snapshot = await db.collection('route_records').where('startTime', '>', rangeStart).where('startTime', '<', rangeEnd).get();
     } else { // recordType === 'checkin'
-      snapshot = await db.collection('checkin_records').get();
+      snapshot = await db.collection('checkin_records').where('checkoutTime', '>', rangeStart).where('checkoutTime', '<', rangeEnd).get();
     }
     data = snapshot.docs.map(doc => doc.data());
   } catch (e) {
