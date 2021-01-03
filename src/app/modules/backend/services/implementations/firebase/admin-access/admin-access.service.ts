@@ -28,4 +28,13 @@ export class AdminAccessService {
       )
     );
   }
+  
+  /**
+   * Updates admins array. Replaces the array with the provided array
+   */
+  public updateAdmins(admins: string[]): Promise<void> {
+    return this.adminsCollection.doc(this.docId).update({
+      admins: admins
+    });
+  }
 }

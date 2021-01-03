@@ -1,46 +1,24 @@
 <mat-card>
-    <p>Welcome to the administrator portal for recycling administrators.</p>
-    <p>Select an option from the menu, or click a button below to begin!</p>
+    <p>On this page, you can control access for yourself and other admins. This is an extra layer of security. If you've just created a new account for an admin, you MUST also add their email address here.</p>
 </mat-card>
 
 <mat-card>
-    <h2>Recycling Routes</h2>
-    <div class="actions">
-        <a routerLink="/routes/manage">
-            <button mat-button>
-                Manage Routes
-            </button>
-        </a>
-        <a routerLink="/routes/records">
-            <button mat-button>
-                View Route Records
-            </button>
-        </a>
-        <a routerLink="/routes/groups">
-            <button mat-button>
-                Control Route Groups
-            </button>
-        </a>
-    </div>
+    <!-- Turn to mat-form to have enter key submission -->
+    <form (ngSubmit)=addAdmin()>
+        <label>
+            Add email (avoid typos):
+        </label>
+        <input [(ngModel)]="adminEmail" name="adminEmail" />
+        <button mat-raised-button>Submit</button>
+    </form>
 </mat-card>
 
 <mat-card>
-    <h2>Recycling Checkins</h2>
-    <div class="actions">
-        <a routerLink="/checkin/manage">
-            <button mat-button>
-                Manage Checkins
-            </button>
-        </a>
-        <a routerLink="/checkin/records">
-            <button mat-button>
-                View Checkin Records
-            </button>
-        </a>
-        <a routerLink="/checkin/groups">
-            <button mat-button>
-                Control Checkin Groups
-            </button>
-        </a>
+    <h3>Admins who have access:</h3>
+    <div *ngFor="let admin of admins; index as i">
+        <span>{{ admin }}</span>
+        <button mat-icon-button aria-label="Delete this admin" (click)="deleteAdmin(i)">
+            <mat-icon>clear</mat-icon>
+        </button>
     </div>
 </mat-card>

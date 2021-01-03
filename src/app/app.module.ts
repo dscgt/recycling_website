@@ -21,6 +21,7 @@ import { APP_ROUTES } from './app.routes';
 import { SharedModule } from './modules/shared';
 import { AppComponent, NavigationComponent, PageNotFoundComponent, HomeComponent, LoginComponent } from './core';
 import { environment } from '../environments/environment';
+import { AdminAccessComponent } from './core/pages/admin-access/admin-access.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import { environment } from '../environments/environment';
     NavigationComponent,
     PageNotFoundComponent,
     HomeComponent,
-    LoginComponent
+    LoginComponent,
+    AdminAccessComponent
   ],
   imports: [
     RouterModule.forRoot(APP_ROUTES),

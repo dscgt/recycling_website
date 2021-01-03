@@ -37,6 +37,11 @@ export class DrawerService {
       name: 'Home'
     },
     {
+      icon: 'lock',
+      path: 'adminaccess',
+      name: 'Admin Access'
+    },
+    {
       icon: 'edit_location',
       path: 'routes/manage',
       name: 'Manage Routes'
