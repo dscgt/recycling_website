@@ -8,6 +8,8 @@ import { FbFunctionsService } from 'src/app/modules/backend/services/implementat
 })
 export class RouteRecordsComponent implements OnInit {
 
+  public startDate: Date = new Date();
+  public endDate: Date = new Date();;
   public disableButton = false;
 
   constructor(
@@ -18,7 +20,8 @@ export class RouteRecordsComponent implements OnInit {
 
   handleDownload(): void {
     this.disableButton = true;
-    this.fbFunctionsService.getRouteRecords()
+    // turn start and end date into UNIX timestamp, then send to getRouteRecords
+    this.fbFunctionsService.getRouteRecords(this.startDate, this.endDate)
       .then((res) => {
         if (res.ok) {
           return res.blob();
