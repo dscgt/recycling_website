@@ -3,7 +3,6 @@ import { AngularFirestoreCollection, DocumentChangeAction, AngularFirestore } fr
 import { IBackendRoutes } from '../../../interfaces/routes';
 import { Observable, zip, of } from 'rxjs';
 import { IRoute, IRouteRecord, ICrewmember, IRouteGroup, IField, InputType } from 'src/app/modules/backend/types';
-import 'firebase/firestore';
 import { switchMap, map } from 'rxjs/operators';
 import { IFirestoreRouteRecord, IFirestoreCrewmember } from '../types';
 import { FirebaseHelperService } from '../helper';
