@@ -5,5 +5,5 @@ export interface IField {
   title: string;
   optional: boolean|null;
   type: InputType;
-  groupId: DocumentReference|string;
+  groupId?: DocumentReference|string;
 }
