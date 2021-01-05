@@ -31,7 +31,7 @@ import { environment } from '../environments/environment';
     LoginComponent
   ],
   imports: [
-    RouterModule.forRoot(APP_ROUTES),
+    RouterModule.forRoot(APP_ROUTES, { relativeLinkResolution: 'legacy' }),
     SharedModule.forRoot(),
     BrowserModule,
     BrowserAnimationsModule,
