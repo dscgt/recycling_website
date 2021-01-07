@@ -1,5 +1,6 @@
 import { PageNotFoundComponent, HomeComponent, LoginComponent } from './core';
 import { AngularFireAuthGuard, redirectUnauthorizedTo, redirectLoggedInTo } from '@angular/fire/auth-guard';
+import { AdminAccessComponent } from './core/pages/admin-access/admin-access.component';
 
 // taken from Shai Reznik: https://medium.com/@shairez/angular-routing-a-better-pattern-for-large-scale-apps-f2890c952a18
 
@@ -17,6 +18,12 @@ export const APP_ROUTES = [
     component: HomeComponent, 
     canActivate: [AngularFireAuthGuard],
     data: { authGuardPipe: redirectUnauthorizedToLogin } 
+  },
+  {
+    path: 'adminaccess',
+    component: AdminAccessComponent,
+    canActivate: [AngularFireAuthGuard],
+    data: { authGuardPipe: redirectUnauthorizedToLogin }
   },
   {
     path: 'routes',

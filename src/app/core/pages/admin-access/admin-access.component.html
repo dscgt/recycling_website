@@ -1,0 +1,24 @@
+<mat-card>
+    <p>On this page, you can control access for yourself and other admins. This is an extra layer of security. If you've just created a new account for an admin, you MUST also add their email address here.</p>
+</mat-card>
+
+<mat-card>
+    <!-- Turn to mat-form to have enter key submission -->
+    <form (ngSubmit)=addAdmin()>
+        <label>
+            Add email (avoid typos):
+        </label>
+        <input [(ngModel)]="adminEmail" name="adminEmail" />
+        <button mat-raised-button>Submit</button>
+    </form>
+</mat-card>
+
+<mat-card>
+    <h3>Admins who have access:</h3>
+    <div *ngFor="let admin of admins; index as i">
+        <span>{{ admin }}</span>
+        <button mat-icon-button aria-label="Delete this admin" (click)="deleteAdmin(i)">
+            <mat-icon>clear</mat-icon>
+        </button>
+    </div>
+</mat-card>
