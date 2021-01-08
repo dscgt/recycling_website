@@ -7,6 +7,8 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormArray, FormBuilder, AsyncValidatorFn, AbstractControl, ValidationErrors, FormControl } from '@angular/forms';
 import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
 import { first, map } from 'rxjs/operators';
+//first change for validation - Angular reactive form validators
+import { Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-manage-checkin',
@@ -14,7 +16,6 @@ import { first, map } from 'rxjs/operators';
   styleUrls: ['./checkin-groups.component.scss']
 })
 export class CheckinGroupComponent implements OnInit {
-
   @ViewChild(ExpansionTableComponent)
   private expansionTable: ExpansionTableComponent<ICheckinGroup>;
 
@@ -79,9 +80,10 @@ export class CheckinGroupComponent implements OnInit {
   // Replaces the existing content of the form with the content of [group]
   public prepopulateCreationForm(group: ICheckinGroup) {
     this.createGroupForm = this.fb.group({
-      title: [group.title, { asyncValidators: [this.groupTitleValidator(group.title)] }],
+      // Reactive form validator added
+      title: [group.title, Validators.required, [this.groupTitleValidator(group.title)]],
       members: this.fb.array(group.members.map((member: ICheckinGroupMember) => this.fb.group({
-        title: [member.title]
+        title: [member.title, Validators.required]
       }))),
     });
   }
@@ -123,7 +125,6 @@ export class CheckinGroupComponent implements OnInit {
 
   public onSubmit(): void {
     const group: ICheckinGroup = this.createGroupForm.value;
-    
     if (this.editMode) {
       group.id = this.currentlyUpdatingGroupId;
       this.backend.updateGroup(group);

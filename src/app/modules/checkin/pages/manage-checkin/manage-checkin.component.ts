@@ -7,6 +7,7 @@ import { FormGroup, FormArray, FormBuilder, AsyncValidatorFn, AbstractControl, V
 import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
 import { DocumentReference } from '@angular/fire/firestore';
 import { first, map } from 'rxjs/operators';
+import { Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-manage-checkin',
@@ -88,10 +89,10 @@ export class ManageCheckinComponent implements OnInit {
   // Replaces the existing content of the form with the content of [model]
   public prepopulateCreationForm(model: ICheckinModel) {
     this.createModelForm = this.fb.group({
-      title: [model.title, { asyncValidators: [this.modelTitleValidator(model.title)] }],
+      title: [model.title, Validators.required, [this.modelTitleValidator(model.title)]],
       fields: this.fb.array(model.fields.map((field) => this.fb.group({
-        title: [field.title],
-        type: [field.type],
+        title: [field.title, Validators.required],
+        type: [field.type, Validators.required],
         optional: [field.optional],
         delay: [field.delay],
         groupId: [field.groupId ? (field.groupId as DocumentReference).id : ''],
