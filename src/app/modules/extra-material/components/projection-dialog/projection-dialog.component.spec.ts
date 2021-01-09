@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ProjectionDialogComponent } from './projection-dialog.component';
 
@@ -6,7 +6,7 @@ xdescribe('ProjectionDialogComponent', () => {
   let component: ProjectionDialogComponent;
   let fixture: ComponentFixture<ProjectionDialogComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ ProjectionDialogComponent ]
     })

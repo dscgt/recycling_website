@@ -33,7 +33,7 @@ import { AdminAccessComponent } from './core/pages/admin-access/admin-access.com
     AdminAccessComponent
   ],
   imports: [
-    RouterModule.forRoot(APP_ROUTES),
+    RouterModule.forRoot(APP_ROUTES, { relativeLinkResolution: 'legacy' }),
     SharedModule.forRoot(),
     BrowserModule,
     BrowserAnimationsModule,

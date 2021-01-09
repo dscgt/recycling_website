@@ -5,7 +5,7 @@ import { map, shareReplay, tap, catchError } from 'rxjs/operators';
 import { ILink, DrawerService } from 'src/app/modules/navigation';
 import { AuthService } from 'src/app/modules/backend/services/implementations/firebase';
 import { Router } from '@angular/router';
-import { User } from 'firebase';
+import firebase from 'firebase/app';
 
 @Component({
   selector: 'app-navigation',
@@ -37,7 +37,7 @@ export class NavigationComponent implements OnInit {
   ngOnInit() {
     // setup observable for authentication states; subscribed to receive events of logins and outs
     this.authenticated = this.authService.authState().pipe(
-      map((data: User|null) => {
+      map((data: firebase.User|null) => {
         return data != null;
       }),
       catchError((err: any, caught: Observable<boolean>) => {

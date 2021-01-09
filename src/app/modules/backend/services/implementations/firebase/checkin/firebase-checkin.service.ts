@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestoreCollection, DocumentChangeAction, AngularFirestore } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import 'firebase/firestore';
 import { IBackendCheckin } from '../../../interfaces/checkin';
 import { ICheckinRecord, ICheckinModel, ICheckinGroup, InputType } from 'src/app/modules/backend/types';
 import { IFirestoreCheckinRecord } from '../types';

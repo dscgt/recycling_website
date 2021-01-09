@@ -6,7 +6,7 @@ export interface ICheckinModel {
     title: string;
     type: InputType;
     optional: boolean;
-    groupId: DocumentReference|string;
+    groupId?: DocumentReference|string;
     delay: boolean;
   }[];
   title: string;
