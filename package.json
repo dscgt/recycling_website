@@ -23,6 +23,7 @@
     "@angular/platform-browser-dynamic": "^11.0.5",
     "@angular/router": "^11.0.5",
     "firebase": "^8.2.1",
+    "luxon": "^1.25.0",
     "rxjs": "^6.5.5",
     "tslib": "^2.0.0",
     "zone.js": "^0.10.3"
@@ -35,6 +36,7 @@
     "@angular/language-service": "^11.0.5",
     "@types/jasmine": "~3.6.0",
     "@types/jasminewd2": "~2.0.3",
+    "@types/luxon": "^1.25.0",
     "@types/node": "^12.12.54",
     "codelyzer": "^6.0.0",
     "firebase-tools": "^8.9.2",

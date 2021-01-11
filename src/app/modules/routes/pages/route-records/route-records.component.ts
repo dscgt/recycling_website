@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FbFunctionsService } from 'src/app/modules/backend/services/implementations/firebase';
+import { DateTime } from 'luxon';
 
 @Component({
   selector: 'app-route-records',
@@ -20,8 +21,10 @@ export class RouteRecordsComponent implements OnInit {
 
   handleDownload(): void {
     this.disableButton = true;
-    // turn start and end date into UNIX timestamp, then send to getRouteRecords
-    this.fbFunctionsService.getRouteRecords(this.startDate, this.endDate)
+    // turn start and end date into beginning and end of day, respectively, then send to getRouteRecords
+    const start = DateTime.fromJSDate(this.startDate).startOf('day').toJSDate();
+    const end = DateTime.fromJSDate(this.endDate).endOf('day').toJSDate();
+    this.fbFunctionsService.getRouteRecords(start, end)
       .then((res) => {
         if (res.ok) {
           return res.blob();

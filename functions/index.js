@@ -178,16 +178,13 @@ const convertDate = (timestampJSON) => new Date(timestampJSON._seconds * 1000);
 const cleanSheetName = (name) => name.replace(/[/\\?*[\]]/g, '');
 
 /**
- * Function that generates an excel sheet for the records databases
- * sheet initialization from https://redstapler.co/sheetjs-tutorial-create-xlsx/
- * 
- * If neither rangeStart nor rangeEnd are provided, this function will retrieve records only from the current time to seven days prior. If one is not provided, this function will retrieve records towards the unprovided direction to a seven-day range. 
- * If the date range is invalid (ex. rangeStart comes after rangeEnd), the result returned will not contain any data.
+ * Function that generates an excel sheet for the records databases. If the date range is invalid (ex. rangeStart comes after rangeEnd), the result returned will likely not contain any data.
+ * Sheet initialization from https://redstapler.co/sheetjs-tutorial-create-xlsx/
  * 
  * Query params:
  * recordType - name of the firebase collection of records. Either 'checkin' or 'recorder'. Defaults to 'recorder'
- * rangeStart - UNIX time number, in seconds. the beginning of the date range from which to retrieve records. Is day-inclusive; will retrieve records starting from the beginning (00:00) of the day. All done in EST.
- * rangeEnd - UNIX time number, in seconds. the end of the date range from which to retrieve records. Is day-inclusive; will retrieve records until the end (23:59) of the day. All done in EST.
+ * rangeStart - Required. UNIX time number, in seconds. the beginning of the time range from which to retrieve records.
+ * rangeEnd - Required. UNIX time number, in seconds. the end of the time range from which to retrieve records.
  * 
  * A blob will be sent back, which can be turned into a file download on the client. Here is an example:
  * https://stackoverflow.com/questions/19327749/javascript-blob-filename-without-link
@@ -214,25 +211,15 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
     return;
   }
 
+  // handle rangeStart, rangeEnd query params
   let rangeStart = req.query.rangeStart;
   let rangeEnd = req.query.rangeEnd;
   try {
-    if (!rangeStart && !rangeEnd) {
-      const now = DateTime.local().setZone('America/New_York'); // must set timezone to guarantee startOf, endOf work
-      rangeStart = now.minus({ weeks: 1 }).startOf('day').toJSDate();
-      rangeEnd = now.endOf('day').toJSDate();
-    } else if (!rangeStart) {
-      const end = DateTime.fromSeconds(parseInt(rangeEnd, 10)).setZone('America/New_York');
-      rangeStart = end.minus({ weeks: 1 }).startOf('day').toJSDate();
-      rangeEnd = end.endOf('day').toJSDate();
-    } else if (!rangeEnd) {
-      const start = DateTime.fromSeconds(parseInt(rangeStart, 10)).setZone('America/New_York');
-      rangeStart = start.startOf('day').toJSDate();
-      rangeEnd = start.plus({ weeks: 1 }).endOf('day').toJSDate();
-    } else {
-      rangeStart = DateTime.fromSeconds(parseInt(rangeStart, 10)).setZone('America/New_York').startOf('day').toJSDate();
-      rangeEnd = DateTime.fromSeconds(parseInt(rangeEnd, 10)).setZone('America/New_York').endOf('day').toJSDate();
+    if (!rangeStart || !rangeEnd) {
+      throw new Error('rangeStart or rangeEnd not provided');
     }
+    rangeStart = DateTime.fromSeconds(parseInt(rangeStart, 10)).toJSDate();
+    rangeEnd = DateTime.fromSeconds(parseInt(rangeEnd, 10)).toJSDate();
   } catch (e) {
     cors(req, res, () => {
       res.status(400).send(e.message);
@@ -240,8 +227,8 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
     return;
   }
 
+  // handle recordType query param
   let recordType = req.query.recordType;
-  // default to recorder
   if (!recordType || recordType.trim() !== 'checkin' && recordType.trim() !== 'recorder') {
     recordType = 'recorder';
   }
