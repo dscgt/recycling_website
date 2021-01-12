@@ -1,15 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { FbFunctionsService } from 'src/app/modules/backend/services/implementations/firebase';
 import { DateTime } from 'luxon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 @Component({
   selector: 'app-route-records',
   templateUrl: './route-records.component.html',
-  styleUrls: ['./route-records.component.scss']
+  styleUrls: ['./route-records.component.scss'],
+  providers: [
+    MatDatepickerModule,
+    MatNativeDateModule,
+  ]
 })
 export class RouteRecordsComponent implements OnInit {
 
-  public startDate: Date = new Date();
+  public startDate: Date = DateTime.fromJSDate(new Date()).minus({ days: 7 }).toJSDate();
   public endDate: Date = new Date();;
   public disableButton = false;
 
