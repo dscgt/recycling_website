@@ -18,7 +18,7 @@ import { AngularFirestore } from '@angular/fire/firestore';
 export abstract class BackendCheckinService implements IBackendCheckin {
   public abstract getGroups(): Observable<ICheckinGroup[]>;
   public abstract getModels(): Observable<ICheckinModel[]>;
-  public abstract getRecords(): Observable<ICheckinRecord[]>;
+  public abstract getRecords(startDate: Date, endDate: Date): Observable<ICheckinRecord[]>;
   public abstract addGroup(group: ICheckinGroup): void;
   public abstract addModel(model: ICheckinModel): void;
   public abstract updateGroup(group: ICheckinGroup): void;
