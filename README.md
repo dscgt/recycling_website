@@ -14,7 +14,7 @@ This is part of a suite of apps made for Georgia Tech's [OSWM&R](http://www.recy
 * the [Angular CLI](https://cli.angular.io/)
 * access to our Firebase console
 * read/write access to this Github repo
-* read/write access to our private Github repo
+* read/write access to our [private Github repo](https://github.gatech.edu/dscgt/recycling_website_dist)
 
 ## Getting your credentials
 
@@ -43,7 +43,7 @@ This uses [Angular's Github Pages deploy](https://npmjs.org/package/angular-cli-
 
 1. Run `ng deploy --base-href=/pages/dscgt/recycling_website_dist/ --repo=https://github.gatech.edu/dscgt/recycling_website_dist.git --branch=master --name="your_gatech_display_name_here" --email="your_gatech_email_here"`
   1. Build is part of deploy process; no need to build beforehand.
-1. View our deploy at https://github.gatech.edu/pages/dscgt/recycling_website_dist/
+1. View our deploy [here](https://github.gatech.edu/pages/dscgt/recycling_website_dist/).
 
 ### To deploy to public website (LEGACY):
 
