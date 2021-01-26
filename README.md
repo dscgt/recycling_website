@@ -6,13 +6,15 @@ This is part of a suite of apps made for Georgia Tech's [OSWM&R](http://www.recy
 * [route-recorder](https://github.com/dscgt/route_recorder): Buddy app for recycling department crewmembers working recycling routes
 * [recycling-checkin](https://github.com/dscgt/recycling_checkin): Daily check-out/check-in for recycling department crewmembers needing GT property
 
-## Prerequisites
+## Prerequisites for developers
 
 * latest stable version of [Node](https://nodejs.org/en/)
 * latest stable version of NPM (usually included with the Node installation)
 * the [Firebase CLI](https://firebase.google.com/docs/cli)
 * the [Angular CLI](https://cli.angular.io/)
 * access to our Firebase console
+* read/write access to this Github repo
+* read/write access to our [private Github repo](https://github.gatech.edu/dscgt/recycling_website_dist)
 
 ## Getting your credentials
 
@@ -35,10 +37,23 @@ After getting your credentials (see section above), this code can be run locally
 
 ## Deploying this code
 
-1. Log in to your Firebase account with the Firebase CLI: `firebase login`
-1. Deploy the app with `ng run recycling-frontend:deploy`
+### To deploy to private instance:
 
-Build is part of deploy process; no need to build beforehand.
+This uses [Angular's Github Pages deploy](https://npmjs.org/package/angular-cli-ghpages) tool.
+
+1. Run `ng deploy --base-href=/pages/dscgt/recycling_website_dist/ --repo=https://github.gatech.edu/dscgt/recycling_website_dist.git --branch=master --name="your_gatech_display_name_here" --email="your_gatech_email_here"`
+  1. Build is part of deploy process; no need to build beforehand.
+1. View our deploy [here](https://github.gatech.edu/pages/dscgt/recycling_website_dist/).
+
+### To deploy to public website (LEGACY):
+
+We use `@angular/fire`'s [deploy process](https://github.com/angular/angularfire/blob/HEAD/docs/deploy/getting-started.md).
+
+1. In `angular.json`, replace the line `"builder": "@angular/fire:deploy",` with `"builder": "angular-cli-ghpages:deploy",`
+1. If you haven't already, log in to your Firebase account with the Firebase CLI: `firebase login`
+1. Select the `gt-recycling` project
+1. Deploy the app with `ng run recycling-frontend:deploy`
+  1. Build is part of deploy process; no need to build beforehand.
 
 ## About
 Made by the [Developer Student Club at Georgia Tech](https://dscgt.club/). 
@@ -47,18 +62,7 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 ## Other Commands
 
-Start emulators (Functions, Firestore, Hosting).
-Due to how the project is set up, the emulated website (Hosting) will use the production Firestore instance, but emulated Functions will use the emulated Firestore instance.
-```
-firebase emulators:start
-```
-
-Build the webapp
-```
-npm run build
-```
-
-Deploy Firebase functions
+### Deploy Firebase functions
 ```
 firebase deploy --only functions:functionname1,functions:functionname2
 ```
@@ -68,3 +72,22 @@ For example, `firebase deploy --only functions:generateExcelSheet` will deploy o
 More information:
 https://firebase.google.com/docs/functions/manage-functions#deploy_functions
 https://firebase.google.com/docs/cli#deploy_specific_functions
+
+### Start Firebase emulators (Functions, Firestore, Hosting).
+Due to how the project is set up, the emulated website (Hosting) will use the production Firestore instance, but emulated Functions will use the emulated Firestore instance.
+
+1. If you haven't already, log in to your Firebase account with the Firebase CLI: `firebase login`
+2. `firebase emulators:start`
+
+More information:
+https://firebase.google.com/docs/emulator-suite
+
+### Build the webapp
+```
+npm run build
+```
+Built files will be placed in a `/dist` directory.
+If building for production, use the `--prod` flag:
+```
+npm run build --prod
+```
