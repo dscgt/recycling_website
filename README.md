@@ -6,6 +6,14 @@ This is part of a suite of apps made for Georgia Tech's [OSWM&R](http://www.recy
 * [route-recorder](https://github.com/dscgt/route_recorder): Buddy app for recycling department crewmembers working recycling routes
 * [recycling-checkin](https://github.com/dscgt/recycling_checkin): Daily check-out/check-in for recycling department crewmembers needing GT property
 
+## Prerequisites
+
+* latest stable version of [Node](https://nodejs.org/en/)
+* latest stable version of NPM (usually included with the Node installation)
+* the [Firebase CLI](https://firebase.google.com/docs/cli)
+* the [Angular CLI](https://cli.angular.io/)
+* access to our Firebase console
+
 ## Getting your credentials
 
 Until you add credentials, the project will not run, and there will be an error about missing imports. Credentials are required for both development and deployment.
@@ -13,7 +21,7 @@ Until you add credentials, the project will not run, and there will be an error 
 1. Go to our [Firebase console](https://console.firebase.google.com/u/0/project/gt-recycling/settings/general/)
 1. Retrieve the code for the Firebase config object (Your Apps -> Web apps -> Admin website -> Firebase SDK Snippet -> Config)
 1. Make a new file called `firebase.ts` and place it in the `src/environments` directory, and export this object as default
-  1. A template, `src/environments/firebase-template.ts`, is provided as a reference for this step
+   1. A template, `src/environments/firebase-template.ts`, is provided as a reference for this step.
 
 It is [not necessary](https://firebase.google.com/docs/projects/api-keys) to secure Firebase API keys like this, but we do so as an extra layer of security. 
 
@@ -21,8 +29,7 @@ It is [not necessary](https://firebase.google.com/docs/projects/api-keys) to sec
 
 After getting your credentials (see section above), this code can be run locally for development:
 
-1. Fork this branch and clone your fork to your local machine
-1. In a CLI, navigate to the project and install dependencies with `npm i`
+1. In a CLI, install dependencies with `npm i`
 1. Start a local instance with `npm start`
 1. In a web browser, navigate to `localhost:4200` to browse the local instance
 
