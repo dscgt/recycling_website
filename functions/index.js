@@ -172,7 +172,8 @@ exports.seedCheckinRecords = functions.https.onRequest(async (req, res) => {
   res.json({ result: `Added checkin records with IDs ${writeResults.map(x => x.id).toString()}.` });
 })
 
-const convertDate = (timestampJSON) => new Date(timestampJSON._seconds * 1000);
+// converts a Firebase timestamp to a human-readable string in Eastern Time
+const convertDate = (timestampJSON) => DateTime.fromJSDate(timestampJSON.toDate()).setZone('America/New_York').toLocaleString(DateTime.DATETIME_SHORT);
 
 // since sheet names cannot contain: \ / ? * [ ]. Removes these things.
 const cleanSheetName = (name) => name.replace(/[/\\?*[\]]/g, '');
