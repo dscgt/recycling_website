@@ -1,10 +1,41 @@
-<div id='download-wrapper'>
+<!-- <div id='download-wrapper'>
   <span>You can also download these records as a more detailed Excel-compatible file:</span>
   <button id='download-button' mat-raised-button color="primary" (click)="handleDownload()" [disabled]="disableButton">Download</button>
+</div> -->
+
+<div *ngIf="selectScreen; else elseBlock">
+  <div id='checkin-records-wrapper'>
+    <p>Choose a date range to get records from:</p>
+    <mat-form-field appearance="fill">
+      <mat-label>Start Date - End Date</mat-label>
+      <mat-date-range-input [rangePicker]="picker">
+        <input matStartDate [(ngModel)]="startDate" name="startDate" placeholder="Start date">
+        <input matEndDate [(ngModel)]="endDate" name="endDate" placeholder="End date">
+      </mat-date-range-input>
+      <mat-datepicker-toggle matSuffix [for]="picker">
+        <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+      </mat-datepicker-toggle>
+      <mat-date-range-picker #picker></mat-date-range-picker>
+    </mat-form-field>
+  
+    <div>
+      <button mat-raised-button color="primary" (click)="handleViewRecords()" [disabled]="disableButton">View</button>
+    </div>
+    <div>
+      <button mat-raised-button color="primary" (click)="handleDownload()" [disabled]="disableButton">Download</button>
+    </div>
+  </div>
 </div>
-<app-expansion-table [defaultPageSize]="10" [pageSizeOptions]="[5, 10, 25, 50]" [data$]="records$"
-  [displayData]="displayData">
-  <ng-template let-record>
-    <pre>{{ record | json }}</pre>
-  </ng-template>
-</app-expansion-table>
+<ng-template #elseBlock>
+  <div id='table-top'>
+    <button (click)="handleBack()" mat-icon-button aria-label="Close group form" type="button">
+      <mat-icon>keyboard_backspace</mat-icon>
+    </button>
+  </div>
+  <app-expansion-table [defaultPageSize]="10" [pageSizeOptions]="[5, 10, 25, 50]" [data$]="records$"
+    [displayData]="displayData">
+    <ng-template let-record>
+      <pre>{{ record | json }}</pre>
+    </ng-template>
+  </app-expansion-table>
+</ng-template>

@@ -1,4 +1,18 @@
 <div id='route-records-wrapper'>
-  <p>Click the button below to download route records as an Excel file.</p>
-  <button mat-raised-button color="primary" (click)="handleDownload()" [disabled]="disableButton">Download</button>
+  <p>Choose a date range to get records from:</p>
+  <mat-form-field appearance="fill">
+    <mat-label>Start Date - End Date</mat-label>
+    <mat-date-range-input [rangePicker]="picker">
+      <input matStartDate [(ngModel)]="startDate" name="startDate" placeholder="Start date">
+      <input matEndDate [(ngModel)]="endDate" name="endDate" placeholder="End date">
+    </mat-date-range-input>
+    <mat-datepicker-toggle matSuffix [for]="picker">
+      <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+    </mat-datepicker-toggle>
+    <mat-date-range-picker #picker></mat-date-range-picker>
+  </mat-form-field>
+
+  <div>
+    <button mat-raised-button color="primary" (click)="handleDownload()" [disabled]="disableButton">Download</button>
+  </div>
 </div>

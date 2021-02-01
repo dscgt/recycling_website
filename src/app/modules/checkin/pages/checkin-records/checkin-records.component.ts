@@ -1,34 +1,49 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
 import { ICheckinRecord } from 'src/app/modules/backend';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { BackendCheckinService } from 'src/app/modules/backend/services/interfaces/checkin';
 import { FbFunctionsService } from 'src/app/modules/backend/services/implementations/firebase';
+import { DateTime } from 'luxon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+
 
 @Component({
   selector: 'app-checkin-records',
   templateUrl: './checkin-records.component.html',
-  styleUrls: ['./checkin-records.component.scss']
+  styleUrls: ['./checkin-records.component.scss'],
+  providers: [
+    MatDatepickerModule,
+    MatNativeDateModule,
+  ]
 })
 export class CheckinRecordsComponent implements OnInit {
 
   @ViewChild(ExpansionTableComponent)
   private expansionTable: ExpansionTableComponent<ICheckinRecord>;
+
   public records$: Observable<ICheckinRecord[]>;
-  public displayData: IDisplayData<ICheckinRecord>[];
-  public disableButton = false;
+  public displayData: IDisplayData<ICheckinRecord>[] = [];
+  public disableButton: boolean = false;
+  public selectScreen: boolean = true;
+  public startDate: Date = DateTime.fromJSDate(new Date()).minus({ days: 7 }).toJSDate();
+  public endDate: Date = new Date();;
 
   constructor(
     private backend: BackendCheckinService,
     private fbFunctionsService: FbFunctionsService
   ) { }
 
-  ngOnInit(): void { 
-    this.displayData = [];
-    this.records$ = this.backend.getRecords();
+  ngOnInit(): void { }
+
+  handleViewRecords(): void {
+    const start = DateTime.fromJSDate(this.startDate).startOf('day').toJSDate();
+    const end = DateTime.fromJSDate(this.endDate).endOf('day').toJSDate();
+    this.records$ = this.backend.getRecords(start, end);
     this.records$.subscribe({
       next: (recordsArray: Array<any>) => {
-        
+
         // collect all column names needed
         const columns = new Set();
         recordsArray.forEach((record) => {
@@ -38,10 +53,10 @@ export class CheckinRecordsComponent implements OnInit {
             }
           });
         });
-        
+
         // generate IDisplayData from columns
         const newDisplayData = Array.from(columns).map((columnName: string) => {
-          const thisAccessor = (record: ICheckinRecord):any => {
+          const thisAccessor = (record: ICheckinRecord): any => {
             if (record.properties[columnName] == null) {
               return 'N/A';
             }
@@ -85,11 +100,14 @@ export class CheckinRecordsComponent implements OnInit {
         this.displayData = newDisplayData;
       }
     });
-   }
+    this.selectScreen = false;
+  }
 
   handleDownload(): void {
     this.disableButton = true;
-    this.fbFunctionsService.getCheckinRecords()
+    const start = DateTime.fromJSDate(this.startDate).startOf('day').toJSDate();
+    const end = DateTime.fromJSDate(this.endDate).endOf('day').toJSDate();
+    this.fbFunctionsService.getCheckinRecords(start, end)
       .then((res) => res.blob())
       .then((res) => {
         var a = document.createElement("a");
@@ -103,5 +121,9 @@ export class CheckinRecordsComponent implements OnInit {
         window.alert("There was an error:\n" + err.message);
         this.disableButton = false;
       });
+  }
+
+  handleBack(): void {
+    this.selectScreen = true;
   }
 }

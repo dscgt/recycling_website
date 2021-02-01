@@ -16,9 +16,11 @@ import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDividerModule } from '@angular/material/divider';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ExtraMaterialModule } from '../extra-material';
 import { SharedModule } from '../shared';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 @NgModule({
   declarations: [
@@ -36,6 +38,8 @@ import { SharedModule } from '../shared';
     MatDialogModule,
     MatButtonModule,
     MatCheckboxModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     MatIconModule,
     MatFormFieldModule,
     MatCardModule,
@@ -44,7 +48,8 @@ import { SharedModule } from '../shared';
     MatDividerModule,
     ReactiveFormsModule,
     ExtraMaterialModule,
-    SharedModule
+    SharedModule,
+    FormsModule
   ]
 })
 export class CheckinModule { }

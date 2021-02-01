@@ -10,7 +10,6 @@ import { map } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class FirebaseCheckinService implements IBackendCheckin {
-  private recordsCollection: AngularFirestoreCollection<IFirestoreCheckinRecord>;
   private modelsCollection: AngularFirestoreCollection<ICheckinModel>;
   private groupsCollection: AngularFirestoreCollection<ICheckinGroup>;
 
@@ -19,11 +18,11 @@ export class FirebaseCheckinService implements IBackendCheckin {
   ) {
     this.groupsCollection = this.firestore.collection<ICheckinGroup>('checkin_groups');
     this.modelsCollection = this.firestore.collection<ICheckinModel>('checkin_models');
-    this.recordsCollection = this.firestore.collection<IFirestoreCheckinRecord>('checkin_records');
   }
 
-  public getRecords(): Observable<ICheckinRecord[]> {
-    return this.recordsCollection.valueChanges().pipe(
+  public getRecords(startDate: Date, endDate: Date): Observable<ICheckinRecord[]> {
+    const query = this.firestore.collection<IFirestoreCheckinRecord>('checkin_records', ref => ref.where('checkoutTime', '>', startDate).where('checkoutTime', '<', endDate));
+    return query.valueChanges().pipe(
       map((rawRecords: IFirestoreCheckinRecord[]): ICheckinRecord[] => {
         return rawRecords.map((rawRecord: IFirestoreCheckinRecord): ICheckinRecord => {
           const record: ICheckinRecord = { ...rawRecord } as unknown as ICheckinRecord;

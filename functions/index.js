@@ -2,7 +2,8 @@ const functions = require("firebase-functions");
 const xlsx = require('xlsx');
 const admin = require("firebase-admin");
 // From https://stackoverflow.com/questions/42755131/enabling-cors-in-cloud-functions-for-firebase
-const cors = require('cors')({ origin: true }); 
+const cors = require('cors')({ origin: true });
+const { DateTime } = require("luxon");
 
 admin.initializeApp();
 var db = admin.firestore();
@@ -171,17 +172,20 @@ exports.seedCheckinRecords = functions.https.onRequest(async (req, res) => {
   res.json({ result: `Added checkin records with IDs ${writeResults.map(x => x.id).toString()}.` });
 })
 
-const convertDate = (timestampJSON) => new Date(timestampJSON._seconds * 1000);
+// converts a Firebase timestamp to a human-readable string in Eastern Time
+const convertDate = (timestampJSON) => DateTime.fromJSDate(timestampJSON.toDate()).setZone('America/New_York').toLocaleString(DateTime.DATETIME_SHORT);
 
-// since sheet names cannot contain: \ / ? * [ ] 
+// since sheet names cannot contain: \ / ? * [ ]. Removes these things.
 const cleanSheetName = (name) => name.replace(/[/\\?*[\]]/g, '');
 
 /**
- * Function that generates an excel sheet for the records databases
- * sheet initialization from https://redstapler.co/sheetjs-tutorial-create-xlsx/
+ * Function that generates an excel sheet for the records databases. If the date range is invalid (ex. rangeStart comes after rangeEnd), the result returned will likely not contain any data.
+ * Sheet initialization from https://redstapler.co/sheetjs-tutorial-create-xlsx/
  * 
  * Query params:
  * recordType - name of the firebase collection of records. Either 'checkin' or 'recorder'. Defaults to 'recorder'
+ * rangeStart - Required. UNIX time number, in seconds. the beginning of the time range from which to retrieve records.
+ * rangeEnd - Required. UNIX time number, in seconds. the end of the time range from which to retrieve records.
  * 
  * A blob will be sent back, which can be turned into a file download on the client. Here is an example:
  * https://stackoverflow.com/questions/19327749/javascript-blob-filename-without-link
@@ -203,13 +207,29 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
     let result = await admin.auth().verifyIdToken(idToken);
   } catch(e) {
     cors(req, res, () => {
-      res.status(401).send(e);
+      res.status(401).send(e)
     });
     return;
   }
 
+  // handle rangeStart, rangeEnd query params
+  let rangeStart = req.query.rangeStart;
+  let rangeEnd = req.query.rangeEnd;
+  try {
+    if (!rangeStart || !rangeEnd) {
+      throw new Error('rangeStart or rangeEnd not provided');
+    }
+    rangeStart = DateTime.fromSeconds(parseInt(rangeStart, 10)).toJSDate();
+    rangeEnd = DateTime.fromSeconds(parseInt(rangeEnd, 10)).toJSDate();
+  } catch (e) {
+    cors(req, res, () => {
+      res.status(400).send(e.message);
+    });
+    return;
+  }
+
+  // handle recordType query param
   let recordType = req.query.recordType;
-  // default to recorder
   if (!recordType || recordType.trim() !== 'checkin' && recordType.trim() !== 'recorder') {
     recordType = 'recorder';
   }
@@ -221,9 +241,9 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
   try {
     let snapshot;
     if (recordType === 'recorder') {
-      snapshot = await db.collection('route_records').get();
+      snapshot = await db.collection('route_records').where('startTime', '>', rangeStart).where('startTime', '<', rangeEnd).get();
     } else { // recordType === 'checkin'
-      snapshot = await db.collection('checkin_records').get();
+      snapshot = await db.collection('checkin_records').where('checkoutTime', '>', rangeStart).where('checkoutTime', '<', rangeEnd).get();
     }
     data = snapshot.docs.map(doc => doc.data());
   } catch (e) {
