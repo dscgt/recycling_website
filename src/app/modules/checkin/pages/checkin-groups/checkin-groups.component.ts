@@ -23,6 +23,9 @@ export class CheckinGroupComponent implements OnInit {
   private controlConfirmationDialogSubject$: BehaviorSubject<boolean>;
 
   public groups$: Observable<ICheckinGroup[]>;
+  // maps a group ID to an array of titles of models which use that group
+  // unused groups will still have an entry, 
+  public groupsAndModels$: Observable<Map<string, string[]>>;
   public displayData: IDisplayData<ICheckinGroup>[];
   public controlCreationDialog$: Observable<boolean>;
   public controlConfirmationDialog$: Observable<boolean>;
@@ -60,6 +63,28 @@ export class CheckinGroupComponent implements OnInit {
     this.controlConfirmationDialog$ = this.controlConfirmationDialogSubject$.asObservable();
 
     this.groups$ = this.backend.getGroups();
+
+    this.groupsAndModels$ = this.backend.getModels().pipe(
+      map((models: ICheckinModel[]) => {
+        const toReturn = new Map<string, string[]>();
+        for (let model of models) {
+          for (let field of model.fields) {
+            if (field.groupId) {
+              const thisGroupId: string = typeof field.groupId === 'string'
+                ? field.groupId
+                : field.groupId.id;
+              if (toReturn.has(thisGroupId)) {
+                toReturn.get(thisGroupId)?.push(model.title);
+              } else {
+                toReturn.set(thisGroupId, [model.title]);
+              }
+            }
+          }
+        }
+        return toReturn;
+      })
+    );
+
     this.displayData = [
       {
         name: "Title",
