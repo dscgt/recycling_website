@@ -24,7 +24,6 @@ export class CheckinGroupComponent implements OnInit {
 
   public groups$: Observable<ICheckinGroup[]>;
   // maps a group ID to an array of titles of models which use that group
-  // unused groups will still have an entry, 
   public groupsAndModels$: Observable<Map<string, string[]>>;
   public displayData: IDisplayData<ICheckinGroup>[];
   public controlCreationDialog$: Observable<boolean>;
@@ -206,7 +205,7 @@ export class CheckinGroupComponent implements OnInit {
   public closeConfirmationDialog(): void {
     this.controlConfirmationDialogSubject$.next(false);
   }
-  
+
   /**
    * For use with form controls which require validation to avoid duplicating a title which already exists among already-created groups.
    * @param allow Group titles to allow. This excludes them from validation checks; if a title which already exists is specified here, then it will still pass validation. 
