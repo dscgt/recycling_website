@@ -65,20 +65,25 @@ export class CheckinGroupComponent implements OnInit {
 
     this.groupsAndModels$ = this.backend.getModels().pipe(
       map((models: ICheckinModel[]) => {
-        const toReturn = new Map<string, string[]>();
+        const toReturnWithSets = new Map<string, Set<string>>();
+        // check all models for groupId and create a map groupId -> [modelTitle, modelTitle, ...]
         for (let model of models) {
           for (let field of model.fields) {
             if (field.groupId) {
               const thisGroupId: string = typeof field.groupId === 'string'
                 ? field.groupId
                 : field.groupId.id;
-              if (toReturn.has(thisGroupId)) {
-                toReturn.get(thisGroupId)?.push(model.title);
-              } else {
-                toReturn.set(thisGroupId, [model.title]);
+              if (!toReturnWithSets.has(thisGroupId)) {
+                toReturnWithSets.set(thisGroupId, new Set());
               }
+              toReturnWithSets.get(thisGroupId)?.add(model.title);
             }
           }
+        }
+        // convert to proper form
+        const toReturn = new Map<string, string[]>();
+        for (let [groupId, set] of toReturnWithSets) {
+          toReturn.set(groupId, Array.from(set));
         }
         return toReturn;
       })
