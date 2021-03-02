@@ -23,7 +23,7 @@ This is part of a suite of apps made for Georgia Tech's [OSWM&R](http://www.recy
 
 Until you add credentials, the project will not run, and there will be an error about missing imports. Credentials are required for both development and deployment.
 
-1. Go to our [Firebase console](https://console.firebase.google.com/u/0/project/gt-recycling/settings/general/)
+1. Go to our [Firebase console settings](https://console.firebase.google.com/u/0/project/gt-recycling/settings/general/)
 1. Retrieve the code for the Firebase config object (Your Apps -> Web apps -> Admin website -> Firebase SDK Snippet -> Config)
 1. Make a new file called `firebase.ts` and place it in the `src/environments` directory, and export the Firebase config object as `default`
    1. A template, `src/environments/firebase-template.ts`, is provided as a reference for this step. This file doesn't do anything else.
