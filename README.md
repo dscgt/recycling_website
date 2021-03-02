@@ -42,7 +42,7 @@ After getting your credentials (see section above), this code can be run locally
 This uses [Angular's Github Pages deploy](https://npmjs.org/package/angular-cli-ghpages) tool.
 
 1. Run `ng deploy --base-href=/pages/dscgt/recycling_website_dist/ --repo=https://github.gatech.edu/dscgt/recycling_website_dist.git --branch=master --name="your_gatech_display_name_here" --email="your_gatech_email_here"`
-  1. Build is part of deploy process; no need to build beforehand.
+  1. Build is part of deploy process; no need to build (as in, run `npm run build-prod`) beforehand.
 1. View our deploy [here](https://github.gatech.edu/pages/dscgt/recycling_website_dist/).
 
 ### To deploy to public website (LEGACY):
@@ -84,10 +84,10 @@ https://firebase.google.com/docs/emulator-suite
 
 ### Build the webapp
 ```
-npm run build
+npm run build-prod
 ```
 Built files will be placed in a `/dist` directory.
-If building for production, use the `--prod` flag:
+If building for development (you shouldn't have to do this often or at all, since `npm start` starts a dev environment for you), use:
 ```
-npm run build --prod
+npm run build
 ```

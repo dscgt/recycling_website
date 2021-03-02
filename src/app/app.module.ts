@@ -12,6 +12,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
+import { USE_EMULATOR as USE_FIRESTORE_EMULATOR } from '@angular/fire/firestore';
+import { USE_EMULATOR as USE_FUNCTIONS_EMULATOR } from '@angular/fire/functions';
 
 // Firebase tooling
 import { AngularFireModule } from '@angular/fire';
@@ -54,7 +56,10 @@ import { AdminAccessComponent } from './core/pages/admin-access/admin-access.com
     // DON'T include AngularFireAuth here, or it causes an error
     // https://github.com/angular/angularfire/issues/2351
   ],
-  providers: [],
+  providers: [
+    { provide: USE_FIRESTORE_EMULATOR, useValue: environment.useEmulators ? ['localhost', 8080] : undefined },
+    { provide: USE_FUNCTIONS_EMULATOR, useValue: environment.useEmulators ? ['localhost', 5001] : undefined },
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
