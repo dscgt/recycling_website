@@ -24,7 +24,8 @@ export class AdminAccessService {
   public getAdmins(): Observable<string[]> {
     return this.adminsCollection.doc(this.docId).valueChanges().pipe(
       map((snapshot: IFirestoreAdmins) =>
-        snapshot.admins
+        // return an empty array if admins document doesn't exist
+        snapshot ? snapshot.admins : []
       )
     );
   }
@@ -33,8 +34,9 @@ export class AdminAccessService {
    * Updates admins array. Replaces the array with the provided array
    */
   public updateAdmins(admins: string[]): Promise<void> {
-    return this.adminsCollection.doc(this.docId).update({
+    // creates the admins document if it doesn't exist yet
+    return this.adminsCollection.doc(this.docId).set({
       admins: admins
-    });
+    }, { merge: true });
   }
 }
