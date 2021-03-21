@@ -183,10 +183,6 @@ export class ManageCheckinComponent implements OnInit {
     }
   }
 
-  public deletionDialogClosed(): void {
-    // console.log("Dialog closed in child");
-  }
-
   public receiveCreationDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
     this.creationDialogRef = ref;
   }
@@ -196,11 +192,11 @@ export class ManageCheckinComponent implements OnInit {
   }
 
   public closeCreationDialog(): void {
-    this.creationDialogRef?.close();
+    this.controlCreationDialogSubject$.next(false);
   }
 
   public closeDeletionDialog(): void {
-    this.deletionDialogRef?.close();
+    this.controlDeletionDialogSubject$.next(false);
   }
 
   /**

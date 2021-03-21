@@ -225,7 +225,7 @@ export class ManageRoutesComponent implements OnInit {
 
   public confirmDeleteRoute(route: IRoute): void {
     this.routeToDelete = route;
-    this.controlDeletionDialogSubject$.next(true);
+    this.openDeletionDialog();
   }
 
   public onDelete(): void {
@@ -296,21 +296,17 @@ export class ManageRoutesComponent implements OnInit {
   }
 
   public closeCreationDialog(): void {
-    this.creationDialogRef?.close();
+    this.controlCreationDialogSubject$.next(false);
   }
 
   public closeDeletionDialog(): void {
-    this.deletionDialogRef?.close();
+    this.controlDeletionDialogSubject$.next(false);
   }
 
   public creationDialogClosed(): void {
     if (this.editMode && this.storedCreationForm) {
       this.createRouteForm = this.storedCreationForm;
     }
-  }
-
-  public deletionDialogClosed(): void {
-    // console.log("Dialog closed in child");
   }
 
   /**

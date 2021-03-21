@@ -164,7 +164,7 @@ export class CheckinGroupComponent implements OnInit {
   }
 
   public closeCreationDialog(): void {
-    this.creationDialogRef?.close();
+    this.controlCreationDialogSubject$.next(false);
   }
 
   public clearCreationDialog(): void {
@@ -174,16 +174,12 @@ export class CheckinGroupComponent implements OnInit {
     });
   }
 
-  public confirmationDialogClosed(): void {
-    // console.log("Dialog closed in child");
-  }
-
   public receiveConfirmationDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
     this.confirmationDialogRef = ref;
   }
 
   public closeConfirmationDialog(): void {
-    this.confirmationDialogRef?.close();
+    this.controlConfirmationDialogSubject$.next(false);
   }
   
   /**

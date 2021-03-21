@@ -14,8 +14,7 @@
 <!-- END row content -->
 
 <!-- Deletion confirmation dialog -->
-<app-projection-dialog [control$]="controlConfirmationDialog$" (onClose)="confirmationDialogClosed()"
-  (getDialogRef)="receiveConfirmationDialogRef($event)">
+<app-projection-dialog [control$]="controlConfirmationDialog$" (getDialogRef)="receiveConfirmationDialogRef($event)">
   <h2 mat-dialog-title>Are you sure you want to delete this group?</h2>
   <mat-dialog-actions align="end">
     <button (click)="closeConfirmationDialog()" mat-icon-button aria-label="Cancel deleting group" type="button">

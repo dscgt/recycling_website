@@ -167,16 +167,12 @@ export class RouteGroupComponent implements OnInit {
     }
   }
 
-  public confirmationDialogClosed(): void {
-    // console.log("Dialog closed in child");
-  }
-
   public receiveConfirmationDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
     this.confirmationDialogRef = ref;
   }
 
   public closeConfirmationDialog(): void {
-    this.confirmationDialogRef?.close();
+    this.controlConfirmationDialogSubject$.next(false);
   }  
 
   /**

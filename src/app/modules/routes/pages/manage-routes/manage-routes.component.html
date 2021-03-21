@@ -14,8 +14,7 @@
 <!-- END row content -->
 
 <!-- deletion confirmation modal -->
-<app-projection-dialog [control$]="controlDeletionDialog$" (onClose)="deletionDialogClosed()"
-  (getDialogRef)="receiveDeletionDialogRef($event)">
+<app-projection-dialog [control$]="controlDeletionDialog$" (getDialogRef)="receiveDeletionDialogRef($event)">
   <h2 mat-dialog-title>Are you sure you want to delete this route option?</h2>
   <mat-dialog-actions align="end">
     <button (click)="closeDeletionDialog()" mat-icon-button aria-label="Cancel deleting route option" type="button">
