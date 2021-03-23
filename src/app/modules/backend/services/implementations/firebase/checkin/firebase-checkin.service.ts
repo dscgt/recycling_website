@@ -12,12 +12,14 @@ import { map } from 'rxjs/operators';
 export class FirebaseCheckinService implements IBackendCheckin {
   private modelsCollection: AngularFirestoreCollection<ICheckinModel>;
   private groupsCollection: AngularFirestoreCollection<ICheckinGroup>;
+  private recordsCollection: AngularFirestoreCollection<ICheckinRecord>;
 
   constructor(
     private readonly firestore: AngularFirestore
   ) {
     this.groupsCollection = this.firestore.collection<ICheckinGroup>('checkin_groups');
     this.modelsCollection = this.firestore.collection<ICheckinModel>('checkin_models');
+    this.recordsCollection = this.firestore.collection<ICheckinRecord>('checkin_records');
   }
 
   public getRecords(startDate: Date, endDate: Date): Observable<ICheckinRecord[]> {
@@ -82,6 +84,15 @@ export class FirebaseCheckinService implements IBackendCheckin {
     this.groupsCollection.doc(id).set(forUpdate);
   }
 
+  public updateRecord(record: ICheckinRecord): void {
+    // TODO implement
+    // only the non-top-level properties should be updated (the 'properties' object)
+    // const forUpdate = Object.assign({}, record);
+    // const id: string = (forUpdate.id) as string;
+    // delete forUpdate.id;
+    // this.recordsCollection.doc(id).set(forUpdate);
+  }
+
   public deleteModel(id?: string): void {
     if (!id) {
       return;
@@ -94,6 +105,10 @@ export class FirebaseCheckinService implements IBackendCheckin {
       return;
     }
     this.groupsCollection.doc(id).delete();
+  }
+
+  public deleteRecord(id: string): void {
+    this.recordsCollection.doc(id).delete();
   }
 
   /**

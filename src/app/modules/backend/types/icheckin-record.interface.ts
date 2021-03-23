@@ -5,5 +5,6 @@ export interface ICheckinRecord {
   checkoutTime: Date;
   properties: {
     [additionalProperties: string]: string;
-  }
+  };
+  id?: string;
 }

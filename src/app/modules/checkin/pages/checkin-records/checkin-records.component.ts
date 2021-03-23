@@ -1,13 +1,14 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
 import { ICheckinRecord } from 'src/app/modules/backend';
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { BackendCheckinService } from 'src/app/modules/backend/services/interfaces/checkin';
 import { FbFunctionsService } from 'src/app/modules/backend/services/implementations/firebase';
 import { DateTime } from 'luxon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-
+import { MatDialogRef } from '@angular/material/dialog';
+import { FormBuilder, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-checkin-records',
@@ -23,19 +24,35 @@ export class CheckinRecordsComponent implements OnInit {
   @ViewChild(ExpansionTableComponent)
   private expansionTable: ExpansionTableComponent<ICheckinRecord>;
 
+  // Modal-related fields
+  private controlDeletionDialogSubject$: BehaviorSubject<boolean>;
+  public controlDeletionDialog$: Observable<boolean>;
+  public deletionDialogRef: MatDialogRef<TemplateRef<any>>;
+  
+  public form: FormGroup;
+
   public records$: Observable<ICheckinRecord[]>;
   public displayData: IDisplayData<ICheckinRecord>[] = [];
   public disableButton: boolean = false;
   public selectScreen: boolean = true;
   public startDate: Date = DateTime.fromJSDate(new Date()).minus({ days: 7 }).toJSDate();
-  public endDate: Date = new Date();;
+  public endDate: Date = new Date();
+
+  // workaround, see checkin-groups component for explanation
+  public recordToDelete: any;
 
   constructor(
     private backend: BackendCheckinService,
-    private fbFunctionsService: FbFunctionsService
+    private fbFunctionsService: FbFunctionsService,
+    private fb: FormBuilder
   ) { }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+
+    // Modal initializations
+    this.controlDeletionDialogSubject$ = new BehaviorSubject<boolean>(false);
+    this.controlDeletionDialog$ = this.controlDeletionDialogSubject$.asObservable();
+  }
 
   handleViewRecords(): void {
     const start = DateTime.fromJSDate(this.startDate).startOf('day').toJSDate();
@@ -125,5 +142,26 @@ export class CheckinRecordsComponent implements OnInit {
 
   handleBack(): void {
     this.selectScreen = true;
+  }
+
+  populateForm(record: ICheckinRecord): void {
+    const fields:any = {};
+    Object.keys(record.properties).forEach((key: string) => {
+      fields[key] = [record.properties[key]]
+    });
+    this.form = this.fb.group(fields);
+  }
+
+  // modal-related functions
+  openDeletionDialog(): void { this.controlDeletionDialogSubject$.next(true) }
+  closeDeletionDialog(): void { this.controlDeletionDialogSubject$.next(false) }
+  receiveDeletionDialogRef(ref: MatDialogRef<TemplateRef<any>>): void { this.deletionDialogRef = ref }
+  handleAttemptDeletion(record: ICheckinRecord): void {
+    this.recordToDelete = record;
+    this.openDeletionDialog();
+  }
+  handleConfirmDeletion(): void {
+    this.closeDeletionDialog();
+    this.backend.deleteRecord(this.recordToDelete.id);
   }
 }
