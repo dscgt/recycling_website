@@ -36,8 +36,8 @@
     [displayData]="displayData">
     <ng-template let-record>
       <div class='row-buttons-wrapper'>
-        <button mat-raised-button color="primary" aria-label="Edit This Record" (click)="handleAttemptDeletion(record)" type="button">Edit This Record</button>
-        <button mat-raised-button color="warn" aria-label="Delete This Record" (click)="handleAttemptDeletion(record)" type="button">Delete This Record</button>
+        <button mat-raised-button color="primary" aria-label="Edit This Record" (click)="handleStartEdit(record)" type="button">Edit This Record</button>
+        <button mat-raised-button color="warn" aria-label="Delete This Record" (click)="handleStartDeletion(record)" type="button">Delete This Record</button>
       </div>
     </ng-template>
   </app-expansion-table>
@@ -57,3 +57,30 @@
   </mat-dialog-actions>
 </app-projection-dialog>
 <!-- END deletion confirmation modal -->
+
+<!-- edit record modal -->
+<app-projection-dialog [control$]="controlEditDialog$" (getDialogRef)="receiveEditDialogRef($event)">
+  <div id='form-title'>
+    <h2 mat-dialog-title>Edit Record</h2>
+    <button (click)="closeEditDialog()" mat-icon-button aria-label="Close edit form" type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <mat-dialog-content>
+    <form [formGroup]="form" (ngSubmit)="handleConfirmEdit()">
+      <div *ngFor="let field of formFieldTitles">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ field }}</mat-label>
+          <input matInput formControlName="{{ field }}" required>
+        </mat-form-field>  
+      </div>
+    </form>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-icon-button aria-label="Confirm updating check-in item" 
+      [disabled]="(form.valid === null) ? false : !form.valid" type="submit">
+      <mat-icon>check</mat-icon>
+    </button>
+  </mat-dialog-actions>
+</app-projection-dialog>
+<!-- END edit record modal -->

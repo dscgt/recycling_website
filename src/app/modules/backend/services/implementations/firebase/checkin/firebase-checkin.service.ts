@@ -87,10 +87,12 @@ export class FirebaseCheckinService implements IBackendCheckin {
   public updateRecord(record: ICheckinRecord): void {
     // TODO implement
     // only the non-top-level properties should be updated (the 'properties' object)
+    // also, return something actionable
     // const forUpdate = Object.assign({}, record);
     // const id: string = (forUpdate.id) as string;
     // delete forUpdate.id;
     // this.recordsCollection.doc(id).set(forUpdate);
+    console.log('updateRecord called')
   }
 
   public deleteModel(id?: string): void {
@@ -108,7 +110,9 @@ export class FirebaseCheckinService implements IBackendCheckin {
   }
 
   public deleteRecord(id: string): void {
-    this.recordsCollection.doc(id).delete();
+    // TODO return something actionable
+    // this.recordsCollection.doc(id).delete();
+    console.log('deleteRecord called')
   }
 
   /**
