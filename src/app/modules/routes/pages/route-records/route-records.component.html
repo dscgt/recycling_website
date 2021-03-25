@@ -1,18 +1,88 @@
-<div id='route-records-wrapper'>
-  <p>Choose a date range to get records from:</p>
-  <mat-form-field appearance="fill">
-    <mat-label>Start Date - End Date</mat-label>
-    <mat-date-range-input [rangePicker]="picker">
-      <input matStartDate [(ngModel)]="startDate" name="startDate" placeholder="Start date">
-      <input matEndDate [(ngModel)]="endDate" name="endDate" placeholder="End date">
-    </mat-date-range-input>
-    <mat-datepicker-toggle matSuffix [for]="picker">
-      <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
-    </mat-datepicker-toggle>
-    <mat-date-range-picker #picker></mat-date-range-picker>
-  </mat-form-field>
-
-  <div>
-    <button mat-raised-button color="primary" (click)="handleDownload()" [disabled]="disableButton">Download</button>
+<!-- date range selection screen -->
+<div *ngIf="selectScreen; else elseBlock">
+  <div id='route-records-wrapper'>
+    <p>Choose a date range to get records from:</p>
+    <mat-form-field appearance="fill">
+      <mat-label>Start Date - End Date</mat-label>
+      <mat-date-range-input [rangePicker]="picker">
+        <input matStartDate [(ngModel)]="startDate" name="startDate" placeholder="Start date">
+        <input matEndDate [(ngModel)]="endDate" name="endDate" placeholder="End date">
+      </mat-date-range-input>
+      <mat-datepicker-toggle matSuffix [for]="picker">
+        <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+      </mat-datepicker-toggle>
+      <mat-date-range-picker #picker></mat-date-range-picker>
+    </mat-form-field>
+  
+    <div>
+      <button mat-raised-button class="select-screen-button" color="primary" (click)="handleViewRecords()"
+        [disabled]="disableButton">View</button>
+    </div>
+    <div>
+      <button mat-raised-button class="select-screen-button" color="primary" (click)="handleDownload()"
+        [disabled]="disableButton">Download</button>
+    </div>
   </div>
 </div>
+<!-- END date range selection screen -->
+
+<!-- rows and content -->
+<ng-template #elseBlock>
+  <div id='table-top'>
+    <button (click)="handleBack()" mat-icon-button aria-label="Go back to date selection" type="button">
+      <mat-icon>keyboard_backspace</mat-icon>
+    </button>
+  </div>
+  <app-expansion-table [defaultPageSize]="10" [pageSizeOptions]="[5, 10, 25, 50]" [data$]="records$"
+    [displayData]="displayData">
+    <ng-template let-record>
+      <div class='row-buttons-wrapper'>
+        <button mat-raised-button color="primary" aria-label="Edit This Record" (click)="handleStartEdit(record)" type="button">Edit This Record</button>
+        <button mat-raised-button color="warn" aria-label="Delete This Record" (click)="handleStartDeletion(record)" type="button">Delete This Record</button>
+      </div>
+    </ng-template>
+  </app-expansion-table>
+</ng-template>
+<!-- END rows and content -->
+
+<!-- deletion confirmation modal -->
+<app-projection-dialog [control$]="controlDeletionDialog$" (getDialogRef)="receiveDeletionDialogRef($event)">
+  <h2 mat-dialog-title>Are you sure you want to delete this record?</h2>
+  <mat-dialog-actions align="end">
+    <button (click)="closeDeletionDialog()" mat-icon-button aria-label="Cancel deleting record" type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+    <button mat-icon-button aria-label="Confirm deleting record" type="submit" (click)="handleConfirmDeletion()">
+      <mat-icon>check</mat-icon>
+    </button>
+  </mat-dialog-actions>
+</app-projection-dialog>
+<!-- END deletion confirmation modal -->
+
+<!-- edit record modal -->
+<app-projection-dialog [control$]="controlEditDialog$" (getDialogRef)="receiveEditDialogRef($event)">
+  <div id='form-title'>
+    <h2 mat-dialog-title>Edit Record</h2>
+    <button (click)="closeEditDialog()" mat-icon-button aria-label="Close edit form" type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <mat-dialog-content>
+    <form [formGroup]="form" (ngSubmit)="handleConfirmEdit()">
+      <!-- TODO -->
+      <!-- <div *ngFor="let field of formFieldTitles">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ field }}</mat-label>
+          <input matInput formControlName="{{ field }}">
+        </mat-form-field>
+      </div> -->
+    </form>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-icon-button aria-label="Confirm updating record"
+      [disabled]="(form.valid === null) ? false : !form.valid" type="submit">
+      <mat-icon>check</mat-icon>
+    </button>
+  </mat-dialog-actions>
+</app-projection-dialog>
+<!-- END edit record modal -->

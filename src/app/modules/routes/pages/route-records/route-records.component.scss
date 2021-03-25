@@ -1,5 +1,5 @@
 
-button {
+.select-screen-button {
   font-size: 24px;
 }
 
@@ -11,5 +11,23 @@ button {
 
 #route-records-wrapper > p {
   font-size: 16px;
+}
+
+#route-records-wrapper button {
+  margin: 5px;
+}
+
+#table-top {
+  margin: 5px;
+  background-color: white;
+}
+
+.row-buttons-wrapper button {
+  margin: 5px;
+}
+
+#form-title {
+  display: flex;
+  justify-content: space-between;
 }
 

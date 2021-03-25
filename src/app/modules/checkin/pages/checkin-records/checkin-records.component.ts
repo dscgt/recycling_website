@@ -1,4 +1,4 @@
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
 import { ICheckinRecord } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable, of } from 'rxjs';
@@ -50,7 +50,8 @@ export class CheckinRecordsComponent implements OnInit {
   constructor(
     private backend: BackendCheckinService,
     private fbFunctionsService: FbFunctionsService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private cd: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -68,7 +69,7 @@ export class CheckinRecordsComponent implements OnInit {
     const end = DateTime.fromJSDate(this.endDate).endOf('day').toJSDate();
     this.records$ = this.backend.getRecords(start, end);
     this.records$.subscribe({
-      next: (recordsArray: Array<any>) => {
+      next: (recordsArray: Array<ICheckinRecord>) => {
 
         // collect all column names needed
         const columns = new Set();
@@ -172,7 +173,11 @@ export class CheckinRecordsComponent implements OnInit {
   }
   handleConfirmDeletion(): void {
     this.closeDeletionDialog();
-    this.backend.deleteRecord(this.recordToDelete.id);
+    this.backend.deleteRecord(this.recordToDelete.id).catch((err) => {
+      if (err) {
+        alert(`Error deleting record. Please try again, or let us know. \n ${err}`);
+      }
+    });
   }
   openEditDialog(): void { this.controlEditDialogSubject$.next(true) }
   closeEditDialog(): void { this.controlEditDialogSubject$.next(false) }
@@ -181,11 +186,16 @@ export class CheckinRecordsComponent implements OnInit {
     this.currentlyUpdatingRecord = record;
     this.populateForm(record);
     this.openEditDialog();
+    this.cd.detectChanges(); // workaround for occasional ExpressionChangedAfterItHasBeenCheckedError
   }
   handleConfirmEdit(): void {
+    this.closeEditDialog();
     const updatedRecord = Object.assign({}, this.currentlyUpdatingRecord);
     updatedRecord.properties = this.form.value;
-    this.backend.updateRecord(updatedRecord);
-    this.closeEditDialog();
+    this.backend.updateRecord(updatedRecord).catch((err) => {
+      if (err) {
+        alert(`Error updating record. Please try again, or let us know. \n ${err}`);
+      }
+    });
   }
 }

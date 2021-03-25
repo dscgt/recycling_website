@@ -28,7 +28,7 @@
 <!-- rows and content -->
 <ng-template #elseBlock>
   <div id='table-top'>
-    <button (click)="handleBack()" mat-icon-button aria-label="Close group form" type="button">
+    <button (click)="handleBack()" mat-icon-button aria-label="Go back to date selection" type="button">
       <mat-icon>keyboard_backspace</mat-icon>
     </button>
   </div>
@@ -71,7 +71,7 @@
       <div *ngFor="let field of formFieldTitles">
         <mat-form-field appearance="outline">
           <mat-label>{{ field }}</mat-label>
-          <input matInput formControlName="{{ field }}" required>
+          <input matInput formControlName="{{ field }}">
         </mat-form-field>  
       </div>
     </form>

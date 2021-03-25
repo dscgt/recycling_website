@@ -1,15 +1,15 @@
-import { DocumentReference } from '@angular/fire/firestore/interfaces';
-import { IRouteStop } from 'src/app/modules/backend/types';
+import { IRouteSave, IRouteStop } from 'src/app/modules/backend/types';
 import { ITimestamp } from './itimestamp.interface';
 
 export interface IFirestoreRouteRecord {
-  crewmember: DocumentReference;
-  comments: string;
-  tonnage: number;
   startTime: ITimestamp;
   endTime: ITimestamp;
-  route: DocumentReference;
+  modelId: string;
+  modelTitle: string;
   id: string;
+  properties: {
+    [additionalProperties: string]: string;
+  };
+  saves: IRouteSave[];
   stops: IRouteStop[];
-  [additional: string]: any;
 }
