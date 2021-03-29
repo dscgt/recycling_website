@@ -37,7 +37,8 @@ This project uses Firebase services: Authentication, Firestore, and Functions.
 To run locally for development:
 
 1. In a CLI, install dependencies with `npm i`
-1. Run `npm start`
+   1. Also navigate to the `functions` folder to install Firebase functions dependencies: `cd functions`, `npm i`
+1. Go back to the project root directory and run `npm start`
    1. This will start a local development instance. In a web browser, navigate to http://localhost:4200/ to view
    1. This also starts the [Firebase emulators](https://firebase.google.com/docs/emulator-suite). The website mostly uses emulated resources during development instead of production data.
       1. Firestore and Functions are emulated. Authentication uses production auth data, and is not emulated due to lack of need. 
