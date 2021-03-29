@@ -1,4 +1,4 @@
-import { IRouteSave, IRouteStop } from 'src/app/modules/backend/types';
+import { IRouteSave, IRouteStopRecord } from 'src/app/modules/backend/types';
 import { ITimestamp } from './itimestamp.interface';
 
 export interface IFirestoreRouteRecord {
@@ -11,5 +11,5 @@ export interface IFirestoreRouteRecord {
     [additionalProperties: string]: string;
   };
   saves: IRouteSave[];
-  stops: IRouteStop[];
+  stops: IRouteStopRecord[];
 }

@@ -190,9 +190,7 @@ export class CheckinRecordsComponent implements OnInit {
   }
   handleConfirmEdit(): void {
     this.closeEditDialog();
-    const updatedRecord = Object.assign({}, this.currentlyUpdatingRecord);
-    updatedRecord.properties = this.form.value;
-    this.backend.updateRecord(updatedRecord).catch((err) => {
+    this.backend.updateRecordProperties(this.currentlyUpdatingRecord.id as string, this.form.value).catch((err) => {
       if (err) {
         alert(`Error updating record. Please try again, or let us know. \n ${err}`);
       }

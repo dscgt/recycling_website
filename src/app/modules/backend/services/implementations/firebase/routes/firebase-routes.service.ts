@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { AngularFirestoreCollection, DocumentChangeAction, AngularFirestore } from '@angular/fire/firestore';
 import { IBackendRoutes } from '../../../interfaces/routes';
 import { Observable } from 'rxjs';
-import { IRoute, IRouteRecord, IRouteGroup, IField, InputType } from 'src/app/modules/backend/types';
+import { IRoute, IRouteRecord, IRouteGroup, IField, InputType, IRouteStopRecord } from 'src/app/modules/backend/types';
 import { map } from 'rxjs/operators';
 import { IFirestoreRouteRecord } from '../types';
 
@@ -89,12 +89,11 @@ export class FirebaseRoutesService implements IBackendRoutes {
     this.groupsCollection.doc(id).set(forUpdate);
   }
 
-  public updateRecord(recordId: string, newProperties: { value: string }): Promise<void> {
-    // TODO figure out
-    // return this.recordsCollection.doc(recordId).update({
-    //   properties: newProperties
-    // });
-    return Promise.resolve();
+  public updateRecord(recordId: string, newProperties: {value: string}, newStops: IRouteStopRecord[]): Promise<void> {
+    return this.recordsCollection.doc(recordId).update({
+      properties: newProperties,
+      stops: newStops
+    });
   }
 
   public deleteRoute(id?: string): void {

@@ -10,3 +10,4 @@ export { ICheckinGroupMember } from './icheckin-group-member.interface';
 export { IRouteGroup } from './iroute-group.interface';
 export { IRouteGroupMember } from './iroute-group-member.interface';
 export { IRouteSave } from './iroute-save.interface';
+export { IRouteStopRecord } from './iroute-stop-record.interface';

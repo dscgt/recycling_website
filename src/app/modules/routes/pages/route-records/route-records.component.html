@@ -67,22 +67,43 @@
       <mat-icon>close</mat-icon>
     </button>
   </div>
-  <mat-dialog-content>
-    <form [formGroup]="form" (ngSubmit)="handleConfirmEdit()">
-      <!-- TODO -->
-      <!-- <div *ngFor="let field of formFieldTitles">
-        <mat-form-field appearance="outline">
-          <mat-label>{{ field }}</mat-label>
-          <input matInput formControlName="{{ field }}">
-        </mat-form-field>
-      </div> -->
-    </form>
-  </mat-dialog-content>
-  <mat-dialog-actions align="end">
-    <button mat-icon-button aria-label="Confirm updating record"
-      [disabled]="(form.valid === null) ? false : !form.valid" type="submit">
-      <mat-icon>check</mat-icon>
-    </button>
-  </mat-dialog-actions>
+  <form [formGroup]="form" (ngSubmit)="handleConfirmEdit()">
+    <mat-dialog-content>
+      <!-- Top-level properties -->
+      <div formGroupName="properties">
+        <div *ngFor="let item of currentlyUpdatingRecord.properties | keyvalue">
+          <mat-form-field appearance="outline">
+            <mat-label>{{ item.key }}</mat-label>
+            <input matInput formControlName="{{ item.key }}">
+          </mat-form-field>
+        </div>
+      </div>
+      <!-- Stops and their properties -->
+      <div formArrayName="stops">
+        <mat-card mat-elevation-z1 *ngFor="let stop of stops.controls; index as i">
+          <div [formGroupName]="i">
+            <!-- The stop title is not actually exposed as a form element, but used as content -->
+            <mat-card-header>
+              <mat-card-subtitle>{{ stops.controls[i].value.title }}</mat-card-subtitle>
+            </mat-card-header>
+            <div formGroupName="properties">
+              <div *ngFor="let item of stops.controls[i].value.properties | keyvalue">
+                <mat-form-field appearance="outline">
+                  <mat-label>{{ item.key }}</mat-label>
+                  <input matInput formControlName="{{ item.key }}">
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+        </mat-card>
+      </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-icon-button aria-label="Confirm updating record"
+        [disabled]="(form.valid === null) ? false : !form.valid" type="submit">
+        <mat-icon>check</mat-icon>
+      </button>
+    </mat-dialog-actions>
+  </form>
 </app-projection-dialog>
 <!-- END edit record modal -->

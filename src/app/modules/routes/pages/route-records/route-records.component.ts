@@ -3,11 +3,11 @@ import { FbFunctionsService } from 'src/app/modules/backend/services/implementat
 import { DateTime } from 'luxon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { BackendRoutesService, IRouteRecord } from 'src/app/modules/backend';
+import { BackendRoutesService, IRouteRecord, IRouteStopRecord } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { IDisplayData } from 'src/app/modules/extra-material';
 import { MatDialogRef } from '@angular/material/dialog';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-route-records',
@@ -41,6 +41,10 @@ export class RouteRecordsComponent implements OnInit {
 
   // workaround, see checkin-groups component for explanation
   public recordToDelete: any;
+
+  get stops() {
+    return this.form.get('stops') as FormArray;
+  }
 
   constructor(
     private backend: BackendRoutesService,
@@ -121,13 +125,23 @@ export class RouteRecordsComponent implements OnInit {
   }
 
   populateForm(record: IRouteRecord): void {
-    // TODO
-    // const fields: any = {};
-    // Object.keys(record.properties).forEach((key: string) => {
-    //   fields[key] = [record.properties[key]]
-    // });
-    // this.formFieldTitles = Object.keys(record.properties);
-    // this.form = this.fb.group(fields);
+    const properties: any = {};
+    Object.keys(record.properties).forEach((key: string) => {
+      properties[key] = [record.properties[key], Validators.required]
+    });
+    this.form = this.fb.group({
+      properties: this.fb.group(properties),
+      stops: this.fb.array(record.stops.map((stopRecord: IRouteStopRecord) => {
+        const stopProperties: any = {};
+        Object.keys(stopRecord.properties).forEach((key: string) => {
+          stopProperties[key] = [stopRecord.properties[key], Validators.required]
+        });
+        return this.fb.group({
+          title: [stopRecord.title],
+          properties: this.fb.group(stopProperties)
+        })
+      }))
+    });
   }
 
   // modal-related functions
@@ -156,9 +170,8 @@ export class RouteRecordsComponent implements OnInit {
   }
   handleConfirmEdit(): void {
     this.closeEditDialog();
-    const something = Object.assign({}, this.currentlyUpdatingRecord);
-    // TODO: now what?
-    this.backend.updateRecord(something).catch((err) => {
+    const newRecord: IRouteRecord = Object.assign({}, this.currentlyUpdatingRecord);
+    this.backend.updateRecord(newRecord.id as string, this.form.value.properties, this.form.value.stops).catch((err) => {
       if (err) {
         alert(`Error updating record. Please try again, or let us know. \n ${err}`);
       }

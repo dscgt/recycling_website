@@ -1,4 +1,4 @@
-import { IRouteStop } from './iroute-stop.interface';
+import { IRouteStopRecord } from './iroute-stop-record.interface';
 import { IRouteSave } from './iroute-save.interface';
 
 export interface IRouteRecord {
@@ -6,10 +6,10 @@ export interface IRouteRecord {
   endTime: Date;
   modelId: string;
   modelTitle: string;
-  id: string;
+  id?: string;
   properties: {
     [additionalProperties: string]: string;
   };
   saves: IRouteSave[];
-  stops: IRouteStop[];
+  stops: IRouteStopRecord[];
 }
