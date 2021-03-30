@@ -2,12 +2,15 @@
   "name": "recycling-frontend",
   "version": "0.0.0",
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
     "build": "ng build",
-    "test": "ng test",
+    "build-prod": "ng build --prod",
+    "dev": "ng serve",
+    "e2e": "ng e2e",
+    "emulate": "firebase emulators:start",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "ng": "ng",
+    "start": "concurrently \"npm run dev\" \"npm run emulate\"",
+    "test": "ng test"
   },
   "private": true,
   "dependencies": {
@@ -38,8 +41,9 @@
     "@types/jasminewd2": "~2.0.3",
     "@types/luxon": "^1.25.0",
     "@types/node": "^12.12.54",
-    "codelyzer": "^6.0.0",
     "angular-cli-ghpages": "^1.0.0-rc.1",
+    "codelyzer": "^6.0.0",
+    "concurrently": "^6.0.0",
     "firebase-tools": "^8.9.2",
     "fuzzy": "^0.1.3",
     "inquirer": "^6.2.2",
