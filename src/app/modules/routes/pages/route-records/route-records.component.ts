@@ -42,8 +42,12 @@ export class RouteRecordsComponent implements OnInit {
   // workaround, see checkin-groups component for explanation
   public recordToDelete: any;
 
+  // form getters
   get stops() {
     return this.form.get('stops') as FormArray;
+  }
+  get properties() {
+    return this.form.get('properties') as FormGroup;
   }
 
   constructor(
@@ -83,7 +87,7 @@ export class RouteRecordsComponent implements OnInit {
         accessorAsString: (record: IRouteRecord) => record.endTime.toLocaleString()
       }
     ];
-    this.form = this.fb.group({});
+    this.initEmptyForm();
   }
 
   handleViewRecords(): void {
@@ -142,6 +146,13 @@ export class RouteRecordsComponent implements OnInit {
         })
       }))
     });
+  }
+  
+  initEmptyForm(): void {
+    this.form = this.fb.group({
+      properties: {},
+      stops: this.fb.array([])
+    })
   }
 
   // modal-related functions

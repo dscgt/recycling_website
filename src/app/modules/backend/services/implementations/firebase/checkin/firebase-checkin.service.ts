@@ -24,12 +24,13 @@ export class FirebaseCheckinService implements IBackendCheckin {
 
   public getRecords(startDate: Date, endDate: Date): Observable<ICheckinRecord[]> {
     const query = this.firestore.collection<IFirestoreCheckinRecord>('checkin_records', ref => ref.where('checkoutTime', '>', startDate).where('checkoutTime', '<', endDate));
-    return query.valueChanges().pipe(
+    return query.valueChanges({ idField: 'id' }).pipe(
       map((rawRecords: IFirestoreCheckinRecord[]): ICheckinRecord[] => {
         return rawRecords.map((rawRecord: IFirestoreCheckinRecord): ICheckinRecord => {
           const record: ICheckinRecord = { ...rawRecord } as unknown as ICheckinRecord;
           record.checkinTime = rawRecord.checkinTime.toDate();
           record.checkoutTime = rawRecord.checkoutTime.toDate();
+          record.id = rawRecord.id;
           return record;
         });
       })

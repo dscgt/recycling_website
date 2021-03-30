@@ -6,7 +6,7 @@ export interface IFirestoreRouteRecord {
   endTime: ITimestamp;
   modelId: string;
   modelTitle: string;
-  id: string;
+  id?: string;
   properties: {
     [additionalProperties: string]: string;
   };

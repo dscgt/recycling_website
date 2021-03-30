@@ -5,6 +5,7 @@ export interface IFirestoreCheckinRecord {
   modelTitle: string;
   checkinTime: ITimestamp;
   checkoutTime: ITimestamp;
+  id?: string;
   properties: {
     [additionalProperties: string]: string;
   }

@@ -37,7 +37,7 @@
     [displayData]="displayData">
     <ng-template let-record>
       <div class='row-buttons-wrapper'>
-        <button mat-raised-button color="primary" aria-label="Edit This Record" (click)="handleStartEdit(record)" type="button">Edit This Record</button>
+        <button mat-raised-button color="primary" aria-label="View or Edit This Record" (click)="handleStartEdit(record)" type="button">View/Edit This Record</button>
         <button mat-raised-button color="warn" aria-label="Delete This Record" (click)="handleStartDeletion(record)" type="button">Delete This Record</button>
       </div>
     </ng-template>
@@ -71,7 +71,7 @@
     <mat-dialog-content>
       <!-- Top-level properties -->
       <div formGroupName="properties">
-        <div *ngFor="let item of currentlyUpdatingRecord.properties | keyvalue">
+        <div *ngFor="let item of properties.value | keyvalue">
           <mat-form-field appearance="outline">
             <mat-label>{{ item.key }}</mat-label>
             <input matInput formControlName="{{ item.key }}">
@@ -84,10 +84,10 @@
           <div [formGroupName]="i">
             <!-- The stop title is not actually exposed as a form element, but used as content -->
             <mat-card-header>
-              <mat-card-subtitle>{{ stops.controls[i].value.title }}</mat-card-subtitle>
+              <mat-card-subtitle>{{ stop.value.title }}</mat-card-subtitle>
             </mat-card-header>
             <div formGroupName="properties">
-              <div *ngFor="let item of stops.controls[i].value.properties | keyvalue">
+              <div *ngFor="let item of stop.value.properties | keyvalue">
                 <mat-form-field appearance="outline">
                   <mat-label>{{ item.key }}</mat-label>
                   <input matInput formControlName="{{ item.key }}">
