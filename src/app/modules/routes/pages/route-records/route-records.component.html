@@ -71,7 +71,7 @@
     <mat-dialog-content>
       <!-- Top-level properties -->
       <div formGroupName="properties">
-        <div *ngFor="let item of properties.value | keyvalue">
+        <div *ngFor="let item of properties.controls | keyvalue">
           <mat-form-field appearance="outline">
             <mat-label>{{ item.key }}</mat-label>
             <input matInput formControlName="{{ item.key }}">
@@ -87,7 +87,7 @@
               <mat-card-subtitle>{{ stop.value.title }}</mat-card-subtitle>
             </mat-card-header>
             <div formGroupName="properties">
-              <div *ngFor="let item of stop.value.properties | keyvalue">
+              <div *ngFor="let item of stop.get('properties').controls | keyvalue">
                 <mat-form-field appearance="outline">
                   <mat-label>{{ item.key }}</mat-label>
                   <input matInput formControlName="{{ item.key }}">

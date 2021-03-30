@@ -89,11 +89,27 @@ export class FirebaseRoutesService implements IBackendRoutes {
     this.groupsCollection.doc(id).set(forUpdate);
   }
 
+  /**
+   * Updates a record with new properties and new stops. If nothing is passed into newProperties or newStops,
+   * no action will be taken. If only newProperties or newStops are provided, then only properties or stops
+   * respectively will be updated.
+   * @param recordId the ID of the record to update
+   * @param newProperties 
+   * @param newStops 
+   * @returns 
+   */
   public updateRecord(recordId: string, newProperties: {value: string}, newStops: IRouteStopRecord[]): Promise<void> {
-    return this.recordsCollection.doc(recordId).update({
-      properties: newProperties,
-      stops: newStops
-    });
+    if (!newProperties && !newStops) {
+      return Promise.resolve();
+    }
+    let updateObj:any = {};
+    if (newProperties) {
+      updateObj.stops = newStops;
+    }
+    if (newStops) { 
+      updateObj.properties = newProperties;
+    }
+    return this.recordsCollection.doc(recordId).update(updateObj);
   }
 
   public deleteRoute(id?: string): void {
