@@ -23,6 +23,8 @@ export class CheckinGroupComponent implements OnInit {
   private controlConfirmationDialogSubject$: BehaviorSubject<boolean>;
 
   public groups$: Observable<ICheckinGroup[]>;
+  // maps a group ID to an array of titles of models which use that group
+  public groupsAndModels$: Observable<Map<string, string[]>>;
   public displayData: IDisplayData<ICheckinGroup>[];
   public controlCreationDialog$: Observable<boolean>;
   public controlConfirmationDialog$: Observable<boolean>;
@@ -60,6 +62,33 @@ export class CheckinGroupComponent implements OnInit {
     this.controlConfirmationDialog$ = this.controlConfirmationDialogSubject$.asObservable();
 
     this.groups$ = this.backend.getGroups();
+
+    this.groupsAndModels$ = this.backend.getModels().pipe(
+      map((models: ICheckinModel[]) => {
+        const toReturnWithSets = new Map<string, Set<string>>();
+        // check all models for groupId and create a map groupId -> [modelTitle, modelTitle, ...]
+        for (let model of models) {
+          for (let field of model.fields) {
+            if (field.groupId) {
+              const thisGroupId: string = typeof field.groupId === 'string'
+                ? field.groupId
+                : field.groupId.id;
+              if (!toReturnWithSets.has(thisGroupId)) {
+                toReturnWithSets.set(thisGroupId, new Set());
+              }
+              toReturnWithSets.get(thisGroupId)?.add(model.title);
+            }
+          }
+        }
+        // convert to proper form
+        const toReturn = new Map<string, string[]>();
+        for (let [groupId, set] of toReturnWithSets) {
+          toReturn.set(groupId, Array.from(set));
+        }
+        return toReturn;
+      })
+    );
+
     this.displayData = [
       {
         name: "Title",
@@ -181,7 +210,7 @@ export class CheckinGroupComponent implements OnInit {
   public closeConfirmationDialog(): void {
     this.controlConfirmationDialogSubject$.next(false);
   }
-  
+
   /**
    * For use with form controls which require validation to avoid duplicating a title which already exists among already-created groups.
    * @param allow Group titles to allow. This excludes them from validation checks; if a title which already exists is specified here, then it will still pass validation. 

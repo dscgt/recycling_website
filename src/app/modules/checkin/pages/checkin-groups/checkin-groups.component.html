@@ -6,8 +6,10 @@
   [displayData]="displayData">
   <ng-template let-group>
     <div class='row-buttons-wrapper'>
+      <p *ngIf="(groupsAndModels$ | async)?.has(group.id)" >In use by: {{ (groupsAndModels$ | async)?.get(group.id).join(', ') }}</p>
       <button mat-raised-button color="primary" aria-label="Edit This Group" (click)="openCreationDialog(group, true)" type="button">Edit This Group</button>
-      <button mat-raised-button color="warn" aria-label="Delete This Group" (click)="confirmDeleteGroup(group)" type="button">Delete This Group</button>
+      <button mat-raised-button color="warn" aria-label="Delete This Group" (click)="confirmDeleteGroup(group)" type="button"
+        [disabled]="(groupsAndModels$ | async)?.has(group.id)">Delete This Group</button>
     </div>
   </ng-template>
 </app-expansion-table>

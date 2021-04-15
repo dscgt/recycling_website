@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
-import { IRouteGroup, BackendRoutesService } from 'src/app/modules/backend';
+import { IRouteGroup, BackendRoutesService, IRoute } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormArray, FormBuilder, AsyncValidatorFn, FormControl, ValidationErrors } from '@angular/forms';
@@ -22,6 +22,8 @@ export class RouteGroupComponent implements OnInit {
   private controlConfirmationDialogSubject$: BehaviorSubject<boolean>;
 
   public groups$: Observable<IRouteGroup[]>;
+  // maps a group ID to an array of titles of models which use that group
+  public groupsAndModels$: Observable<Map<string, string[]>>;
   public displayData: IDisplayData<IRouteGroup>[];
   public controlCreationDialog$: Observable<boolean>;
   public creationDialogRef: MatDialogRef<TemplateRef<any>>;
@@ -58,6 +60,34 @@ export class RouteGroupComponent implements OnInit {
     this.controlConfirmationDialog$ = this.controlConfirmationDialogSubject$.asObservable();
 
     this.groups$ = this.backend.getGroups();
+
+    this.groupsAndModels$ = this.backend.getRoutes().pipe(
+      map((models: IRoute[]) => {
+        // check all models for groupId and create a map groupId -> [modelTitle, modelTitle, ...]
+        const toReturnWithSets = new Map<string, Set<string>>();
+        for (let model of models) {
+          const allFields = model.fields.concat(model.stopData.fields);
+          for (let field of allFields) {
+            if (field.groupId) {
+              const thisGroupId: string = typeof field.groupId === 'string'
+                ? field.groupId
+                : field.groupId.id;
+              if (!toReturnWithSets.has(thisGroupId)) {
+                toReturnWithSets.set(thisGroupId, new Set());
+              }
+              toReturnWithSets.get(thisGroupId)?.add(model.title);
+            }
+          }
+        }
+        // convert to proper form
+        const toReturn = new Map<string, string[]>();
+        for (let [groupId, set] of toReturnWithSets) {
+          toReturn.set(groupId, Array.from(set));
+        }
+        return toReturn;
+      })
+    );
+
     this.displayData = [
       {
         name: "Title",
