@@ -44,7 +44,7 @@ To run locally for development:
       1. Firestore and Functions are emulated. Authentication uses production auth data, and is not emulated due to lack of need. 
       1. Firestore Rules are not emulated, so be mindful when testing new changes.
       1. If you need the emulated database to contain record data, there are two Functions endpoints (`seedRouteRecords` and `seedCheckinRecords`) to help you by seeding some data.
-      2. A Firebase Hosting version of our website is emulated, at http://localhost:5000/. It may behave unexpectedly, so use the 4200 website instead. For some reason, this can't be shut this off, but we can just ignore it.
+      2. A Firebase Hosting version of our website is emulated, at http://localhost:5000/. It may behave unexpectedly, so use the 4200 website instead. For some reason, this can't be shut off, but we can just ignore it.
 
 ### Deploying this code
 

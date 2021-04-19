@@ -12,22 +12,25 @@ import { map } from 'rxjs/operators';
 export class FirebaseCheckinService implements IBackendCheckin {
   private modelsCollection: AngularFirestoreCollection<ICheckinModel>;
   private groupsCollection: AngularFirestoreCollection<ICheckinGroup>;
+  private recordsCollection: AngularFirestoreCollection<ICheckinRecord>;
 
   constructor(
     private readonly firestore: AngularFirestore
   ) {
     this.groupsCollection = this.firestore.collection<ICheckinGroup>('checkin_groups');
     this.modelsCollection = this.firestore.collection<ICheckinModel>('checkin_models');
+    this.recordsCollection = this.firestore.collection<ICheckinRecord>('checkin_records');
   }
 
   public getRecords(startDate: Date, endDate: Date): Observable<ICheckinRecord[]> {
     const query = this.firestore.collection<IFirestoreCheckinRecord>('checkin_records', ref => ref.where('checkoutTime', '>', startDate).where('checkoutTime', '<', endDate));
-    return query.valueChanges().pipe(
+    return query.valueChanges({ idField: 'id' }).pipe(
       map((rawRecords: IFirestoreCheckinRecord[]): ICheckinRecord[] => {
         return rawRecords.map((rawRecord: IFirestoreCheckinRecord): ICheckinRecord => {
           const record: ICheckinRecord = { ...rawRecord } as unknown as ICheckinRecord;
           record.checkinTime = rawRecord.checkinTime.toDate();
           record.checkoutTime = rawRecord.checkoutTime.toDate();
+          record.id = rawRecord.id;
           return record;
         });
       })
@@ -82,6 +85,17 @@ export class FirebaseCheckinService implements IBackendCheckin {
     this.groupsCollection.doc(id).set(forUpdate);
   }
 
+  /**
+   * Updates the `properties` field of a checkin record
+   * @param recordId 
+   * @param newProperties 
+   */
+  public updateRecordProperties(recordId: string, newProperties: {value: string }): Promise<void> {
+    return this.recordsCollection.doc(recordId).update({
+      properties: newProperties
+    });
+  }
+
   public deleteModel(id?: string): void {
     if (!id) {
       return;
@@ -94,6 +108,10 @@ export class FirebaseCheckinService implements IBackendCheckin {
       return;
     }
     this.groupsCollection.doc(id).delete();
+  }
+
+  public deleteRecord(id: string): Promise<void> {
+    return this.recordsCollection.doc(id).delete();
   }
 
   /**

@@ -1,5 +1,4 @@
 export { IRouteRecord } from './iroute-record.interface';
-export { ICrewmember } from './icrewmember.interface';
 export { InputType } from './input-type.enum';
 export { IRoute } from './iroute.interface';
 export { IRouteStop } from './iroute-stop.interface';
@@ -10,3 +9,5 @@ export { ICheckinGroup } from './icheckin-group.interface';
 export { ICheckinGroupMember } from './icheckin-group-member.interface';
 export { IRouteGroup } from './iroute-group.interface';
 export { IRouteGroupMember } from './iroute-group-member.interface';
+export { IRouteSave } from './iroute-save.interface';
+export { IRouteStopRecord } from './iroute-stop-record.interface';

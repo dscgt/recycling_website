@@ -1,15 +1,15 @@
-import { IRouteStop } from './iroute-stop.interface';
-import { ICrewmember } from './icrewmember.interface';
-import { IRoute } from './iroute.interface';
+import { IRouteStopRecord } from './iroute-stop-record.interface';
+import { IRouteSave } from './iroute-save.interface';
 
 export interface IRouteRecord {
-  crewmember: ICrewmember;
-  comments: string;
-  tonnage: number;
   startTime: Date;
   endTime: Date;
-  route: IRoute;
-  id: string;
-  stops: IRouteStop[];
-  [additional: string]: any;
+  modelId: string;
+  modelTitle: string;
+  id?: string;
+  properties: {
+    [additionalProperties: string]: string;
+  };
+  saves: IRouteSave[];
+  stops: IRouteStopRecord[];
 }

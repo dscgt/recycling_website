@@ -3,8 +3,6 @@ import { DocumentReference, AngularFirestore } from '@angular/fire/firestore';
 // import respective AngularFirestore versions and use?
 import { Observable, of, EMPTY } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { ICrewmember } from 'src/app/modules/backend/types';
-import { ITimestamp, IFirestoreCrewmember } from '../types';
 
 @Injectable({
   providedIn: 'root'
@@ -23,24 +21,6 @@ export class FirebaseHelperService {
         }
         return EMPTY;
       })
-    );
-  }
-
-  public convertCrewmember(rawCrewmember: IFirestoreCrewmember): Observable<ICrewmember> {
-    const crewmember = { ...rawCrewmember } as unknown as ICrewmember;
-    crewmember.hours = [];
-    rawCrewmember.hours.forEach((rawHour: { start: ITimestamp, stop: ITimestamp }) => {
-      crewmember.hours.push({
-        start: rawHour.start.toDate(),
-        stop: rawHour.stop.toDate()
-      });
-    });
-    return of(crewmember);
-  }
-
-  public convertCrewmember$(rawCrewmember$: Observable<IFirestoreCrewmember>): Observable<ICrewmember> {
-    return rawCrewmember$.pipe(
-      switchMap((rawCrewmember: IFirestoreCrewmember) => this.convertCrewmember(rawCrewmember))
     );
   }
 }
