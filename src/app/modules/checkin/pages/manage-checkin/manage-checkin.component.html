@@ -1,4 +1,4 @@
-<!-- row content -->
+<!-- rows and content -->
 <app-expansion-table
   [defaultPageSize]="10"
   [pageSizeOptions]="[5, 10, 25, 50]"
@@ -11,7 +11,7 @@
     </div>
   </ng-template>
 </app-expansion-table>
-<!-- END row content -->
+<!-- END rows and content -->
 
 <!-- deletion confirmation modal -->
 <app-projection-dialog [control$]="controlDeletionDialog$" (getDialogRef)="receiveDeletionDialogRef($event)">

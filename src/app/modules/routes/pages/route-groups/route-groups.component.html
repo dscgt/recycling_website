@@ -1,4 +1,4 @@
-<!-- Row content -->
+<!-- rows and content -->
 <app-expansion-table
   [defaultPageSize]="10"
   [pageSizeOptions]="[5, 10, 25, 50]"
@@ -13,7 +13,7 @@
     </div>
   </ng-template>
 </app-expansion-table>
-<!-- END row content -->
+<!-- END rows and content -->
 
 <!-- Deletion confirmation dialog -->
 <app-projection-dialog [control$]="controlDeletionDialog$" (getDialogRef)="receiveDeletionDialogRef($event)">
@@ -35,7 +35,7 @@
   (click)="handleOpenCreationDialog()">
 </app-fab>
 
-<!-- Creation form -->
+<!-- creation form modal -->
 <app-projection-dialog
   [control$]="controlCreationDialog$"
   (onClose)="handleCreationDialogClosed()"
@@ -109,4 +109,4 @@
     </button>
   </mat-dialog-actions>
 </app-projection-dialog>
-<!-- END creation form -->
+<!-- END creation form modal -->
