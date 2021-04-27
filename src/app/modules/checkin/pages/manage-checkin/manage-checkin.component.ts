@@ -19,31 +19,26 @@ export class ManageCheckinComponent implements OnInit {
   @ViewChild(ExpansionTableComponent)
   private expansionTable: ExpansionTableComponent<ICheckinModel>;
 
+  public models$: Observable<ICheckinModel[]>;
+  public groups$: Observable<ICheckinGroup[]>;
+  public displayData: IDisplayData<ICheckinModel>[];
+  public createModelForm: FormGroup;
+  public fieldInputTypes: string[];
+  public fieldInputTypeValues: string[];
+  public modelToDelete: ICheckinModel;
+
+  // Modal-related fields
   private controlCreationDialogSubject$: BehaviorSubject<boolean>;
   private controlDeletionDialogSubject$: BehaviorSubject<boolean>;
-
-  public models$: Observable<ICheckinModel[]>;
-  public displayData: IDisplayData<ICheckinModel>[];
   public controlCreationDialog$: Observable<boolean>;
   public controlDeletionDialog$: Observable<boolean>;
   public creationDialogRef: MatDialogRef<TemplateRef<any>>;
   public deletionDialogRef: MatDialogRef<TemplateRef<any>>;
-  public createModelForm: FormGroup;
-  public fieldInputTypes: string[];
-  public fieldInputTypeValues: string[];
-  public groups$: Observable<ICheckinGroup[]>;
 
-  // fields related to editing groups; see openCreationDialog
-  public editMode: boolean = false;
+  // Fields used during editing
+  public isEditMode: boolean = false;
   public storedCreationForm: FormGroup;
   public currentlyUpdatingModelId: string | undefined;
-
-  // workaround, see checkin-groups component for explanation
-  public modelToDelete: ICheckinModel;
-
-  get fields(): FormArray {
-    return this.createModelForm.get('fields') as FormArray;
-  }
 
   constructor(
     private backend: BackendCheckinService,
@@ -51,6 +46,10 @@ export class ManageCheckinComponent implements OnInit {
     private cdref: ChangeDetectorRef,
     private utils: UtilsService
   ) { }
+
+  get fields(): FormArray {
+    return this.createModelForm.get('fields') as FormArray;
+  }
 
   ngOnInit(): void {
     this.fieldInputTypes = Object.keys(InputType);
@@ -75,7 +74,7 @@ export class ManageCheckinComponent implements OnInit {
         accessorAsString: (model: ICheckinModel) => model.fields.length.toString()
       },
     ];
-    this.clearCreationDialog();
+    this.clearCreationForm();
   }
 
   // This is a workaround for a bug with Angular / Angular Forms
@@ -100,28 +99,7 @@ export class ManageCheckinComponent implements OnInit {
     });
   }
 
-  public addField(): void {
-    this.fields.push(this.createField());
-  }
-
-  public removeField(index: number): void {
-    if (this.fields.length <= 1) {
-      return;
-    }
-
-    this.fields.removeAt(index);
-  }
-
-  // swaps the contents of the field at [a] with the field at [b]
-  public swapField(a: number, b: number): void {
-    if (a < 0 || b < 0 || a >= this.fields.length || b >= this.fields.length) {
-      return;
-    }
-
-    this.utils.swapFormArray(this.fields, a, b);
-  }
-
-  public clearCreationDialog(): void {
+  public clearCreationForm(): void {
     this.createModelForm = this.fb.group({
       title: ['', { asyncValidators: [this.modelTitleValidator()] }],
       fields: this.fb.array([this.createField()], { validators: [this.modelFieldsValidator] }),
@@ -138,64 +116,74 @@ export class ManageCheckinComponent implements OnInit {
     }, { validators: [this.groupIdValidator] });
   }
 
-  public confirmDeleteModel(model: ICheckinModel): void {
-    this.modelToDelete = model;
-    this.controlDeletionDialogSubject$.next(true);
+  public handleAddField(): void {
+    this.fields.push(this.createField());
   }
 
-  public onDelete(): void {
-    this.closeDeletionDialog();
-    this.backend.deleteModel(this.modelToDelete.id);
+  public handleRemoveField(index: number): void {
+    if (this.fields.length <= 1) {
+      return;
+    }
+    this.fields.removeAt(index);
   }
 
-  public onSubmit(): void {
+  // swaps the contents of the field at [a] with the field at [b]
+  public handleSwapField(a: number, b: number): void {
+    if (a < 0 || b < 0 || a >= this.fields.length || b >= this.fields.length) {
+      return;
+    }
+
+    this.utils.swapFormArray(this.fields, a, b);
+  }
+
+  public handleCreate(): void {
     const model: ICheckinModel = this.createModelForm.value;
-    if (this.editMode) {
+    if (this.isEditMode) {
       model.id = this.currentlyUpdatingModelId;
       this.backend.updateModel(model);
     } else {
       this.backend.addModel(model);
-      this.clearCreationDialog();
+      this.clearCreationForm();
     }
-    this.closeCreationDialog();
+    this.handleCloseCreationDialog();
   }
 
-  public openCreationDialog(model?: ICheckinModel, editMode?: boolean): void {
-    this.editMode = editMode || false;
-    if (editMode && model) {
+  public handleDelete(): void {
+    this.handleCloseDeletionDialog();
+    this.backend.deleteModel(this.modelToDelete.id);
+  }
+
+  // Modal-handling functions
+  public receiveCreationDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
+    this.creationDialogRef = ref;
+  }
+  public handleOpenCreationDialog(model?: ICheckinModel, isEditMode?: boolean): void {
+    this.isEditMode = isEditMode || false;
+    if (isEditMode && model) {
       // save the old state of the form before replacing with model to update
       // also save the model-to-update's ID so that we can refer to it on confirm
       this.storedCreationForm = this.createModelForm;
       this.currentlyUpdatingModelId = model.id;
       this.prepopulateCreationForm(model);
     }
-    
     this.controlCreationDialogSubject$.next(true);
   }
-
-  public openDeletionDialog(): void {
-    this.controlDeletionDialogSubject$.next(true);
+  public handleCloseCreationDialog(): void {
+    this.controlCreationDialogSubject$.next(false);
   }
-
-  public creationDialogClosed(): void {
-    if (this.editMode && this.storedCreationForm) {
+  public handleCreationDialogClosed(): void {
+    if (this.isEditMode && this.storedCreationForm) {
       this.createModelForm = this.storedCreationForm;
     }
   }
-
-  public receiveCreationDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
-    this.creationDialogRef = ref;
-  }
-
   public receiveDeletionDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
     this.deletionDialogRef = ref;
   }
-
-  public closeCreationDialog(): void {
-    this.controlCreationDialogSubject$.next(false);
+  public handleOpenDeletionDialog(model: ICheckinModel): void {
+    this.modelToDelete = model;
+    this.controlDeletionDialogSubject$.next(true);
   }
-
-  public closeDeletionDialog(): void {
+  public handleCloseDeletionDialog(): void {
     this.controlDeletionDialogSubject$.next(false);
   }
 
@@ -219,7 +207,6 @@ export class ManageCheckinComponent implements OnInit {
       );
     }
   }
-
   /**
    * For use with FormArrays which require validation to ensure no two FormControl's within it have the same 'title' property.
    * In this context, this is used to prevent two fields from having the same title.
@@ -250,7 +237,6 @@ export class ManageCheckinComponent implements OnInit {
       return null;
     }
   }
-
   /**
    * Synchronous validator for use with FormControl's which represent fields. 
    * Ensures that groupId is required if type is specified. 

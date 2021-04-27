@@ -18,46 +18,43 @@ export class RouteGroupComponent implements OnInit {
   @ViewChild(ExpansionTableComponent)
   private expansionTable: ExpansionTableComponent<IRouteGroup>;
 
-  private controlCreationDialogSubject$: BehaviorSubject<boolean>;
-  private controlConfirmationDialogSubject$: BehaviorSubject<boolean>;
-
   public groups$: Observable<IRouteGroup[]>;
-  // maps a group ID to an array of titles of models which use that group
-  public groupsAndModels$: Observable<Map<string, string[]>>;
+  public groupsAndModels$: Observable<Map<string, string[]>>; // maps a group ID to an array of titles of models which use that group
   public displayData: IDisplayData<IRouteGroup>[];
-  public controlCreationDialog$: Observable<boolean>;
-  public creationDialogRef: MatDialogRef<TemplateRef<any>>;
-  public controlConfirmationDialog$: Observable<boolean>;
-  public confirmationDialogRef: MatDialogRef<TemplateRef<any>>;
   public createGroupForm: FormGroup;
   public fieldInputTypes: string[];
   public fieldInputTypeValues: string[];
-
-  // fields related to editing groups; see openCreationDialog
-  public editMode: boolean = false;
-  public storedCreationForm: FormGroup;
-  public currentlyUpdatingGroupId: string | undefined;
-
-  // workaround. app-expansion-table contains information for a group, and uses these to populate
-  // each row, however this bugs out with app-projection-dialog. 
   public groupToDelete: IRouteGroup;
 
-  get members(): FormArray {
-    return this.createGroupForm.get('members') as FormArray;
-  }
+  // Modal-related fields
+  private controlCreationDialogSubject$: BehaviorSubject<boolean>;
+  private controlDeletionDialogSubject$: BehaviorSubject<boolean>;
+  public controlCreationDialog$: Observable<boolean>;
+  public creationDialogRef: MatDialogRef<TemplateRef<any>>;
+  public controlDeletionDialog$: Observable<boolean>;
+  public deletionDialogRef: MatDialogRef<TemplateRef<any>>;
 
+  // fields related to editing groups
+  public isEditMode: boolean = false;
+  public storedCreationForm: FormGroup;
+  public currentlyUpdatingGroupId: string | undefined;
+  
   constructor(
     private backend: BackendRoutesService,
     private fb: FormBuilder,
     private utils: UtilsService
   ) { }
+    
+  get members(): FormArray {
+    return this.createGroupForm.get('members') as FormArray;
+  }
 
   ngOnInit(): void {
     // initialize dialog controls
     this.controlCreationDialogSubject$ = new BehaviorSubject<boolean>(false);
     this.controlCreationDialog$ = this.controlCreationDialogSubject$.asObservable();
-    this.controlConfirmationDialogSubject$ = new BehaviorSubject<boolean>(false);
-    this.controlConfirmationDialog$ = this.controlConfirmationDialogSubject$.asObservable();
+    this.controlDeletionDialogSubject$ = new BehaviorSubject<boolean>(false);
+    this.controlDeletionDialog$ = this.controlDeletionDialogSubject$.asObservable();
 
     this.groups$ = this.backend.getGroups();
 
@@ -102,7 +99,7 @@ export class RouteGroupComponent implements OnInit {
         accessorAsString: (group: IRouteGroup) => group.members.length.toString()
       },
     ];
-    this.clearCreationDialog();
+    this.clearCreationForm();
   }
 
   // Replaces the existing content of the form with the content of [group]
@@ -116,24 +113,11 @@ export class RouteGroupComponent implements OnInit {
     });
   }
 
-  public addMember(): void {
-    this.members.push(this.createMember());
-  }
-
-  public removeMember(index: number): void {
-    if (this.members.length <= 1) {
-      return;
-    }
-
-    this.members.removeAt(index);
-  }
-
-  public swapMember(a: number, b: number): void {
-    if (a < 0 || b < 0 || a >= this.members.length || b >= this.members.length) {
-      return;
-    }
-    
-    this.utils.swapFormArray(this.members, a, b);
+  public clearCreationForm(): void {
+    this.createGroupForm = this.fb.group({
+      title: ['', { asyncValidators: [this.groupTitleValidator()] }],
+      members: this.fb.array([this.createMember()]),
+    });
   }
 
   public createMember(): FormGroup {
@@ -142,9 +126,49 @@ export class RouteGroupComponent implements OnInit {
     });
   }
 
-  public openCreationDialog(group?: IRouteGroup, editMode?: boolean): void {
-    this.editMode = editMode || false;
-    if (editMode && group) {
+  public handleAddMember(): void {
+    this.members.push(this.createMember());
+  }
+
+  public handleRemoveMember(index: number): void {
+    if (this.members.length <= 1) {
+      return;
+    }
+
+    this.members.removeAt(index);
+  }
+
+  public handleSwapMember(a: number, b: number): void {
+    if (a < 0 || b < 0 || a >= this.members.length || b >= this.members.length) {
+      return;
+    }
+    this.utils.swapFormArray(this.members, a, b);
+  }
+
+  public handleCreate(): void {
+    const group: IRouteGroup = this.createGroupForm.value;
+    if (this.isEditMode) {
+      group.id = this.currentlyUpdatingGroupId;
+      this.backend.updateGroup(group);
+    } else {
+      this.backend.addGroup(group);
+      this.clearCreationForm();
+    }
+    this.handleCloseCreationDialog();
+  }
+
+  public handleDelete(): void {
+    this.handleCloseDeletionDialog();
+    this.backend.deleteGroup(this.groupToDelete.id);
+  }
+
+  // Modal-handling functions
+  public receiveCreationDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
+    this.creationDialogRef = ref;
+  }
+  public handleOpenCreationDialog(group?: IRouteGroup, isEditMode?: boolean): void {
+    this.isEditMode = isEditMode || false;
+    if (isEditMode && group) {
       // save the old state of the form before replacing with group to update
       // also save the group-to-update's ID so that we can refer to it on confirm
       this.storedCreationForm = this.createGroupForm;
@@ -153,56 +177,23 @@ export class RouteGroupComponent implements OnInit {
     }
     this.controlCreationDialogSubject$.next(true);
   }
-
-  public clearCreationDialog(): void {
-    this.createGroupForm = this.fb.group({
-      title: ['', { asyncValidators: [this.groupTitleValidator()] }],
-      members: this.fb.array([this.createMember()]),
-    });
-  }
-
-  public confirmDeleteGroup(group: IRouteGroup): void {
-    this.groupToDelete = group;
-    this.controlConfirmationDialogSubject$.next(true);
-  }
-
-  public onDelete(): void {
-    this.closeConfirmationDialog();
-    this.backend.deleteGroup(this.groupToDelete.id);
-  }
-
-  public onSubmit(): void {
-    const group: IRouteGroup = this.createGroupForm.value;
-    if (this.editMode) {
-      group.id = this.currentlyUpdatingGroupId;
-      this.backend.updateGroup(group);
-    } else {
-      this.backend.addGroup(group);
-      this.clearCreationDialog();
-    }
-    this.closeCreationDialog();
-  }
-
-  public receiveCreationDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
-    this.creationDialogRef = ref;
-  }
-
-  public closeCreationDialog(): void {
+  public handleCloseCreationDialog(): void {
     this.creationDialogRef?.close();
   }
-
-  public creationDialogClosed(): void {
-    if (this.editMode && this.storedCreationForm) {
+  public handleCreationDialogClosed(): void {
+    if (this.isEditMode && this.storedCreationForm) {
       this.createGroupForm = this.storedCreationForm;
     }
   }
-
-  public receiveConfirmationDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
-    this.confirmationDialogRef = ref;
+  public receiveDeletionDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
+    this.deletionDialogRef = ref;
   }
-
-  public closeConfirmationDialog(): void {
-    this.controlConfirmationDialogSubject$.next(false);
+  public handleOpenDeletionDialog(group: IRouteGroup): void {
+    this.groupToDelete = group;
+    this.controlDeletionDialogSubject$.next(true);
+  }
+  public handleCloseDeletionDialog(): void {
+    this.controlDeletionDialogSubject$.next(false);
   }  
 
   /**

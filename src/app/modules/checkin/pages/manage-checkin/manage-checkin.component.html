@@ -6,8 +6,8 @@
   [displayData]="displayData">
   <ng-template let-model>
     <div class='row-buttons-wrapper'>
-      <button mat-raised-button color="primary" aria-label="Edit This Check-in Option" (click)="openCreationDialog(model, true)" type="button">Edit This Check-in Option</button>
-      <button mat-raised-button color="warn" aria-label="Delete This Check-in Option" (click)="confirmDeleteModel(model)" type="button">Delete This Check-in Option</button>
+      <button mat-raised-button color="primary" aria-label="Edit This Check-in Option" (click)="handleOpenCreationDialog(model, true)" type="button">Edit This Check-in Option</button>
+      <button mat-raised-button color="warn" aria-label="Delete This Check-in Option" (click)="handleOpenDeletionDialog(model)" type="button">Delete This Check-in Option</button>
     </div>
   </ng-template>
 </app-expansion-table>
@@ -17,10 +17,10 @@
 <app-projection-dialog [control$]="controlDeletionDialog$" (getDialogRef)="receiveDeletionDialogRef($event)">
   <h2 mat-dialog-title>Are you sure you want to delete this check-in option?</h2>
   <mat-dialog-actions align="end">
-    <button (click)="closeDeletionDialog()" mat-icon-button aria-label="Cancel deleting check-in option" type="button">
+    <button (click)="handleCloseDeletionDialog()" mat-icon-button aria-label="Cancel deleting check-in option" type="button">
       <mat-icon>close</mat-icon>
     </button>
-    <button mat-icon-button aria-label="Confirm deleting check-in option" type="submit" (click)="onDelete()">
+    <button mat-icon-button aria-label="Confirm deleting check-in option" type="submit" (click)="handleDelete()">
       <mat-icon>check</mat-icon>
     </button>
   </mat-dialog-actions>
@@ -30,23 +30,23 @@
 <app-fab
   icon="add"
   label="Create a checkin item"
-  (click)="openCreationDialog()">
+  (click)="handleOpenCreationDialog()">
 </app-fab>
 
 <!-- creation form modal -->
 <app-projection-dialog
   [control$]="controlCreationDialog$"
-  (onClose)="creationDialogClosed()"
+  (onClose)="handleCreationDialogClosed()"
   (getDialogRef)="receiveCreationDialogRef($event)">
   <div id='form-title'>
     <h2 mat-dialog-title>Create a Checkin Item</h2>
-    <button (click)="closeCreationDialog()" mat-icon-button aria-label="Close check-in option form" type="button">
+    <button (click)="handleCloseCreationDialog()" mat-icon-button aria-label="Close check-in option form" type="button">
       <mat-icon>close</mat-icon>
     </button>
   </div>
   <mat-dialog-content>
 
-    <form [formGroup]="createModelForm" (ngSubmit)="onSubmit()">
+    <form [formGroup]="createModelForm" (ngSubmit)="handleCreate()">
 
       <p [hidden]="!(this.createModelForm.get('title')?.errors?.titleExistsAlready)" style='color: red'>This name already
         exists; please choose another one.</p>
@@ -93,13 +93,13 @@
                 </mat-form-field>
               </div>
               <div id='field-box-buttons-wrapper'>
-                <button *ngIf="fields.length > 1" mat-icon-button aria-label="Remove a field" (click)="removeField(i)" type="button">
+                <button *ngIf="fields.length > 1" mat-icon-button aria-label="Remove a field" (click)="handleRemoveField(i)" type="button">
                   <mat-icon>clear</mat-icon>
                 </button>
-                <button *ngIf="fields.length > 1 && i !== 0" mat-icon-button aria-label="Swap this field with the one above" (click)="swapField(i, i - 1)" type="button">
+                <button *ngIf="fields.length > 1 && i !== 0" mat-icon-button aria-label="Swap this field with the one above" (click)="handleSwapField(i, i - 1)" type="button">
                   <mat-icon>keyboard_arrow_up</mat-icon>
                 </button>
-                <button *ngIf="fields.length > 1 && i !== fields.length - 1" mat-icon-button aria-label="Swap this field with the one below" (click)="swapField(i, i + 1)" type="button">
+                <button *ngIf="fields.length > 1 && i !== fields.length - 1" mat-icon-button aria-label="Swap this field with the one below" (click)="handleSwapField(i, i + 1)" type="button">
                   <mat-icon>keyboard_arrow_down</mat-icon>
                 </button>
               </div>
@@ -116,11 +116,11 @@
 
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button mat-icon-button aria-label="Add another field" (click)="addField()" type="button">
+    <button mat-icon-button aria-label="Add another field" (click)="handleAddField()" type="button">
       <mat-icon>add</mat-icon>
     </button>
     <span class="spacer"></span>
-    <button mat-icon-button [attr.aria-label]="editMode ? 'Confirm updating check-in item' : 'Confirm creating check-in item'" [disabled]="(createModelForm.valid === null) ? false : !createModelForm.valid" type="submit" (click)="onSubmit()">
+    <button mat-icon-button [attr.aria-label]="isEditMode ? 'Confirm updating check-in item' : 'Confirm creating check-in item'" [disabled]="(createModelForm.valid === null) ? false : !createModelForm.valid" type="submit" (click)="handleCreate()">
       <mat-icon>check</mat-icon>
     </button>
   </mat-dialog-actions>

@@ -24,28 +24,26 @@ export class CheckinRecordsComponent implements OnInit {
   @ViewChild(ExpansionTableComponent)
   private expansionTable: ExpansionTableComponent<ICheckinRecord>;
 
-  // Modal-related fields
-  private controlDeletionDialogSubject$: BehaviorSubject<boolean>;
-  public controlDeletionDialog$: Observable<boolean>;
-  public deletionDialogRef: MatDialogRef<TemplateRef<any>>;
-  private controlEditDialogSubject$: BehaviorSubject<boolean>;
-  public controlEditDialog$: Observable<boolean>;
-  public editDialogRef: MatDialogRef<TemplateRef<any>>;
-  
-  // Form-related fields
-  public form: FormGroup;
-  public currentlyUpdatingRecord: ICheckinRecord;
-  public formFieldTitles: string[]; // workaround for not being able to use Object.keys in the HTML
-
   public records$: Observable<ICheckinRecord[]>;
   public displayData: IDisplayData<ICheckinRecord>[] = [];
   public disableButton: boolean = false;
   public selectScreen: boolean = true;
   public startDate: Date = DateTime.fromJSDate(new Date()).minus({ days: 7 }).toJSDate();
   public endDate: Date = new Date();
-
-  // workaround, see checkin-groups component for explanation
   public recordToDelete: any;
+
+  // Modal-related fields
+  private controlDeletionDialogSubject$: BehaviorSubject<boolean>;
+  public controlDeletionDialog$: Observable<boolean>;
+  public deletionDialogRef: MatDialogRef<TemplateRef<any>>;
+  private controlEditingDialogSubject$: BehaviorSubject<boolean>;
+  public controlEditingDialog$: Observable<boolean>;
+  public editingDialogRef: MatDialogRef<TemplateRef<any>>;
+  
+  // Form-related fields
+  public form: FormGroup;
+  public currentlyUpdatingRecord: ICheckinRecord;
+  public formFieldTitles: string[]; // workaround for not being able to use Object.keys in the HTML
 
   constructor(
     private backend: BackendCheckinService,
@@ -58,10 +56,19 @@ export class CheckinRecordsComponent implements OnInit {
     // Modal initializations
     this.controlDeletionDialogSubject$ = new BehaviorSubject<boolean>(false);
     this.controlDeletionDialog$ = this.controlDeletionDialogSubject$.asObservable();
-    this.controlEditDialogSubject$ = new BehaviorSubject<boolean>(false);
-    this.controlEditDialog$ = this.controlEditDialogSubject$.asObservable();
+    this.controlEditingDialogSubject$ = new BehaviorSubject<boolean>(false);
+    this.controlEditingDialog$ = this.controlEditingDialogSubject$.asObservable();
 
     this.form = this.fb.group({});
+  }
+
+  populateForm(record: ICheckinRecord): void {
+    const fields: any = {};
+    Object.keys(record.properties).forEach((key: string) => {
+      fields[key] = [record.properties[key]]
+    });
+    this.formFieldTitles = Object.keys(record.properties);
+    this.form = this.fb.group(fields);
   }
 
   handleViewRecords(): void {
@@ -154,46 +161,37 @@ export class CheckinRecordsComponent implements OnInit {
     this.selectScreen = true;
   }
 
-  populateForm(record: ICheckinRecord): void {
-    const fields:any = {};
-    Object.keys(record.properties).forEach((key: string) => {
-      fields[key] = [record.properties[key]]
-    });
-    this.formFieldTitles = Object.keys(record.properties);
-    this.form = this.fb.group(fields);
-  }
-
-  // modal-related functions
-  openDeletionDialog(): void { this.controlDeletionDialogSubject$.next(true) }
-  closeDeletionDialog(): void { this.controlDeletionDialogSubject$.next(false) }
-  receiveDeletionDialogRef(ref: MatDialogRef<TemplateRef<any>>): void { this.deletionDialogRef = ref }
-  handleStartDeletion(record: ICheckinRecord): void {
-    this.recordToDelete = record;
-    this.openDeletionDialog();
-  }
-  handleConfirmDeletion(): void {
-    this.closeDeletionDialog();
+  handleDelete(): void {
+    this.handleCloseDeletionDialog();
     this.backend.deleteRecord(this.recordToDelete.id).catch((err) => {
       if (err) {
         alert(`Error deleting record. Please try again, or let us know. \n ${err}`);
       }
     });
   }
-  openEditDialog(): void { this.controlEditDialogSubject$.next(true) }
-  closeEditDialog(): void { this.controlEditDialogSubject$.next(false) }
-  receiveEditDialogRef(ref: MatDialogRef<TemplateRef<any>>): void { this.editDialogRef = ref }
-  handleStartEdit(record: ICheckinRecord): void {
-    this.currentlyUpdatingRecord = record;
-    this.populateForm(record);
-    this.openEditDialog();
-    this.cd.detectChanges(); // workaround for occasional ExpressionChangedAfterItHasBeenCheckedError
-  }
+
   handleConfirmEdit(): void {
-    this.closeEditDialog();
+    this.handleCloseEditingDialog();
     this.backend.updateRecordProperties(this.currentlyUpdatingRecord.id as string, this.form.value).catch((err) => {
       if (err) {
         alert(`Error updating record. Please try again, or let us know. \n ${err}`);
       }
     });
   }
+
+  // Modal-handling functions
+  receiveDeletionDialogRef(ref: MatDialogRef<TemplateRef<any>>): void { this.deletionDialogRef = ref }
+  handleOpenDeletionDialog(record: ICheckinRecord): void {
+    this.recordToDelete = record;
+    this.controlDeletionDialogSubject$.next(true);
+  }
+  handleCloseDeletionDialog(): void { this.controlDeletionDialogSubject$.next(false) }
+  receiveEditingDialogRef(ref: MatDialogRef<TemplateRef<any>>): void { this.editingDialogRef = ref }
+  handleOpenEditingDialog(record: ICheckinRecord): void {
+    this.currentlyUpdatingRecord = record;
+    this.populateForm(record);
+    this.controlEditingDialogSubject$.next(true);
+    this.cd.detectChanges(); // workaround for occasional ExpressionChangedAfterItHasBeenCheckedError
+  }
+  handleCloseEditingDialog(): void { this.controlEditingDialogSubject$.next(false) }
 }

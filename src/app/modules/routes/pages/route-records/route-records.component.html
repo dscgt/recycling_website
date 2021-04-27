@@ -37,8 +37,8 @@
     [displayData]="displayData">
     <ng-template let-record>
       <div class='row-buttons-wrapper'>
-        <button mat-raised-button color="primary" aria-label="View or Edit This Record" (click)="handleStartEdit(record)" type="button">View/Edit This Record</button>
-        <button mat-raised-button color="warn" aria-label="Delete This Record" (click)="handleStartDeletion(record)" type="button">Delete This Record</button>
+        <button mat-raised-button color="primary" aria-label="View or Edit This Record" (click)="handleOpenEditingDialog(record)" type="button">View/Edit This Record</button>
+        <button mat-raised-button color="warn" aria-label="Delete This Record" (click)="handleOpenDeletionDialog(record)" type="button">Delete This Record</button>
       </div>
     </ng-template>
   </app-expansion-table>
@@ -49,10 +49,10 @@
 <app-projection-dialog [control$]="controlDeletionDialog$" (getDialogRef)="receiveDeletionDialogRef($event)">
   <h2 mat-dialog-title>Are you sure you want to delete this record?</h2>
   <mat-dialog-actions align="end">
-    <button (click)="closeDeletionDialog()" mat-icon-button aria-label="Cancel deleting record" type="button">
+    <button (click)="handleCloseDeletionDialog()" mat-icon-button aria-label="Cancel deleting record" type="button">
       <mat-icon>close</mat-icon>
     </button>
-    <button mat-icon-button aria-label="Confirm deleting record" type="submit" (click)="handleConfirmDeletion()">
+    <button mat-icon-button aria-label="Confirm deleting record" type="submit" (click)="handleDelete()">
       <mat-icon>check</mat-icon>
     </button>
   </mat-dialog-actions>
@@ -60,10 +60,10 @@
 <!-- END deletion confirmation modal -->
 
 <!-- edit record modal -->
-<app-projection-dialog [control$]="controlEditDialog$" (getDialogRef)="receiveEditDialogRef($event)">
+<app-projection-dialog [control$]="controlEditingDialog$" (getDialogRef)="receiveEditingDialogRef($event)">
   <div id='form-title'>
     <h2 mat-dialog-title>Edit Record</h2>
-    <button (click)="closeEditDialog()" mat-icon-button aria-label="Close edit form" type="button">
+    <button (click)="handleCloseEditingDialog()" mat-icon-button aria-label="Close edit form" type="button">
       <mat-icon>close</mat-icon>
     </button>
   </div>
