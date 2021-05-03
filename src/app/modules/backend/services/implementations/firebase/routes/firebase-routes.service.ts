@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { AngularFirestoreCollection, DocumentChangeAction, AngularFirestore } from '@angular/fire/firestore';
-import { IBackendRoutes } from '../../../interfaces/routes';
 import { Observable } from 'rxjs';
 import { IRoute, IRouteRecord, IRouteGroup, IField, InputType, IRouteStopRecord } from 'src/app/modules/backend/types';
 import { map } from 'rxjs/operators';
@@ -9,7 +8,7 @@ import { IFirestoreRouteRecord } from '../types';
 @Injectable({
   providedIn: 'root'
 })
-export class FirebaseRoutesService implements IBackendRoutes {
+export class FirebaseRoutesService {
   private recordsCollection: AngularFirestoreCollection<IFirestoreRouteRecord>;
   private routesCollection: AngularFirestoreCollection<IRoute>;
   private groupsCollection: AngularFirestoreCollection<IRouteGroup>;

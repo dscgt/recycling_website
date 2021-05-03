@@ -1,12 +1,13 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
-import { ICheckinGroup, ICheckinGroupMember, BackendCheckinService, ICheckinModel } from 'src/app/modules/backend';
+import { ICheckinGroup, ICheckinGroupMember, ICheckinModel } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormArray, FormBuilder, AsyncValidatorFn, AbstractControl, ValidationErrors, FormControl } from '@angular/forms';
 import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
 import { first, map } from 'rxjs/operators';
 import { Validators } from '@angular/forms';
+import { FirebaseCheckinService } from 'src/app/modules/backend/services/implementations/firebase';
 
 @Component({
   selector: 'app-manage-checkin',
@@ -40,7 +41,7 @@ export class CheckinGroupComponent implements OnInit {
   public currentlyUpdatingGroupId: string | undefined;
 
   constructor(
-    private backend: BackendCheckinService,
+    private backend: FirebaseCheckinService,
     private fb: FormBuilder,
     private utils: UtilsService
   ) { }

@@ -1,12 +1,13 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
-import { IRouteGroup, BackendRoutesService, IRoute } from 'src/app/modules/backend';
+import { IRouteGroup, IRoute } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormArray, FormBuilder, AsyncValidatorFn, FormControl, ValidationErrors } from '@angular/forms';
 import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
 import { first, map } from 'rxjs/operators';
 import { Validators } from '@angular/forms';
+import { FirebaseRoutesService } from 'src/app/modules/backend/services/implementations/firebase';
 
 @Component({
   selector: 'app-manage-route',
@@ -40,7 +41,7 @@ export class RouteGroupComponent implements OnInit {
   public currentlyUpdatingGroupId: string | undefined;
   
   constructor(
-    private backend: BackendRoutesService,
+    private backend: FirebaseRoutesService,
     private fb: FormBuilder,
     private utils: UtilsService
   ) { }

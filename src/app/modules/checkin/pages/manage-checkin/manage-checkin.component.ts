@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, TemplateRef, ChangeDetectorRef, Input } from '@angular/core';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
-import { ICheckinModel, InputType, BackendCheckinService, ICheckinGroup } from 'src/app/modules/backend';
+import { ICheckinModel, InputType, ICheckinGroup } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormArray, FormBuilder, AsyncValidatorFn, AbstractControl, ValidationErrors, FormControl } from '@angular/forms';
@@ -8,6 +8,7 @@ import { UtilsService } from 'src/app/modules/extra-material/services/utils/util
 import { DocumentReference } from '@angular/fire/firestore';
 import { first, map } from 'rxjs/operators';
 import { Validators } from '@angular/forms';
+import { FirebaseCheckinService } from 'src/app/modules/backend/services/implementations/firebase';
 
 @Component({
   selector: 'app-manage-checkin',
@@ -41,7 +42,7 @@ export class ManageCheckinComponent implements OnInit {
   public currentlyUpdatingModelId: string | undefined;
 
   constructor(
-    private backend: BackendCheckinService,
+    private backend: FirebaseCheckinService,
     private fb: FormBuilder,
     private cdref: ChangeDetectorRef,
     private utils: UtilsService

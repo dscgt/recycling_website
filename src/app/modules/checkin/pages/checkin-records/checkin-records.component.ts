@@ -2,8 +2,7 @@ import { ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild } from '@a
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
 import { ICheckinRecord } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { BackendCheckinService } from 'src/app/modules/backend/services/interfaces/checkin';
-import { FbFunctionsService } from 'src/app/modules/backend/services/implementations/firebase';
+import { FbFunctionsService, FirebaseCheckinService } from 'src/app/modules/backend/services/implementations/firebase';
 import { DateTime } from 'luxon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -46,7 +45,7 @@ export class CheckinRecordsComponent implements OnInit {
   public formFieldTitles: string[]; // workaround for not being able to use Object.keys in the HTML
 
   constructor(
-    private backend: BackendCheckinService,
+    private backend: FirebaseCheckinService,
     private fbFunctionsService: FbFunctionsService,
     private fb: FormBuilder,
     private cd: ChangeDetectorRef

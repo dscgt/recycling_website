@@ -1,9 +1,9 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
-import { FbFunctionsService } from 'src/app/modules/backend/services/implementations/firebase';
+import { FbFunctionsService, FirebaseRoutesService } from 'src/app/modules/backend/services/implementations/firebase';
 import { DateTime } from 'luxon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { BackendRoutesService, IRouteRecord, IRouteStopRecord } from 'src/app/modules/backend';
+import { IRouteRecord, IRouteStopRecord } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { IDisplayData } from 'src/app/modules/extra-material';
 import { MatDialogRef } from '@angular/material/dialog';
@@ -41,7 +41,7 @@ export class RouteRecordsComponent implements OnInit {
   public currentlyUpdatingRecord: IRouteRecord;
 
   constructor(
-    private backend: BackendRoutesService,
+    private backend: FirebaseRoutesService,
     private fbFunctionsService: FbFunctionsService,
     private fb: FormBuilder
   ) { }

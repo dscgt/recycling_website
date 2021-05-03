@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, TemplateRef, ChangeDetectorRef } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { IRoute, BackendRoutesService, InputType, IField, IRouteStop, IRouteGroup } from 'src/app/modules/backend';
+import { IRoute, InputType, IField, IRouteStop, IRouteGroup } from 'src/app/modules/backend';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormBuilder, FormArray, AsyncValidatorFn, FormControl, ValidationErrors } from '@angular/forms';
@@ -8,6 +8,7 @@ import { UtilsService } from 'src/app/modules/extra-material/services/utils/util
 import { DocumentReference } from '@angular/fire/firestore';
 import { first, map } from 'rxjs/operators';
 import { Validators } from '@angular/forms';
+import { FirebaseRoutesService } from 'src/app/modules/backend/services/implementations/firebase';
 
 @Component({
   selector: 'app-manage-routes',
@@ -41,7 +42,7 @@ export class ManageRoutesComponent implements OnInit {
   public deletionDialogRef: MatDialogRef<TemplateRef<any>>;
 
   constructor(
-    private routesBackend: BackendRoutesService,
+    private routesBackend: FirebaseRoutesService,
     private fb: FormBuilder,
     private cdref: ChangeDetectorRef,
     private utils: UtilsService
