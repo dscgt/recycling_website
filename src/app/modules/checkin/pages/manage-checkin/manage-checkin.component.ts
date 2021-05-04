@@ -138,12 +138,12 @@ export class ManageCheckinComponent implements OnInit {
   }
 
   public handleCreate(): void {
-    const model: ICheckinModel = this.createModelForm.value;
-    if (this.isEditMode) {
+    if (this.isEditMode && this.currentlyUpdatingModelId) {
+      const model: ICheckinModel = this.createModelForm.value;
       model.id = this.currentlyUpdatingModelId;
       this.backend.updateModel(model);
     } else {
-      this.backend.addModel(model);
+      this.backend.addModel(this.createModelForm.value);
       this.clearCreationForm();
     }
     this.handleCloseCreationDialog();

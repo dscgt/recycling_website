@@ -1,14 +1,13 @@
-import { InputType } from './input-type.enum';
 import { DocumentReference } from '@angular/fire/firestore';
+import { InputType } from 'src/app/modules/backend/types';
 
-export interface ICheckinModel {
+export interface IFirestoreCheckinModel {
   fields: {
     title: string;
     type: InputType;
     optional: boolean;
-    groupId?: DocumentReference|string;
+    groupId?: DocumentReference;
     delay: boolean;
   }[];
   title: string;
-  id: string;
 }

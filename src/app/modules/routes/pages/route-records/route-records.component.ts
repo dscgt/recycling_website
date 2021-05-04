@@ -155,7 +155,7 @@ export class RouteRecordsComponent implements OnInit {
   handleConfirmEdit(): void {
     this.handleCloseEditingDialog();
     const newRecord: IRouteRecord = Object.assign({}, this.currentlyUpdatingRecord);
-    this.backend.updateRecord(newRecord.id as string, this.form.value.properties, this.form.value.stops).catch((err) => {
+    this.backend.updateRecord(newRecord.id, this.form.value.properties, this.form.value.stops).catch((err) => {
       if (err) {
         alert(`Error updating record. Please try again, or let us know. \n ${err}`);
       }

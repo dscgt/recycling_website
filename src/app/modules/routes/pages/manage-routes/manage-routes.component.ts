@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, TemplateRef, ChangeDetectorRef } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { IRoute, InputType, IField, IRouteStop, IRouteGroup } from 'src/app/modules/backend';
+import { IRouteModel, InputType, IField, IRouteStop, IRouteGroup } from 'src/app/modules/backend';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormBuilder, FormArray, AsyncValidatorFn, FormControl, ValidationErrors } from '@angular/forms';
@@ -8,7 +8,7 @@ import { UtilsService } from 'src/app/modules/extra-material/services/utils/util
 import { DocumentReference } from '@angular/fire/firestore';
 import { first, map } from 'rxjs/operators';
 import { Validators } from '@angular/forms';
-import { FirebaseRoutesService } from 'src/app/modules/backend/services/implementations/firebase';
+import { FirebaseRoutesService, IFirestoreRouteModel } from 'src/app/modules/backend/services/implementations/firebase';
 
 @Component({
   selector: 'app-manage-routes',
@@ -18,15 +18,15 @@ import { FirebaseRoutesService } from 'src/app/modules/backend/services/implemen
 export class ManageRoutesComponent implements OnInit {
 
   @ViewChild(ExpansionTableComponent)
-  private expansionTable: ExpansionTableComponent<IRoute>;
+  private expansionTable: ExpansionTableComponent<IRouteModel>;
 
-  public routes$: Observable<IRoute[]>;
+  public routes$: Observable<IRouteModel[]>;
   public groups$: Observable<IRouteGroup[]>;
-  public displayData: IDisplayData<IRoute>[];
+  public displayData: IDisplayData<IRouteModel>[];
   public createRouteForm: FormGroup;
   public fieldInputTypes: string[];
   public fieldInputTypeValues: string[];
-  public routeToDelete: IRoute;
+  public routeToDelete: IRouteModel;
 
   // Fields related to editing
   public isEditMode: boolean = false;
@@ -73,26 +73,26 @@ export class ManageRoutesComponent implements OnInit {
       {
         name: "Title",
         property: "title",
-        accessor: (route: IRoute) => route.title,
-        accessorAsString: (route: IRoute) => route.title
+        accessor: (route: IRouteModel) => route.title,
+        accessorAsString: (route: IRouteModel) => route.title
       },
       {
         name: "# of Fields in Route",
         property: "fields",
-        accessor: (route: IRoute) => route.fields.length,
-        accessorAsString: (route: IRoute) => route.fields.length.toString()
+        accessor: (route: IRouteModel) => route.fields.length,
+        accessorAsString: (route: IRouteModel) => route.fields.length.toString()
       },
       {
         name: "# of Fields in Stops",
         property: "fields_stops",
-        accessor: (route: IRoute) => route.stopData.fields.length,
-        accessorAsString: (route: IRoute) => route.stopData.fields.length.toString()
+        accessor: (route: IRouteModel) => route.stopData.fields.length,
+        accessorAsString: (route: IRouteModel) => route.stopData.fields.length.toString()
       },
       {
         name: "# of Stops",
         property: "stops",
-        accessor: (route: IRoute) => route.stopData.stops.length,
-        accessorAsString: (route: IRoute) => route.stopData.stops.length.toString()
+        accessor: (route: IRouteModel) => route.stopData.stops.length,
+        accessorAsString: (route: IRouteModel) => route.stopData.stops.length.toString()
       },
     ];
     this.clearCreationForm();
@@ -116,7 +116,7 @@ export class ManageRoutesComponent implements OnInit {
   }
 
   // Replaces the existing content of the form with the content of [model]
-  public prepopulateCreationForm(model: IRoute) {
+  public prepopulateCreationForm(model: IRouteModel) {
     this.createRouteForm = this.fb.group({
       title: [model.title, Validators.required, [this.routeTitleValidator(model.title)] ],
       fields: this.fb.array(model.fields.map((field: IField) => this.fb.group({
@@ -225,7 +225,7 @@ export class ManageRoutesComponent implements OnInit {
   public handleCreate(): void {
     // build Route from form data
     const vals: any = this.createRouteForm.value;
-    const route: IRoute = {
+    const route: IFirestoreRouteModel = {
       title: vals["title"],
       fields: [],
       stopData: {
@@ -250,9 +250,11 @@ export class ManageRoutesComponent implements OnInit {
       route.stopData.stops.push(stopCopy as IRouteStop);
     }
 
-    if (this.isEditMode) {
-      route.id = this.currentlyUpdatingModelId;
-      this.routesBackend.updateRoute(route);
+    if (this.isEditMode && this.currentlyUpdatingModelId) {
+      this.routesBackend.updateRoute({
+        ...route,
+        id: this.currentlyUpdatingModelId
+      });
     } else {
       this.routesBackend.addRoute(route);
       this.clearCreationForm();
@@ -269,7 +271,7 @@ export class ManageRoutesComponent implements OnInit {
   public receiveCreationDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
     this.creationDialogRef = ref;
   }
-  public handleOpenCreationDialog(model?: IRoute, isEditMode?: boolean): void {
+  public handleOpenCreationDialog(model?: IRouteModel, isEditMode?: boolean): void {
     this.isEditMode = isEditMode || false;
     if (isEditMode && model) {
       // save the old state of the form before replacing with group to update
@@ -291,7 +293,7 @@ export class ManageRoutesComponent implements OnInit {
   public receiveDeletionDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
     this.deletionDialogRef = ref;
   }
-  public handleOpenDeletionDialog(route: IRoute): void {
+  public handleOpenDeletionDialog(route: IRouteModel): void {
     this.routeToDelete = route;
     this.controlDeletionDialogSubject$.next(true);
   }

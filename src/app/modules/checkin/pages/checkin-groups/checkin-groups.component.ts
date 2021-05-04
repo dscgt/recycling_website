@@ -151,7 +151,7 @@ export class CheckinGroupComponent implements OnInit {
 
   public handleCreate(): void {
     const group: ICheckinGroup = this.createGroupForm.value;
-    if (this.isEditMode) {
+    if (this.isEditMode && this.currentlyUpdatingGroupId) {
       group.id = this.currentlyUpdatingGroupId;
       this.backend.updateGroup(group);
     } else {

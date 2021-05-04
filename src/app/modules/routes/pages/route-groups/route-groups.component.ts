@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
-import { IRouteGroup, IRoute } from 'src/app/modules/backend';
+import { IRouteGroup, IRouteModel } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormArray, FormBuilder, AsyncValidatorFn, FormControl, ValidationErrors } from '@angular/forms';
@@ -60,7 +60,7 @@ export class RouteGroupComponent implements OnInit {
     this.groups$ = this.backend.getGroups();
 
     this.groupsAndModels$ = this.backend.getRoutes().pipe(
-      map((models: IRoute[]) => {
+      map((models: IRouteModel[]) => {
         // check all models for groupId and create a map groupId -> [modelTitle, modelTitle, ...]
         const toReturnWithSets = new Map<string, Set<string>>();
         for (let model of models) {
@@ -148,7 +148,7 @@ export class RouteGroupComponent implements OnInit {
 
   public handleCreate(): void {
     const group: IRouteGroup = this.createGroupForm.value;
-    if (this.isEditMode) {
+    if (this.isEditMode && this.currentlyUpdatingGroupId) {
       group.id = this.currentlyUpdatingGroupId;
       this.backend.updateGroup(group);
     } else {
