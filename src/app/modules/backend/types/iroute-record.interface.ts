@@ -6,7 +6,7 @@ export interface IRouteRecord {
   endTime: Date;
   modelId: string;
   modelTitle: string;
-  id?: string;
+  id: string;
   properties: {
     [additionalProperties: string]: string;
   };

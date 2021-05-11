@@ -1,6 +1,6 @@
 export { IRouteRecord } from './iroute-record.interface';
 export { InputType } from './input-type.enum';
-export { IRoute } from './iroute.interface';
+export { IRouteModel } from './iroute-model.interface';
 export { IRouteStop } from './iroute-stop.interface';
 export { IField } from './ifield.interface';
 export { ICheckinRecord } from './icheckin-record.interface';

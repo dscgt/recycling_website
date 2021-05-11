@@ -1,14 +1,13 @@
 import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { ExpansionTableComponent, IDisplayData } from 'src/app/modules/extra-material';
-// different model
-import { ICheckinGroup, ICheckinGroupMember, BackendCheckinService, ICheckinModel } from 'src/app/modules/backend';
+import { ICheckinGroup, ICheckinGroupMember, ICheckinModel } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormArray, FormBuilder, AsyncValidatorFn, AbstractControl, ValidationErrors, FormControl } from '@angular/forms';
 import { UtilsService } from 'src/app/modules/extra-material/services/utils/utils.service';
 import { first, map } from 'rxjs/operators';
-//first change for validation - Angular reactive form validators
 import { Validators } from '@angular/forms';
+import { FirebaseCheckinService } from 'src/app/modules/backend/services/implementations/firebase';
 
 @Component({
   selector: 'app-manage-checkin',
@@ -16,53 +15,49 @@ import { Validators } from '@angular/forms';
   styleUrls: ['./checkin-groups.component.scss']
 })
 export class CheckinGroupComponent implements OnInit {
+  
   @ViewChild(ExpansionTableComponent)
   private expansionTable: ExpansionTableComponent<ICheckinGroup>;
 
-  private controlCreationDialogSubject$: BehaviorSubject<boolean>;
-  private controlConfirmationDialogSubject$: BehaviorSubject<boolean>;
-
   public groups$: Observable<ICheckinGroup[]>;
-  // maps a group ID to an array of titles of models which use that group
-  public groupsAndModels$: Observable<Map<string, string[]>>;
+  public groupsAndModels$: Observable<Map<string, string[]>>; // maps a group ID to an array of titles of models which use that group
   public displayData: IDisplayData<ICheckinGroup>[];
-  public controlCreationDialog$: Observable<boolean>;
-  public controlConfirmationDialog$: Observable<boolean>;
-  public creationDialogRef: MatDialogRef<TemplateRef<any>>;
-  public confirmationDialogRef: MatDialogRef<TemplateRef<any>>;
   public createGroupForm: FormGroup;
   public fieldInputTypes: string[];
   public fieldInputTypeValues: string[];
+  public groupToDelete: ICheckinGroup;
 
-  // fields related to editing groups; see openCreationDialog
-  public editMode: boolean = false;
+  // Modal-related fields
+  private controlCreationDialogSubject$: BehaviorSubject<boolean>;
+  public controlCreationDialog$: Observable<boolean>;
+  public creationDialogRef: MatDialogRef<TemplateRef<any>>;
+  private controlDeletionDialogSubject$: BehaviorSubject<boolean>;
+  public controlDeletionDialog$: Observable<boolean>;
+  public deletionDialogRef: MatDialogRef<TemplateRef<any>>;
+
+  // Fields used when editing groups
+  public isEditMode: boolean = false;
   public storedCreationForm: FormGroup;
   public currentlyUpdatingGroupId: string | undefined;
 
-  // workaround. there is no way for deletion method to know which group to delete without this reference.
-  // ideally, this is passed to the deletion method directly--but the nesting required to do so causes
-  // bugs with expansion tables.
-  public groupToDelete: ICheckinGroup;
+  constructor(
+    private backend: FirebaseCheckinService,
+    private fb: FormBuilder,
+    private utils: UtilsService
+  ) { }
 
   get members(): FormArray {
     return this.createGroupForm.get('members') as FormArray;
   }
 
-  constructor(
-    private backend: BackendCheckinService,
-    private fb: FormBuilder,
-    private utils: UtilsService
-  ) { }
-
   ngOnInit(): void {
     // initialize dialog controls
     this.controlCreationDialogSubject$ = new BehaviorSubject<boolean>(false);
     this.controlCreationDialog$ = this.controlCreationDialogSubject$.asObservable();
-    this.controlConfirmationDialogSubject$ = new BehaviorSubject<boolean>(false);
-    this.controlConfirmationDialog$ = this.controlConfirmationDialogSubject$.asObservable();
+    this.controlDeletionDialogSubject$ = new BehaviorSubject<boolean>(false);
+    this.controlDeletionDialog$ = this.controlDeletionDialogSubject$.asObservable();
 
     this.groups$ = this.backend.getGroups();
-
     this.groupsAndModels$ = this.backend.getModels().pipe(
       map((models: ICheckinModel[]) => {
         const toReturnWithSets = new Map<string, Set<string>>();
@@ -103,7 +98,8 @@ export class CheckinGroupComponent implements OnInit {
         accessorAsString: (group: ICheckinGroup) => group.members.length.toString(),
       },
     ];
-    this.clearCreationDialog();
+    
+    this.clearCreationForm();
   }
 
   // Replaces the existing content of the form with the content of [group]
@@ -117,56 +113,71 @@ export class CheckinGroupComponent implements OnInit {
     });
   }
 
-  public addMember(): void {
-    this.members.push(this.createMember());
-  }
-
-  public removeMember(index: number): void {
-    if (this.members.length <= 1) {
-      return;
-    }
-
-    this.members.removeAt(index);
-  }
-
-  public swapMember(a: number, b: number): void {
-    if (a < 0 || b < 0 || a >= this.members.length || b >= this.members.length) {
-      return;
-    }
-    this.utils.swapFormArray(this.members, a, b);
-  }
-
   public createMember(): FormGroup {
     return this.fb.group({
       title: [''],
     });
   }
 
-  public confirmDeleteGroup(group: ICheckinGroup): void {
-    this.groupToDelete = group;
-    this.controlConfirmationDialogSubject$.next(true);
+  public clearCreationForm(): void {
+    this.createGroupForm = this.fb.group({
+      title: ['', { asyncValidators: [this.groupTitleValidator()] }],
+      members: this.fb.array([this.createMember()]),
+    });
   }
 
-  public onDelete(): void {
-    this.closeConfirmationDialog();
+  public handleAddMember(): void {
+    this.members.push(this.createMember());
+  }
+
+  public handleRemoveMember(index: number): void {
+    if (this.members.length <= 1) {
+      return;
+    }
+    this.members.removeAt(index);
+  }
+
+  public handleSwapMember(a: number, b: number): void {
+    if (a < 0 || b < 0 || a >= this.members.length || b >= this.members.length) {
+      return;
+    }
+    this.utils.swapFormArray(this.members, a, b);
+  }
+
+  public handleDelete(): void {
+    this.handleCloseDeletionDialog();
     this.backend.deleteGroup(this.groupToDelete.id);
   }
 
-  public onSubmit(): void {
+  public handleCreate(): void {
     const group: ICheckinGroup = this.createGroupForm.value;
-    if (this.editMode) {
+    if (this.isEditMode && this.currentlyUpdatingGroupId) {
       group.id = this.currentlyUpdatingGroupId;
       this.backend.updateGroup(group);
     } else {
       this.backend.addGroup(group);
-      this.clearCreationDialog();
+      this.clearCreationForm();
     }
-    this.closeCreationDialog();
+    this.handleCloseCreationDialog();
   }
 
-  public openCreationDialog(group?: ICheckinGroup, editMode?: boolean): void {
-    this.editMode = editMode || false;
-    if (editMode && group) {
+  // Modal-handling functions
+  public receiveDeletionDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
+    this.deletionDialogRef = ref;
+  }
+  public handleOpenDeletionDialog(group: ICheckinGroup): void {
+    this.groupToDelete = group;
+    this.controlDeletionDialogSubject$.next(true);
+  }
+  public handleCloseDeletionDialog(): void {
+    this.controlDeletionDialogSubject$.next(false);
+  }
+  public receiveCreationDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
+    this.creationDialogRef = ref;
+  }
+  public handleOpenCreationDialog(group?: ICheckinGroup, isEditMode?: boolean): void {
+    this.isEditMode = isEditMode || false;
+    if (isEditMode && group) {
       // save the old state of the form
       // ex. when a user is in the middle of creating a new group, then edits a group, this allows
       // them to return to their new group
@@ -181,34 +192,13 @@ export class CheckinGroupComponent implements OnInit {
     }
     this.controlCreationDialogSubject$.next(true);
   }
-
-  public creationDialogClosed(): void {
-    if (this.editMode && this.storedCreationForm) {
-      this.createGroupForm = this.storedCreationForm;
-    }
-  }
-
-  public receiveCreationDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
-    this.creationDialogRef = ref;
-  }
-
-  public closeCreationDialog(): void {
+  public handleCloseCreationDialog(): void {
     this.controlCreationDialogSubject$.next(false);
   }
-
-  public clearCreationDialog(): void {
-    this.createGroupForm = this.fb.group({
-      title: ['', { asyncValidators: [this.groupTitleValidator()] }],
-      members: this.fb.array([this.createMember()]),
-    });
-  }
-
-  public receiveConfirmationDialogRef(ref: MatDialogRef<TemplateRef<any>>): void {
-    this.confirmationDialogRef = ref;
-  }
-
-  public closeConfirmationDialog(): void {
-    this.controlConfirmationDialogSubject$.next(false);
+  public handleCreationDialogClosed(): void {
+    if (this.isEditMode && this.storedCreationForm) {
+      this.createGroupForm = this.storedCreationForm;
+    }
   }
 
   /**

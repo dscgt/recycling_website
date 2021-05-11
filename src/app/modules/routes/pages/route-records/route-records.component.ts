@@ -1,9 +1,9 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
-import { FbFunctionsService } from 'src/app/modules/backend/services/implementations/firebase';
+import { FbFunctionsService, FirebaseRoutesService } from 'src/app/modules/backend/services/implementations/firebase';
 import { DateTime } from 'luxon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { BackendRoutesService, IRouteRecord, IRouteStopRecord } from 'src/app/modules/backend';
+import { IRouteRecord, IRouteStopRecord } from 'src/app/modules/backend';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { IDisplayData } from 'src/app/modules/extra-material';
 import { MatDialogRef } from '@angular/material/dialog';
@@ -20,29 +20,32 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 })
 export class RouteRecordsComponent implements OnInit {
 
-  // Modal-related fields
-  private controlDeletionDialogSubject$: BehaviorSubject<boolean>;
-  public controlDeletionDialog$: Observable<boolean>;
-  public deletionDialogRef: MatDialogRef<TemplateRef<any>>;
-  private controlEditDialogSubject$: BehaviorSubject<boolean>;
-  public controlEditDialog$: Observable<boolean>;
-  public editDialogRef: MatDialogRef<TemplateRef<any>>;
-
-  // Form-related fields
-  public form: FormGroup;
-  public currentlyUpdatingRecord: IRouteRecord;
-
   public records$: Observable<IRouteRecord[]>;
   public startDate: Date = DateTime.fromJSDate(new Date()).minus({ days: 7 }).toJSDate();
   public endDate: Date = new Date();;
   public displayData: IDisplayData<IRouteRecord>[] = [];
   public disableButton = false;
   public selectScreen: boolean = true;
-
-  // workaround, see checkin-groups component for explanation
   public recordToDelete: any;
 
-  // form getters
+  // Modal-related fields
+  private controlDeletionDialogSubject$: BehaviorSubject<boolean>;
+  public controlDeletionDialog$: Observable<boolean>;
+  public deletionDialogRef: MatDialogRef<TemplateRef<any>>;
+  private controlEditingDialogSubject$: BehaviorSubject<boolean>;
+  public controlEditingDialog$: Observable<boolean>;
+  public editingDialogRef: MatDialogRef<TemplateRef<any>>;
+
+  // Form-related fields
+  public form: FormGroup;
+  public currentlyUpdatingRecord: IRouteRecord;
+
+  constructor(
+    private backend: FirebaseRoutesService,
+    private fbFunctionsService: FbFunctionsService,
+    private fb: FormBuilder
+  ) { }
+
   get stops() {
     return this.form.get('stops') as FormArray;
   }
@@ -50,18 +53,12 @@ export class RouteRecordsComponent implements OnInit {
     return this.form.get('properties') as FormGroup;
   }
 
-  constructor(
-    private backend: BackendRoutesService,
-    private fbFunctionsService: FbFunctionsService,
-    private fb: FormBuilder
-  ) { }
-
   ngOnInit(): void {
     // Modal initializations
     this.controlDeletionDialogSubject$ = new BehaviorSubject<boolean>(false);
     this.controlDeletionDialog$ = this.controlDeletionDialogSubject$.asObservable();
-    this.controlEditDialogSubject$ = new BehaviorSubject<boolean>(false);
-    this.controlEditDialog$ = this.controlEditDialogSubject$.asObservable();
+    this.controlEditingDialogSubject$ = new BehaviorSubject<boolean>(false);
+    this.controlEditingDialog$ = this.controlEditingDialogSubject$.asObservable();
 
     this.displayData = [
       {
@@ -88,6 +85,33 @@ export class RouteRecordsComponent implements OnInit {
       }
     ];
     this.initEmptyForm();
+  }
+
+  populateForm(record: IRouteRecord): void {
+    const properties: any = {};
+    Object.keys(record.properties).forEach((key: string) => {
+      properties[key] = [record.properties[key], Validators.required]
+    });
+    this.form = this.fb.group({
+      properties: this.fb.group(properties),
+      stops: this.fb.array(record.stops.map((stopRecord: IRouteStopRecord) => {
+        const stopProperties: any = {};
+        Object.keys(stopRecord.properties).forEach((key: string) => {
+          stopProperties[key] = [stopRecord.properties[key], Validators.required]
+        });
+        return this.fb.group({
+          title: [stopRecord.title],
+          properties: this.fb.group(stopProperties)
+        })
+      }))
+    });
+  }
+
+  initEmptyForm(): void {
+    this.form = this.fb.group({
+      properties: {},
+      stops: this.fb.array([])
+    })
   }
 
   handleViewRecords(): void {
@@ -128,64 +152,37 @@ export class RouteRecordsComponent implements OnInit {
     this.selectScreen = true;
   }
 
-  populateForm(record: IRouteRecord): void {
-    const properties: any = {};
-    Object.keys(record.properties).forEach((key: string) => {
-      properties[key] = [record.properties[key], Validators.required]
-    });
-    this.form = this.fb.group({
-      properties: this.fb.group(properties),
-      stops: this.fb.array(record.stops.map((stopRecord: IRouteStopRecord) => {
-        const stopProperties: any = {};
-        Object.keys(stopRecord.properties).forEach((key: string) => {
-          stopProperties[key] = [stopRecord.properties[key], Validators.required]
-        });
-        return this.fb.group({
-          title: [stopRecord.title],
-          properties: this.fb.group(stopProperties)
-        })
-      }))
-    });
-  }
-  
-  initEmptyForm(): void {
-    this.form = this.fb.group({
-      properties: {},
-      stops: this.fb.array([])
-    })
-  }
-
-  // modal-related functions
-  openDeletionDialog(): void { this.controlDeletionDialogSubject$.next(true) }
-  closeDeletionDialog(): void { this.controlDeletionDialogSubject$.next(false) }
-  receiveDeletionDialogRef(ref: MatDialogRef<TemplateRef<any>>): void { this.deletionDialogRef = ref }
-  handleStartDeletion(record: IRouteRecord): void {
-    this.recordToDelete = record;
-    this.openDeletionDialog();
-  }
-  handleConfirmDeletion(): void {
-    this.closeDeletionDialog();
-    this.backend.deleteRecord(this.recordToDelete.id).catch((err:any) => {
-      if (err) {
-        alert(`Error deleting record. Please try again, or let us know. \n ${err}`);
-      }
-    });
-  }
-  openEditDialog(): void { this.controlEditDialogSubject$.next(true) }
-  closeEditDialog(): void { this.controlEditDialogSubject$.next(false) }
-  receiveEditDialogRef(ref: MatDialogRef<TemplateRef<any>>): void { this.editDialogRef = ref }
-  handleStartEdit(record: IRouteRecord): void {
-    this.currentlyUpdatingRecord = record;
-    this.populateForm(record);
-    this.openEditDialog();
-  }
   handleConfirmEdit(): void {
-    this.closeEditDialog();
+    this.handleCloseEditingDialog();
     const newRecord: IRouteRecord = Object.assign({}, this.currentlyUpdatingRecord);
-    this.backend.updateRecord(newRecord.id as string, this.form.value.properties, this.form.value.stops).catch((err) => {
+    this.backend.updateRecord(newRecord.id, this.form.value.properties, this.form.value.stops).catch((err) => {
       if (err) {
         alert(`Error updating record. Please try again, or let us know. \n ${err}`);
       }
     });
   }
+
+  handleDelete(): void {
+    this.handleCloseDeletionDialog();
+    this.backend.deleteRecord(this.recordToDelete.id).catch((err: any) => {
+      if (err) {
+        alert(`Error deleting record. Please try again, or let us know. \n ${err}`);
+      }
+    });
+  }
+
+  // modal-related functions
+  receiveEditingDialogRef(ref: MatDialogRef<TemplateRef<any>>): void { this.editingDialogRef = ref }
+  handleOpenEditingDialog(record: IRouteRecord): void {
+    this.currentlyUpdatingRecord = record;
+    this.populateForm(record);
+    this.controlEditingDialogSubject$.next(true)
+  }
+  handleCloseEditingDialog(): void { this.controlEditingDialogSubject$.next(false) }
+  receiveDeletionDialogRef(ref: MatDialogRef<TemplateRef<any>>): void { this.deletionDialogRef = ref }
+  handleOpenDeletionDialog(record: IRouteRecord): void {
+    this.recordToDelete = record;
+    this.controlDeletionDialogSubject$.next(true);
+  }
+  handleCloseDeletionDialog(): void { this.controlDeletionDialogSubject$.next(false) }
 }

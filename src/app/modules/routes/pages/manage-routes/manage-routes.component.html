@@ -6,8 +6,8 @@
   [displayData]="displayData">
   <ng-template let-route>
     <div class='row-buttons-wrapper'>
-      <button mat-raised-button color="primary" aria-label="Edit This Route" (click)="openCreationDialog(route, true)" type="button">Edit This Route</button>
-      <button mat-raised-button color="warn" aria-label="Delete This Route" (click)="confirmDeleteRoute(route)" type="button">Delete This Route</button>
+      <button mat-raised-button color="primary" aria-label="Edit This Route" (click)="handleOpenCreationDialog(route, true)" type="button">Edit This Route</button>
+      <button mat-raised-button color="warn" aria-label="Delete This Route" (click)="handleOpenDeletionDialog(route)" type="button">Delete This Route</button>
     </div>
   </ng-template>
 </app-expansion-table>
@@ -17,10 +17,10 @@
 <app-projection-dialog [control$]="controlDeletionDialog$" (getDialogRef)="receiveDeletionDialogRef($event)">
   <h2 mat-dialog-title>Are you sure you want to delete this route option?</h2>
   <mat-dialog-actions align="end">
-    <button (click)="closeDeletionDialog()" mat-icon-button aria-label="Cancel deleting route option" type="button">
+    <button (click)="handleCloseDeletionDialog()" mat-icon-button aria-label="Cancel deleting route option" type="button">
       <mat-icon>close</mat-icon>
     </button>
-    <button mat-icon-button aria-label="Confirm deleting check-in option" type="submit" (click)="onDelete()">
+    <button mat-icon-button aria-label="Confirm deleting check-in option" type="submit" (click)="handleDelete()">
       <mat-icon>check</mat-icon>
     </button>
   </mat-dialog-actions>
@@ -30,22 +30,22 @@
 <app-fab
   icon="add"
   label="Create a route"
-  (click)="openCreationDialog()">
+  (click)="handleOpenCreationDialog()">
 </app-fab>
 
 <!-- creation form (modal content) -->
 <app-projection-dialog
   [control$]="controlCreationDialog$"
-  (onClose)="creationDialogClosed()"
+  (onClose)="handleCreationDialogClosed()"
   (getDialogRef)="receiveCreationDialogRef($event)">
   <div id='form-title'>
     <h2 mat-dialog-title>Create a Route</h2>
-    <button (click)="closeCreationDialog()" mat-icon-button aria-label="Close route form" type="button">
+    <button (click)="handleCloseCreationDialog()" mat-icon-button aria-label="Close route form" type="button">
       <mat-icon>close</mat-icon>
     </button>
   </div>
   <mat-dialog-content>
-    <form [formGroup]="createRouteForm" (ngSubmit)="onSubmit()">
+    <form [formGroup]="createRouteForm" (ngSubmit)="handleCreate()">
 
       <p [hidden]="!(this.createRouteForm.get('title')?.errors?.titleExistsAlready)" style='color: red'>This name already
         exists; please choose another one.</p>
@@ -92,15 +92,15 @@
                 </mat-form-field>
               </div>
               <div class='field-box-buttons-wrapper'>
-                <button *ngIf="fields.length > 1" mat-icon-button aria-label="Remove a field" (click)="removeField(i)" type="button">
+                <button *ngIf="fields.length > 1" mat-icon-button aria-label="Remove a field" (click)="handleRemoveField(i)" type="button">
                   <mat-icon>clear</mat-icon>
                 </button>
                 <button *ngIf="fields.length > 1 && i !== 0" mat-icon-button aria-label="Swap this field with the one above"
-                  (click)="swapField(i, i - 1)" type="button">
+                  (click)="handleSwapField(i, i - 1)" type="button">
                   <mat-icon>keyboard_arrow_up</mat-icon>
                 </button>
                 <button *ngIf="fields.length > 1 && i !== fields.length - 1" mat-icon-button
-                  aria-label="Swap this field with the one below" (click)="swapField(i, i + 1)" type="button">
+                  aria-label="Swap this field with the one below" (click)="handleSwapField(i, i + 1)" type="button">
                   <mat-icon>keyboard_arrow_down</mat-icon>
                 </button>
               </div>
@@ -111,7 +111,7 @@
           </div>
           <div class="card-footer">
             <mat-divider></mat-divider><br>
-            <button mat-icon-button aria-label="Add another field" (click)="addField()" type="button">
+            <button mat-icon-button aria-label="Add another field" (click)="handleAddField()" type="button">
               <mat-icon>add</mat-icon>
             </button>
           </div>
@@ -149,15 +149,15 @@
                 </mat-form-field>
               </div>
               <div class='field-box-buttons-wrapper'>
-                <button *ngIf="stops.length > 1" mat-icon-button aria-label="Remove this stop" (click)="removeStop(i)" type="button">
+                <button *ngIf="stops.length > 1" mat-icon-button aria-label="Remove this stop" (click)="handleRemoveStop(i)" type="button">
                   <mat-icon>clear</mat-icon>
                 </button>
                 <button *ngIf="stops.length > 1 && i !== 0" mat-icon-button aria-label="Swap this stop with the one above"
-                  (click)="swapStop(i, i - 1)" type="button">
+                  (click)="handleSwapStop(i, i - 1)" type="button">
                   <mat-icon>keyboard_arrow_up</mat-icon>
                 </button>
                 <button *ngIf="stops.length > 1 && i !== stops.length - 1" mat-icon-button
-                  aria-label="Swap this stop with the one below" (click)="swapStop(i, i + 1)" type="button">
+                  aria-label="Swap this stop with the one below" (click)="handleSwapStop(i, i + 1)" type="button">
                   <mat-icon>keyboard_arrow_down</mat-icon>
                 </button>
               </div>
@@ -169,7 +169,7 @@
           <mat-divider></mat-divider><br>
           <div class="card-footer">
             <p>Want to exclude a stop field below from being included in a stop? Type its name into 'Exclusions'. Separate multiple exclusions with commas.</p>
-            <button mat-icon-button aria-label="Add another stop" (click)="addStop()" type="button">
+            <button mat-icon-button aria-label="Add another stop" (click)="handleAddStop()" type="button">
               <mat-icon>add</mat-icon>
             </button>
           </div>
@@ -218,15 +218,15 @@
                 </mat-form-field>
               </div>
               <div class='field-box-buttons-wrapper'>
-                <button *ngIf="fields_stops.length > 1" mat-icon-button aria-label="Remove a field for stops" (click)="removeField_Stop(i)" type="button">
+                <button *ngIf="fields_stops.length > 1" mat-icon-button aria-label="Remove a field for stops" (click)="handleRemoveStopField(i)" type="button">
                   <mat-icon>clear</mat-icon>
                 </button>
                 <button *ngIf="fields_stops.length > 1 && i !== 0" mat-icon-button aria-label="Swap this stop field with the one above"
-                  (click)="swapField_Stop(i, i - 1)" type="button">
+                  (click)="handleSwapStopField(i, i - 1)" type="button">
                   <mat-icon>keyboard_arrow_up</mat-icon>
                 </button>
                 <button *ngIf="fields_stops.length > 1 && i !== fields_stops.length - 1" mat-icon-button
-                  aria-label="Swap this stop field with the one below" (click)="swapField_Stop(i, i + 1)" type="button">
+                  aria-label="Swap this stop field with the one below" (click)="handleSwapStopField(i, i + 1)" type="button">
                   <mat-icon>keyboard_arrow_down</mat-icon>
                 </button>
               </div>
@@ -237,7 +237,7 @@
           </div>
           <div class="card-footer">
             <mat-divider></mat-divider><br>
-            <button mat-icon-button aria-label="Add another field for stops" (click)="addField_Stop()" type="button">
+            <button mat-icon-button aria-label="Add another field for stops" (click)="handleAddStopField()" type="button">
               <mat-icon>add</mat-icon>  
             </button>
           </div>
@@ -250,9 +250,9 @@
 
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button mat-icon-button [attr.aria-label]="editMode ? 'Confirm updating route' : 'Confirm creating route'"
+    <button mat-icon-button [attr.aria-label]="isEditMode ? 'Confirm updating route' : 'Confirm creating route'"
       [disabled]="(createRouteForm.valid === null) ? false : !createRouteForm.valid"
-      type="submit" (click)="onSubmit()">
+      type="submit" (click)="handleCreate()">
       <mat-icon>check</mat-icon>
     </button>
   </mat-dialog-actions>

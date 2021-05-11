@@ -7,8 +7,8 @@
   <ng-template let-group>
     <div class='row-buttons-wrapper'>
       <p *ngIf="(groupsAndModels$ | async)?.has(group.id)" >In use by: {{ (groupsAndModels$ | async)?.get(group.id).join(', ') }}</p>
-      <button mat-raised-button color="primary" aria-label="Edit This Group" (click)="openCreationDialog(group, true)" type="button">Edit This Group</button>
-      <button mat-raised-button color="warn" aria-label="Delete This Group" (click)="confirmDeleteGroup(group)" type="button"
+      <button mat-raised-button color="primary" aria-label="Edit This Group" (click)="handleOpenCreationDialog(group, true)" type="button">Edit This Group</button>
+      <button mat-raised-button color="warn" aria-label="Delete This Group" (click)="handleOpenDeletionDialog(group)" type="button"
         [disabled]="(groupsAndModels$ | async)?.has(group.id)">Delete This Group</button>
     </div>
   </ng-template>
@@ -16,13 +16,13 @@
 <!-- END row content -->
 
 <!-- deletion confirmation modal -->
-<app-projection-dialog [control$]="controlConfirmationDialog$" (getDialogRef)="receiveConfirmationDialogRef($event)">
+<app-projection-dialog [control$]="controlDeletionDialog$" (getDialogRef)="receiveDeletionDialogRef($event)">
   <h2 mat-dialog-title>Are you sure you want to delete this group?</h2>
   <mat-dialog-actions align="end">
-    <button (click)="closeConfirmationDialog()" mat-icon-button aria-label="Cancel deleting group" type="button">
+    <button (click)="handleCloseDeletionDialog()" mat-icon-button aria-label="Cancel deleting group" type="button">
       <mat-icon>close</mat-icon>
     </button>
-    <button mat-icon-button aria-label="Confirm deleting group" type="submit" (click)="onDelete()">
+    <button mat-icon-button aria-label="Confirm deleting group" type="submit" (click)="handleDelete()">
       <mat-icon>check</mat-icon>
     </button>
   </mat-dialog-actions>
@@ -32,23 +32,23 @@
 <app-fab
   icon="add"
   label="Create a checkin item"
-  (click)="openCreationDialog()">
+  (click)="handleOpenCreationDialog()">
 </app-fab>
 
 <!-- creation form modal -->
 <app-projection-dialog
   [control$]="controlCreationDialog$"
-  (onClose)="creationDialogClosed()"
+  (onClose)="handleCreationDialogClosed()"
   (getDialogRef)="receiveCreationDialogRef($event)">
   <div id='form-title'>
     <h2 mat-dialog-title>Create a Checkin Group</h2>
-    <button (click)="closeCreationDialog()" mat-icon-button aria-label="Close check-in group form" type="button">
+    <button (click)="handleCloseCreationDialog()" mat-icon-button aria-label="Close check-in group form" type="button">
       <mat-icon>close</mat-icon>
     </button>
   </div>
   <mat-dialog-content>
 
-    <form [formGroup]="createGroupForm" (ngSubmit)="onSubmit()">
+    <form [formGroup]="createGroupForm" (ngSubmit)="handleCreate()">
 
       <p [hidden]="!(this.createGroupForm.get('title')?.errors?.titleExistsAlready)" style='color: red'>This name already exists; please choose another one.</p>
 
@@ -73,15 +73,15 @@
                 </mat-form-field>
               </div>
               <div id='field-box-buttons-wrapper'>
-                <button *ngIf="members.length > 1" mat-icon-button aria-label="Remove this member" (click)="removeMember(i)" type="button">
+                <button *ngIf="members.length > 1" mat-icon-button aria-label="Remove this member" (click)="handleRemoveMember(i)" type="button">
                   <mat-icon>clear</mat-icon>
                 </button>
-                <button *ngIf="members.length > 1 && i !== 0" mat-icon-button aria-label="Swap this member with the one above" (click)="swapMember(i, i - 1)"
+                <button *ngIf="members.length > 1 && i !== 0" mat-icon-button aria-label="Swap this member with the one above" (click)="handleSwapMember(i, i - 1)"
                   type="button">
                   <mat-icon>keyboard_arrow_up</mat-icon>
                 </button>
                 <button *ngIf="members.length > 1 && i !== members.length - 1" mat-icon-button aria-label="Swap this member with the one below"
-                  (click)="swapMember(i, i + 1)" type="button">
+                  (click)="handleSwapMember(i, i + 1)" type="button">
                   <mat-icon>keyboard_arrow_down</mat-icon>
                 </button>
               </div>
@@ -97,13 +97,13 @@
 
   </mat-dialog-content>
   <mat-dialog-actions align="end">
-    <button mat-icon-button aria-label="Add another member" (click)="addMember()" type="button">
+    <button mat-icon-button aria-label="Add another member" (click)="handleAddMember()" type="button">
       <mat-icon>add</mat-icon>
     </button>
     <span class="spacer"></span>
-    <button mat-icon-button [attr.aria-label]="editMode ? 'Confirm updating check-in group' : 'Submit new check-in group'"
+    <button mat-icon-button [attr.aria-label]="isEditMode ? 'Confirm updating check-in group' : 'Submit new check-in group'"
       [disabled]="(createGroupForm.valid === null) ? false : !createGroupForm.valid"
-      type="submit" (click)="onSubmit()">
+      type="submit" (click)="handleCreate()">
       <mat-icon>check</mat-icon>
     </button>
   </mat-dialog-actions>
