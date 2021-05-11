@@ -75,13 +75,13 @@ export class FirebaseRoutesService {
     const forUpdate:any = Object.assign({}, route);
     this.cleanGroupIds(forUpdate);
     delete forUpdate.id;
-    this.routesCollection.doc(route.id).set(forUpdate as IFirestoreRouteModel);
+    this.routesCollection.doc(route.id).set(forUpdate);
   }
 
   public updateGroup(group: IRouteGroup): void {
     const forUpdate:any = Object.assign({}, group);
     delete forUpdate.id;
-    this.groupsCollection.doc(group.id).set(forUpdate as IFirestoreRouteGroup);
+    this.groupsCollection.doc(group.id).set(forUpdate);
   }
 
   /**

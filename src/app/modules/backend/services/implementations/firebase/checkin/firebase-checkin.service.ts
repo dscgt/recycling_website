@@ -30,7 +30,7 @@ export class FirebaseCheckinService {
           record.checkinTime = rawRecord.checkinTime.toDate();
           record.checkoutTime = rawRecord.checkoutTime.toDate();
           record.id = rawRecord.id;
-          return record as ICheckinRecord;
+          return record;
         });
       })
     );
@@ -42,7 +42,7 @@ export class FirebaseCheckinService {
         snapshots.map((snapshot: DocumentChangeAction<IFirestoreCheckinModel>) => {
           const toReturn: any = snapshot.payload.doc.data();
           toReturn.id = snapshot.payload.doc.id;
-          return toReturn as ICheckinModel;
+          return toReturn;
         })
       )
     );
@@ -54,7 +54,7 @@ export class FirebaseCheckinService {
         snapshots.map((snapshot: DocumentChangeAction<ICheckinGroup>) => {
           const toReturn: ICheckinGroup = snapshot.payload.doc.data();
           toReturn.id = snapshot.payload.doc.id;
-          return toReturn as ICheckinGroup;
+          return toReturn;
         })
       )
     );
@@ -74,13 +74,13 @@ export class FirebaseCheckinService {
     const forUpdate:any = Object.assign({}, model);
     delete forUpdate.id;
     this.cleanGroupIds(forUpdate);
-    this.modelsCollection.doc(model.id).set(forUpdate as IFirestoreCheckinModel);
+    this.modelsCollection.doc(model.id).set(forUpdate);
   }
 
   public updateGroup(group: ICheckinGroup): void {
     const forUpdate: any = Object.assign({}, group);
     delete forUpdate.id;
-    this.groupsCollection.doc(group.id).set(forUpdate as IFirestoreCheckinGroup);
+    this.groupsCollection.doc(group.id).set(forUpdate);
   }
 
   /**
