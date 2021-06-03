@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
+import { environment } from 'src/environments/environment';
 import { AuthService } from '../auth/auth.service'; // relative import, otherwise circular dependency issue due to importing from barrel file
 
 @Injectable({
   providedIn: "root",
 })
 export class FbFunctionsService {
-  private GENERATE_EXCEL_SHEET_URL = "https://us-central1-gt-recycling.cloudfunctions.net/generateExcelSheet";
+  private GENERATE_EXCEL_SHEET_URL = environment.useEmulators
+    ? "http://localhost:5001/gt-recycling/us-central1/generateExcelSheet"
+    : "https://us-central1-gt-recycling.cloudfunctions.net/generateExcelSheet";
 
   constructor(private authService: AuthService) {}
 

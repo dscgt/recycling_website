@@ -256,7 +256,6 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
   // handle no records
   if (data.length === 0) {
     // send back empty Excel sheet
-    // let ws = xlsx.utils.aoa_to_sheet([[]]);
     wb.SheetNames.push("NO_DATA");
     let wbout = xlsx.write(wb, { bookType: 'xlsx', type: 'buffer' });
     res.type('blob');
@@ -264,15 +263,14 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
       res.status(200).send(wbout);
     })
     return;
-    // wb.Sheets[thisSheetName] = ws;
   }
 
   /* 
-  The objective here is to separate data by model name; data points will be separated into Excel sheets as determined by the model name.
+  The objective here is to separate data by model name; records will be separated into Excel sheets as determined by the model name.
   */
 
   // preprocess all records to separate them by model title, and do null checks
-  // modelTitles is a map of model name to array of data points
+  // modelTitles is a map of model name to array of records
   const modelTitles = new Map();
   data.forEach((record) => {
     // handle model titles not seen before
@@ -305,32 +303,31 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
           }
         }
       }
-    } else { // recordType === 'property'
+    } else { // recordType === 'recorder'
       for (let record of records) {
         // handle "properties" of record
         const allProperties = Object.keys(record.properties);
         for (let property of allProperties) {
           if (!headers.has(property)) {
-            headers.set(property, record => record.properties[property]);
+            headers.set(property, thisRecord => thisRecord.properties[property]);
           }
         }
 
         // handle "stops" of record
+        // also adds a key to record which is a Map of stops; stop titles will be mapped to their properties object, which
+        // makes stop data retrieval easier later
+        record.stopsMap = new Map();
         for (let stop of record.stops) {
+          record.stopsMap.set(stop.title, stop.properties);
           const stopProperties = Object.keys(stop.properties);
           for (let stopProperty of stopProperties) {
             const headerName = `${stop.title} ${stopProperty}`;
             if (!headers.has(headerName)) {
-              headers.set(headerName, (record) => {
-                // the retriever iterates through all of a record's stops to find the right one
-                // this is highly inefficient. Maybe record stops should be preprocessed to be keyed to stop title? sometime before this loop?
-                for (let thisStop of record.stops) {
-                  if (thisStop.title === stop.title) {
-                    return thisStop.properties[stopProperty];
-                  }
-                }
-                return null;
-              });
+              // perform a stop title check to handle records with same model title but different stops
+              headers.set(headerName, (record) => record.stopsMap.has(stop.title)
+                ? record.stopsMap.get(stop.title)[stopProperty] || null
+                : null
+              );
             }
           }
         }
