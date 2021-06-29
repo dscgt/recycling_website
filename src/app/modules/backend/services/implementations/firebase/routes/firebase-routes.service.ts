@@ -22,7 +22,11 @@ export class FirebaseRoutesService {
   }
 
   public getRecords(startDate: Date, endDate: Date): Observable<IRouteRecord[]> {
-    const query = this.firestore.collection<IFirestoreRouteRecord>('route_records', ref => ref.where('startTime', '>', startDate).where('startTime', '<', endDate));
+    const query = this.firestore.collection<IFirestoreRouteRecord>('route_records', ref => ref
+      .where('startTime', '>', startDate)
+      .where('startTime', '<', endDate)
+      .limit(2000)
+    );
     return query.valueChanges({ idField: 'id' }).pipe(
       map((rawRecords: IFirestoreRouteRecord[]): IRouteRecord[] => {
         return rawRecords.map((rawRecord: IFirestoreRouteRecord): IRouteRecord => {
