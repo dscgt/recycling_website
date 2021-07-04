@@ -22,7 +22,11 @@ export class FirebaseCheckinService {
   }
 
   public getRecords(startDate: Date, endDate: Date): Observable<ICheckinRecord[]> {
-    const query = this.firestore.collection<IFirestoreCheckinRecord>('checkin_records', ref => ref.where('checkoutTime', '>', startDate).where('checkoutTime', '<', endDate));
+    const query = this.firestore.collection<IFirestoreCheckinRecord>('checkin_records', ref => ref
+      .where('checkoutTime', '>', startDate)
+      .where('checkoutTime', '<', endDate)
+      .limit(2000)
+    );
     return query.valueChanges({ idField: 'id' }).pipe(
       map((rawRecords: IFirestoreCheckinRecord[]): ICheckinRecord[] => {
         return rawRecords.map((rawRecord: IFirestoreCheckinRecord): ICheckinRecord => {

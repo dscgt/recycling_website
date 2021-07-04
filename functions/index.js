@@ -241,9 +241,9 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
   try {
     let snapshot;
     if (recordType === 'recorder') {
-      snapshot = await db.collection('route_records').where('startTime', '>', rangeStart).where('startTime', '<', rangeEnd).get();
+      snapshot = await db.collection('route_records').where('startTime', '>', rangeStart).where('startTime', '<', rangeEnd).limit(2000).get();
     } else { // recordType === 'checkin'
-      snapshot = await db.collection('checkin_records').where('checkoutTime', '>', rangeStart).where('checkoutTime', '<', rangeEnd).get();
+      snapshot = await db.collection('checkin_records').where('checkoutTime', '>', rangeStart).where('checkoutTime', '<', rangeEnd).limit(2000).get();
     }
     data = snapshot.docs.map(doc => doc.data());
   } catch (e) {
