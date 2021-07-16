@@ -6,7 +6,7 @@
     "build-prod": "ng build --prod",
     "dev": "ng serve",
     "e2e": "ng e2e",
-    "emulate": "firebase emulators:start",
+    "emulate": "firebase emulators:start --import=./sample_data",
     "lint": "ng lint",
     "ng": "ng",
     "start": "concurrently \"npm run dev\" \"npm run emulate\"",
