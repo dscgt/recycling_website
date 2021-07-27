@@ -238,20 +238,45 @@ exports.generateExcelSheet = functions.https.onRequest(async (req, res) => {
 
   // read data from Firebase
   let data;
+  // TODO: clean up error catches, test error catches
+  const limitDocumentRef = db.collection('TODO').doc('TODO');
   try {
-    let snapshot;
-    if (recordType === 'recorder') {
-      snapshot = await db.collection('route_records').where('startTime', '>', rangeStart).where('startTime', '<', rangeEnd).limit(2000).get();
-    } else { // recordType === 'checkin'
-      snapshot = await db.collection('checkin_records').where('checkoutTime', '>', rangeStart).where('checkoutTime', '<', rangeEnd).limit(2000).get();
-    }
-    data = snapshot.docs.map(doc => doc.data());
+    await db.runTransaction(async (t) => {
+      const doc = await t.get(limitDocumentRef).data;
+      const { TODODAILYLIMIT, TODODAILYTIME } = doc.data();
+      let newDailyTime;
+      let limit;
+      if (areSameDayPacific(etc, etc)) {
+        limit = 49000;
+        newDailyTime = etc; //beginning of today
+      } else {
+        limit = TODODAILYLIMIT;
+        newDailyTime = TODODAILYTIME;
+      }
+      const queryLimit = max(0, min(limit, 2000));
+      try {
+        let snapshot;
+        if (recordType === 'recorder') {
+          snapshot = await db.collection('route_records').where('startTime', '>', rangeStart).where('startTime', '<', rangeEnd).limit(queryLimit).get();
+        } else { // recordType === 'checkin'
+          snapshot = await db.collection('checkin_records').where('checkoutTime', '>', rangeStart).where('checkoutTime', '<', rangeEnd).limit(queryLimit).get();
+        }
+        data = snapshot.docs.map(doc => doc.data());
+        t.update(limitDocumentRef, {
+          TODODAILYLIMIT: limit - snapshot.size,
+          TODODAILYTIME: newDailyTime
+        });
+      } catch (e) {
+        cors(req, res, () => {
+          res.sendStatus(500);
+        });
+        return;
+      }
+    })
   } catch (e) {
-    cors(req, res, () => {
-      res.sendStatus(500);
-    });
-    return;
+    console.log('Transaction failure:', e);
   }
+  
 
   // handle no records
   if (data.length === 0) {
